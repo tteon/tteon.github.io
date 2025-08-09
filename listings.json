@@ -1,9 +1,17 @@
 [
   {
+    "listing": "/about.html",
+    "items": [
+      "/posts/welcome/index.html"
+    ]
+  },
+  {
+    "listing": "/posts/welcome/index.html",
+    "items": []
+  },
+  {
     "listing": "/index.html",
     "items": [
-      "/posts/post-with-code/index.html",
-      "/posts/2025-07-15-welcome.html",
       "/posts/welcome/index.html"
     ]
   }
