@@ -1,0 +1,22 @@
+---
+title: "About Me"
+---
+
+# About Me
+
+Hi! I'm Hardy, a passionate developer and writer.
+
+## What I Do
+
+I write about:
+- Software development
+- Technology trends
+- Programming best practices
+- Open source projects
+
+## Get in Touch
+
+- **GitHub**: [tteon](https://github.com/tteon)
+- **Email**: Available upon request
+
+This blog is my space to share thoughts, tutorials, and insights about the ever-evolving world of technology.

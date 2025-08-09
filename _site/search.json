@@ -1,0 +1,86 @@
+[
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About Me",
+    "section": "",
+    "text": "Hi! I’m Hardy, a passionate developer and writer.\n\n\nI write about: - Software development - Technology trends - Programming best practices - Open source projects\n\n\n\n\nGitHub: tteon\nEmail: Available upon request\n\nThis blog is my space to share thoughts, tutorials, and insights about the ever-evolving world of technology."
+  },
+  {
+    "objectID": "about.html#what-i-do",
+    "href": "about.html#what-i-do",
+    "title": "About Me",
+    "section": "",
+    "text": "I write about: - Software development - Technology trends - Programming best practices - Open source projects"
+  },
+  {
+    "objectID": "about.html#get-in-touch",
+    "href": "about.html#get-in-touch",
+    "title": "About Me",
+    "section": "",
+    "text": "GitHub: tteon\nEmail: Available upon request\n\nThis blog is my space to share thoughts, tutorials, and insights about the ever-evolving world of technology."
+  },
+  {
+    "objectID": "posts/welcome/index.html",
+    "href": "posts/welcome/index.html",
+    "title": "Welcome to My Blog",
+    "section": "",
+    "text": "This is my first post using Quarto, a powerful open-source scientific and technical publishing system.\n\n\nQuarto enables you to weave together content and executable code into a finished document. It’s perfect for:\n\nTechnical writing with code examples\nScientific papers with reproducible results\nData analysis with interactive visualizations\nBlogs like this one!\n\n\n\n\nThis blog includes:\n\nResponsive design that works on all devices\nBeautiful typography using Inter font\nDark mode support\nSyntax highlighting for code blocks\nMathematical equations with KaTeX\nInteractive visualizations\n\n\n\n\nTo get started with Quarto, you can:\n\nInstall Quarto from quarto.org\nCreate a new project with quarto create-project\nWrite your content in .qmd files\nPublish with quarto publish\n\n\n\n\nHere’s a simple Python example:\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nx = np.linspace(0, 10, 100)\ny = np.sin(x)\n\nplt.figure(figsize=(8, 4))\nplt.plot(x, y)\nplt.title('Sine Wave')\nplt.xlabel('x')\nplt.ylabel('sin(x)')\nplt.grid(True)\nplt.show()\n\n\n\nStay tuned for more posts about:\n\nProgramming tutorials\nTechnology insights\nBest practices\nOpen source projects\n\nThanks for reading!"
+  },
+  {
+    "objectID": "posts/welcome/index.html#what-is-quarto",
+    "href": "posts/welcome/index.html#what-is-quarto",
+    "title": "Welcome to My Blog",
+    "section": "",
+    "text": "Quarto enables you to weave together content and executable code into a finished document. It’s perfect for:\n\nTechnical writing with code examples\nScientific papers with reproducible results\nData analysis with interactive visualizations\nBlogs like this one!"
+  },
+  {
+    "objectID": "posts/welcome/index.html#features-of-this-blog",
+    "href": "posts/welcome/index.html#features-of-this-blog",
+    "title": "Welcome to My Blog",
+    "section": "",
+    "text": "This blog includes:\n\nResponsive design that works on all devices\nBeautiful typography using Inter font\nDark mode support\nSyntax highlighting for code blocks\nMathematical equations with KaTeX\nInteractive visualizations"
+  },
+  {
+    "objectID": "posts/welcome/index.html#getting-started",
+    "href": "posts/welcome/index.html#getting-started",
+    "title": "Welcome to My Blog",
+    "section": "",
+    "text": "To get started with Quarto, you can:\n\nInstall Quarto from quarto.org\nCreate a new project with quarto create-project\nWrite your content in .qmd files\nPublish with quarto publish"
+  },
+  {
+    "objectID": "posts/welcome/index.html#code-example",
+    "href": "posts/welcome/index.html#code-example",
+    "title": "Welcome to My Blog",
+    "section": "",
+    "text": "Here’s a simple Python example:\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nx = np.linspace(0, 10, 100)\ny = np.sin(x)\n\nplt.figure(figsize=(8, 4))\nplt.plot(x, y)\nplt.title('Sine Wave')\nplt.xlabel('x')\nplt.ylabel('sin(x)')\nplt.grid(True)\nplt.show()"
+  },
+  {
+    "objectID": "posts/welcome/index.html#next-steps",
+    "href": "posts/welcome/index.html#next-steps",
+    "title": "Welcome to My Blog",
+    "section": "",
+    "text": "Stay tuned for more posts about:\n\nProgramming tutorials\nTechnology insights\nBest practices\nOpen source projects\n\nThanks for reading!"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Hardy’s Blog",
+    "section": "",
+    "text": "This is a modern blog built with Quarto, featuring beautiful typography, responsive design, and excellent readability.\n\n\nExplore my latest thoughts and insights on technology, programming, and more.\n\n\n\n\n\n\nThis blog is built with: - Quarto: An open-source scientific and technical publishing system - Responsive Design: Optimized for all devices - Modern CSS: Using CSS variables and smooth animations - GitHub Pages: Hosted for free with continuous deployment"
+  },
+  {
+    "objectID": "index.html#recent-posts",
+    "href": "index.html#recent-posts",
+    "title": "Hardy’s Blog",
+    "section": "",
+    "text": "Explore my latest thoughts and insights on technology, programming, and more."
+  },
+  {
+    "objectID": "index.html#about-this-site",
+    "href": "index.html#about-this-site",
+    "title": "Hardy’s Blog",
+    "section": "",
+    "text": "This blog is built with: - Quarto: An open-source scientific and technical publishing system - Responsive Design: Optimized for all devices - Modern CSS: Using CSS variables and smooth animations - GitHub Pages: Hosted for free with continuous deployment"
+  }
+]

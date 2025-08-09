@@ -1,0 +1,30 @@
+---
+title: "Hardy's Blog"
+listing:
+  contents: posts
+  sort: "date desc"
+  type: grid
+  categories: true
+  sort-ui: true
+  filter-ui: true
+page-layout: full
+---
+
+# Welcome to My Blog
+
+This is a modern blog built with [Quarto](https://quarto.org/), featuring beautiful typography, responsive design, and excellent readability.
+
+## Recent Posts
+
+Explore my latest thoughts and insights on technology, programming, and more.
+
+::: {#listing-listing}
+:::
+
+## About This Site
+
+This blog is built with:
+- **Quarto**: An open-source scientific and technical publishing system
+- **Responsive Design**: Optimized for all devices
+- **Modern CSS**: Using CSS variables and smooth animations
+- **GitHub Pages**: Hosted for free with continuous deployment
