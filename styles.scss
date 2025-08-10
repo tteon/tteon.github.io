@@ -1,49 +1,501 @@
-/* 다크 기본 글자 대비 보정 */
-:root { --radius: 16px; }
-
-.hero {
-  padding: 72px 24px;
-  border-radius: var(--radius);
-  color: #fff;
-  text-align: center;
-  /* 레이어드 그라데이션 */
-  background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(78,156,255,.35), transparent 60%),
-    radial-gradient(800px 400px at 110% 10%, rgba(160,80,255,.28), transparent 60%),
-    linear-gradient(135deg, #0d0f1a 0%, #0b1222 60%, #08111f 100%);
-  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+/* ===== Enhanced Dark + Green Theme ===== */
+:root{
+  --radius: 16px;
+  --bg: #0a0f0d;          /* deeper dark green */
+  --fg: #e8f5f0;
+  --muted: #7a9a8f;
+  --primary: #00ff88;     /* vibrant green */
+  --primary-soft: #00cc6a;
+  --primary-dark: #008844;
+  --accent: #66ffaa;      /* light green accent */
+  --card: rgba(0, 255, 136, 0.08);
+  --card-hover: rgba(0, 255, 136, 0.12);
+  --border: rgba(0, 255, 136, 0.2);
+  --border-hover: rgba(0, 255, 136, 0.4);
+  --shadow: rgba(0, 255, 136, 0.1);
+  --glow: rgba(0, 255, 136, 0.3);
+  --thumb: 360px;
+  --thumb-ratio: 16 / 10;
+  --font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  
+  /* Journey theme colors */
+  --journey-blue: #0a84ff;
+  --journey-purple: #bf5af2;
+  --journey-orange: #ff9f0a;
+  --gradient-start: #00ff88;
+  --gradient-end: #0a84ff;
 }
 
-/* 카드형 포스트 목록을 유리 효과로 */
-.card, .quarto-listing .listing-item {
-  background: rgba(255,255,255,.04);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,.08);
+/* ===== Global ===== */
+html, body { 
+  background: var(--bg); 
+  color: var(--fg); 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.6;
+}
+
+a { 
+  color: var(--primary); 
+  text-decoration: none; 
+  transition: all 0.2s ease;
+}
+a:hover { 
+  color: var(--accent); 
+  text-shadow: 0 0 8px var(--glow);
+}
+
+/* ===== Typography ===== */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+code, pre {
+  font-family: var(--font-mono);
+}
+
+/* ===== Header & Navigation ===== */
+.navbar, .navbar-dark, .navbar-light, .navbar.bg-dark, .quarto-title-banner, .quarto-header {
+  background: rgba(10, 15, 13, 0.8) !important;
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(16px);
+  transition: all 0.3s ease;
+}
+
+.navbar-brand, .navbar-nav .nav-link {
+  color: var(--fg) !important;
+  font-weight: 500;
+}
+
+.navbar-nav .nav-link:hover {
+  color: var(--primary) !important;
+  text-shadow: 0 0 12px var(--glow);
+}
+
+/* ===== Journey-themed Background ===== */
+body::before{
+  content: ""; 
+  position: fixed; 
+  inset: -20% -10% -10% -10%; 
+  z-index: -1;
+  background:
+    radial-gradient(70rem 50rem at 5% 5%, rgba(0, 255, 136, 0.06) 0%, transparent 60%),
+    radial-gradient(60rem 40rem at 95% 15%, rgba(10, 132, 255, 0.05) 0%, transparent 65%),
+    radial-gradient(50rem 30rem at 15% 85%, rgba(191, 90, 242, 0.04) 0%, transparent 70%),
+    linear-gradient(135deg, #0a0f0d 0%, #0c1218 50%, #050807 100%);
+  filter: saturate(120%); 
+  pointer-events: none; 
+  animation: shift 28s ease-in-out infinite alternate;
+}
+
+@keyframes shift { 
+  0% { transform: translateY(0px) rotate(0deg); }
+  100% { transform: translateY(-20px) rotate(0.5deg); }
+}
+
+/* ===== Floating particles effect ===== */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, var(--primary), transparent),
+    radial-gradient(2px 2px at 40px 70px, var(--accent), transparent),
+    radial-gradient(1px 1px at 90px 40px, var(--primary), transparent),
+    radial-gradient(1px 1px at 130px 80px, var(--accent), transparent),
+    radial-gradient(2px 2px at 160px 30px, var(--primary), transparent);
+  background-repeat: repeat;
+  background-size: 200px 100px;
+  animation: sparkle 20s linear infinite;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+@keyframes sparkle {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-100px); }
+}
+
+
+/* ===== Enhanced Hero ===== */
+.hero{
+  padding: 80px 32px; 
+  text-align: left; 
   border-radius: var(--radius);
+  background:
+    radial-gradient(100rem 60rem at -5% -10%, rgba(0, 255, 136, 0.12) 0%, transparent 65%),
+    radial-gradient(80rem 50rem at 105% 5%, rgba(10, 132, 255, 0.1) 0%, transparent 70%),
+    linear-gradient(135deg, #0b1512 0%, #0c1418 50%, #081210 100%);
+  border: 1px solid var(--border);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(0, 255, 136, 0.05);
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  animation: scan 3s ease-in-out infinite;
+}
+
+@keyframes scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.hero h1{ 
+  margin: 0 0 16px 0; 
+  font-size: 2.5rem; 
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  margin: 0;
+  font-size: 1.2rem;
+  opacity: 0.8;
+  color: var(--muted);
+}
+
+/* ===== Post cards only (simple, separated) ===== */
+.quarto-listing{ 
+  margin-top: 32px; 
+  display: grid;
+  gap: 0; /* Timeline effect - no gaps */
+}
+
+.quarto-listing.timeline {
+  position: relative;
+}
+
+.quarto-listing.timeline::before {
+  content: "";
+  position: absolute;
+  left: 32px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--gradient-start), var(--gradient-end));
+  opacity: 0.3;
+}
+
+.quarto-listing .listing-item{
+  display: grid; 
+  grid-template-columns: var(--thumb) 1fr; 
+  gap: 24px;
+  background: var(--card); 
+  border: 1px solid var(--border);
+  border-radius: var(--radius); 
+  padding: 24px; 
+  transition: all 0.3s ease;
+  backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 0; /* Remove spacing between items */
+}
+
+.quarto-listing .listing-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.quarto-listing .listing-item:hover{ 
+  transform: translateY(-2px); 
+  box-shadow: 0 12px 40px var(--shadow);
+  border-color: var(--border-hover);
+  background: var(--card-hover);
+}
+
+.quarto-listing .listing-item:hover::before {
+  transform: scaleX(1);
+}
+
+.quarto-listing .listing-item .thumbnail img{
+  width:100%; aspect-ratio: var(--thumb-ratio); object-fit:cover; border-radius:12px;
+}
+
+/* ===== Enhanced Post Cards ===== */
+.quarto-listing .listing-item .listing-title{ 
+  margin: 0 0 8px 0; 
+  font-weight: 700; 
+  font-size: 1.3rem;
+  color: var(--fg);
+}
+
+.quarto-listing .listing-item .listing-subtitle{ 
+  display: inline; 
+  opacity: 0.8; 
+  color: var(--primary);
+  font-weight: 500;
+}
+.quarto-listing .listing-item .listing-subtitle::before{ content:" · "; }
+
+.quarto-listing .listing-item .metadata{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+/* Journey-specific styles */
+.decision-point {
+  border-left: 3px solid var(--primary);
+  padding-left: 16px;
+  margin: 16px 0;
+  background: rgba(0, 255, 136, 0.05);
   padding: 16px;
+  border-radius: 8px;
 }
 
-/* 링크/액션 강조 */
-a { text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-/* 라이트 모드 보정 */
-html:not(.quarto-dark) .hero {
-  color: #0b1222;
-  background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(78,156,255,.25), transparent 60%),
-    radial-gradient(800px 400px at 110% 10%, rgba(160,80,255,.22), transparent 60%),
-    linear-gradient(135deg, #f8fbff 0%, #eef3ff 60%, #eaf0ff 100%);
-  border: 1px solid rgba(0,0,0,.06);
+.journey-date {
+  color: var(--primary);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
-/* 애니메이티드 subtle gradient (옵션) */
-@keyframes floatGrad {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.journey-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
 }
-.hero {
-  background-size: 200% 200%;
-  animation: floatGrad 18s ease infinite;
+
+.quarto-listing .listing-item .metadata .listing-date{
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-family: var(--font-mono);
 }
+
+.quarto-listing .listing-item .listing-description{ 
+  opacity: 0.9; 
+  margin-top: 12px; 
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* ===== Enhanced Thumbnails ===== */
+.quarto-listing .listing-item .thumbnail {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.quarto-listing .listing-item .thumbnail img{
+  width: 100%; 
+  aspect-ratio: var(--thumb-ratio); 
+  object-fit: cover; 
+  border-radius: 12px;
+  transition: transform 0.3s ease;
+}
+
+.quarto-listing .listing-item:hover .thumbnail img {
+  transform: scale(1.05);
+}
+
+/* ===== Enhanced Code blocks ===== */
+code {
+  background: rgba(0, 255, 136, 0.1);
+  color: var(--primary);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 0.9em;
+}
+
+pre {
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.4) !important;
+  border-radius: 12px !important;
+  padding: 20px;
+  overflow-x: auto;
+}
+
+pre code {
+  background: none;
+  color: var(--fg);
+  padding: 0;
+}
+
+/* ===== Enhanced About page ===== */
+.about-hero{
+  text-align: center; 
+  margin: 32px 0 48px; 
+  padding: 48px 32px; 
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--card), rgba(0, 255, 136, 0.05));
+  border: 1px solid var(--border); 
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+}
+
+.about-hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  animation: scan 4s ease-in-out infinite;
+}
+
+.about-avatar{
+  width: 140px; 
+  height: 140px; 
+  object-fit: cover; 
+  border-radius: 50%;
+  border: 3px solid var(--primary); 
+  box-shadow: 
+    0 15px 40px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(0, 255, 136, 0.2);
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.about-hero:hover .about-avatar {
+  transform: scale(1.05);
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(0, 255, 136, 0.3);
+}
+
+.about-hero h1 {
+  margin: 0 0 12px 0;
+  color: var(--fg);
+  font-size: 2rem;
+}
+
+.about-hero p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+
+/* ===== Enhanced Category badges ===== */
+.quarto-category{
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--primary);
+  padding: 4px 12px; 
+  border-radius: 9999px; 
+  font-size: 0.75rem; 
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+
+.quarto-category:hover {
+  background: var(--primary);
+  color: var(--bg);
+  border-color: var(--primary);
+}
+
+/* ===== Enhanced Filter UI ===== */
+.listing-actions .filter { 
+  gap: 12px; 
+  margin-bottom: 32px;
+}
+
+.listing-actions .filter .form-check { 
+  background: var(--card); 
+  border: 1px solid var(--border);
+  padding: 8px 16px; 
+  border-radius: 9999px; 
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.listing-actions .filter .form-check:hover {
+  border-color: var(--border-hover);
+  background: var(--card-hover);
+  color: var(--fg);
+}
+
+.listing-actions .active .form-check { 
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--bg);
+  box-shadow: 0 0 20px var(--glow);
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+  .hero {
+    padding: 60px 24px;
+    text-align: center;
+  }
+  
+  .hero h1 {
+    font-size: 2rem;
+  }
+  
+  .quarto-listing .listing-item {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 20px;
+  }
+  
+  .about-hero {
+    padding: 40px 24px;
+    margin: 20px 0 32px;
+  }
+  
+  .about-avatar {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 48px 20px;
+  }
+  
+  .hero h1 {
+    font-size: 1.8rem;
+  }
+  
+  .quarto-listing .listing-item {
+    padding: 16px;
+    gap: 12px;
+  }
+}
+
+.card{
+  display:block; padding:20px; border:1px solid var(--border);
+  border-radius: var(--radius); background: var(--card);
+  transition:.2s; text-align:center; font-weight:600;
+}
+.card:hover{ background: var(--card-hover); border-color: var(--border-hover); transform: translateY(-2px); }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* Ensure anchor cards never get underlined on hover */
+.card, .card:hover { text-decoration: none; }

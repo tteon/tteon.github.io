@@ -1,8 +1,14 @@
 [
   {
-    "listing": "/index.html",
+    "listing": "/seochodiary/index.html",
     "items": [
-      "/posts/Graphfoundation-1.html"
+      "/seochodiary/2025-08-10-trace-recorder.html"
+    ]
+  },
+  {
+    "listing": "/decisionpoint/index.html",
+    "items": [
+      "/decisionpoint/2025-08-10-graphfoundationmodel.html"
     ]
   }
 ]

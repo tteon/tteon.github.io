@@ -1,37 +1,79 @@
 [
   {
+    "objectID": "decisionpoint/2025-08-10-graphfoundationmodel.html",
+    "href": "decisionpoint/2025-08-10-graphfoundationmodel.html",
+    "title": "Why the graph foundation model is boom",
+    "section": "",
+    "text": "In this article, I break down the trade-offs…"
+  },
+  {
     "objectID": "about.html",
     "href": "about.html",
-    "title": "About Me",
+    "title": "About Hardy",
     "section": "",
-    "text": "Hi! I’m Hardy, a passionate developer and writer.\n\n\nI write about: - Software development - Technology trends - Programming best practices - Open source projects\n\n\n\n\nGitHub: tteon\nEmail: Available upon request\n\nThis blog is my space to share thoughts, tutorials, and insights about the ever-evolving world of technology."
+    "text": "Hardware-Software Co-Design • Graph Data Scientist • Open Source Builder"
   },
   {
-    "objectID": "about.html#what-i-do",
-    "href": "about.html#what-i-do",
-    "title": "About Me",
-    "section": "",
-    "text": "I write about: - Software development - Technology trends - Programming best practices - Open source projects"
+    "objectID": "about.html#summary",
+    "href": "about.html#summary",
+    "title": "About Hardy",
+    "section": "Summary",
+    "text": "Summary\nEngineer focusing on…"
   },
   {
-    "objectID": "about.html#get-in-touch",
-    "href": "about.html#get-in-touch",
-    "title": "About Me",
-    "section": "",
-    "text": "GitHub: tteon\nEmail: Available upon request\n\nThis blog is my space to share thoughts, tutorials, and insights about the ever-evolving world of technology."
+    "objectID": "about.html#skills",
+    "href": "about.html#skills",
+    "title": "About Hardy",
+    "section": "Skills",
+    "text": "Skills\n\nHardware-Software Co-Design\nWorkload Characterization\nGraph Product Management (CXL)"
   },
   {
-    "objectID": "posts/Graphfoundation-1.html",
-    "href": "posts/Graphfoundation-1.html",
-    "title": "Graph Foundation Model 의 부상",
+    "objectID": "about.html#experience",
+    "href": "about.html#experience",
+    "title": "About Hardy",
+    "section": "Experience",
+    "text": "Experience\n\nOpen Source Seocho – Founder\nCompany X – Role, Dates"
+  },
+  {
+    "objectID": "about.html#education",
+    "href": "about.html#education",
+    "title": "About Hardy",
+    "section": "Education",
+    "text": "Education\n\nDegree, University"
+  },
+  {
+    "objectID": "about.html#contact",
+    "href": "about.html#contact",
+    "title": "About Hardy",
+    "section": "Contact",
+    "text": "Contact\n\nGitHub: tteon\nLinkedIn: yitaejeong"
+  },
+  {
+    "objectID": "seochodiary/2025-08-10-trace-recorder.html",
+    "href": "seochodiary/2025-08-10-trace-recorder.html",
+    "title": "Implemented CXL Trace Recorder",
     "section": "",
-    "text": "왜 기업들은 graph foundation model에 집중을 하고 있을까?"
+    "text": "Today’s commit focused on…"
+  },
+  {
+    "objectID": "seochodiary/index.html",
+    "href": "seochodiary/index.html",
+    "title": "Seochodiary",
+    "section": "",
+    "text": "Implemented CXL Trace Recorder\n\n\nAdded Perfetto-based xTrace with thread track separation.\n\n\n\n\n\nAug 10, 2025\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Home",
+    "title": "SEOCHO JOURNEY",
     "section": "",
-    "text": "Graphs · CXL · Systems\n\n\nNotes on workload characterization, co-design, and GraphRAG.\n\n\n\n//참고: posts/ 아래에 있는 *.qmd 들은 자동 노출됩니다. image:, categories: 메타데이터를 각 포스트에 추가하면 카드에 표시돼요.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nGraph Foundation Model 의 부상\n\n\n\n\n\n\n\n\nAug 10, 2025\n\n\n\n\n\nNo matching items"
+    "text": "Seocho: An Open Source Journey\n\n\nFrom critical decisions to daily coding notes, and my professional story."
+  },
+  {
+    "objectID": "decisionpoint/index.html",
+    "href": "decisionpoint/index.html",
+    "title": "Decisionpoint",
+    "section": "",
+    "text": "Why the graph foundation model is boom\n\n\nDeep dive into the reasoning behind selecting CXL for Seocho’s architecture.\n\n\n\nAug 20, 2025\n\n\n\n\n\n\nNo matching items"
   }
 ]
