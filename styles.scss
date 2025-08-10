@@ -1,0 +1,49 @@
+/* 다크 기본 글자 대비 보정 */
+:root { --radius: 16px; }
+
+.hero {
+  padding: 72px 24px;
+  border-radius: var(--radius);
+  color: #fff;
+  text-align: center;
+  /* 레이어드 그라데이션 */
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(78,156,255,.35), transparent 60%),
+    radial-gradient(800px 400px at 110% 10%, rgba(160,80,255,.28), transparent 60%),
+    linear-gradient(135deg, #0d0f1a 0%, #0b1222 60%, #08111f 100%);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+/* 카드형 포스트 목록을 유리 효과로 */
+.card, .quarto-listing .listing-item {
+  background: rgba(255,255,255,.04);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+/* 링크/액션 강조 */
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* 라이트 모드 보정 */
+html:not(.quarto-dark) .hero {
+  color: #0b1222;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(78,156,255,.25), transparent 60%),
+    radial-gradient(800px 400px at 110% 10%, rgba(160,80,255,.22), transparent 60%),
+    linear-gradient(135deg, #f8fbff 0%, #eef3ff 60%, #eaf0ff 100%);
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+/* 애니메이티드 subtle gradient (옵션) */
+@keyframes floatGrad {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.hero {
+  background-size: 200% 200%;
+  animation: floatGrad 18s ease infinite;
+}

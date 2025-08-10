@@ -1,0 +1,24 @@
+/* Quarto 다크일 때만 적용 */
+html.quarto-dark {
+  --radius: 16px; --card-bg: rgba(255,255,255,.04); --border: rgba(255,255,255,.08);
+
+  .hero {
+    padding: 72px 24px; border-radius: var(--radius);
+    color: #fff; text-align: center;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgba(78,156,255,.35), transparent 60%),
+      radial-gradient(800px 400px at 110% 10%, rgba(160,80,255,.28), transparent 60%),
+      linear-gradient(135deg, #0d0f1a 0%, #0b1222 60%, #08111f 100%);
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    background-size: 200% 200%; animation: floatGrad 18s ease infinite;
+  }
+
+  .quarto-listing .listing-item, .card {
+    background: var(--card-bg); backdrop-filter: blur(8px);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px; transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .quarto-listing .listing-item:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(0,0,0,.35); }
+
+  a:hover { text-decoration: underline; }
+}
