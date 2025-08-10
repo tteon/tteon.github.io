@@ -9,49 +9,49 @@
   {
     "objectID": "about.html",
     "href": "about.html",
-    "title": "About Hardy",
+    "title": "\nHardy\n",
     "section": "",
     "text": "Hardware-Software Co-Design • Graph Data Scientist • Open Source Builder"
   },
   {
     "objectID": "about.html#summary",
     "href": "about.html#summary",
-    "title": "About Hardy",
+    "title": "\nHardy\n",
     "section": "Summary",
     "text": "Summary\nEngineer focusing on…"
   },
   {
     "objectID": "about.html#skills",
     "href": "about.html#skills",
-    "title": "About Hardy",
+    "title": "\nHardy\n",
     "section": "Skills",
     "text": "Skills\n\nHardware-Software Co-Design for graph workload\nGraph Workload Characterization by each graph database principle\nGraph Product Engineering"
   },
   {
     "objectID": "about.html#experience",
     "href": "about.html#experience",
-    "title": "About Hardy",
+    "title": "\nHardy\n",
     "section": "Experience",
     "text": "Experience\n\nOpen Source Seocho – Founder\nCompany X – Role, Dates"
   },
   {
     "objectID": "about.html#education",
     "href": "about.html#education",
-    "title": "About Hardy",
+    "title": "\nHardy\n",
     "section": "Education",
     "text": "Education\n\nDegree, University"
   },
   {
     "objectID": "about.html#contact",
     "href": "about.html#contact",
-    "title": "About Hardy",
+    "title": "\nHardy\n",
     "section": "Contact",
     "text": "Contact\n\nGitHub: tteon\nLinkedIn: yitaejeong"
   },
   {
     "objectID": "seochodiary/2025-08-10-trace-recorder.html",
     "href": "seochodiary/2025-08-10-trace-recorder.html",
-    "title": "Implemented CXL Trace Recorder",
+    "title": "Openlineage for datahub load",
     "section": "",
     "text": "Today’s commit focused on…"
   },
@@ -60,7 +60,7 @@
     "href": "seochodiary/index.html",
     "title": "Seochodiary",
     "section": "",
-    "text": "Implemented CXL Trace Recorder\n\n\nAdded Perfetto-based xTrace with thread track separation.\n\n\n\n\n\nAug 10, 2025\n\n\n\n\n\nNo matching items"
+    "text": "Openlineage for datahub load\n\n\nBased on data mesh architecture, we load data into datahub from external data\n\n\n\n\n\nAug 10, 2025\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "index.html",
