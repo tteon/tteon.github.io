@@ -26,7 +26,7 @@ listing:
 page-layout: full
 ---
 
-# Open Source Portfolio
+## Open Source Portfolio
 
 Explore our contribution to the open source ecosystem. Building tools for the future of AI and Data.
 
