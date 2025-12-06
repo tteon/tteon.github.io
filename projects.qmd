@@ -1,0 +1,35 @@
+---
+title: "Projects"
+listing:
+  contents:
+    - title: "GraphRAG-Dev"
+      description: "Advanced RAG extraction pipeline with Neo4j integration. Optimizing semantic search and knowledge graph construction."
+      categories: [AI, RAG, Neo4j, Python]
+      image: https://placehold.co/600x400/0a0a0f/00f2ea?text=GraphRAG
+      path: https://github.com/tteon/seocho
+    - title: "Seocho-AI"
+      description: "Local LLM orchestration framework designed for privacy-preserving inference and rapid prototyping."
+      categories: [LLM, Privacy, System]
+      image: https://placehold.co/600x400/0a0a0f/7000ff?text=Seocho
+      path: https://github.com/tteon/seocho
+    - title: "OpenGDS-Monitor"
+      description: "Real-time visualization dashboard for graph database performance metrics and query optimization."
+      categories: [Visualization, Database, Tools]
+      image: https://placehold.co/600x400/0a0a0f/ffffff?text=Monitor
+      path: "#"
+  type: grid
+  grid-columns: 3
+  image-height: 200px
+  page-size: 9
+  sort-ui: false
+  filter-ui: true
+page-layout: full
+---
+
+# Open Source Portfolio
+
+Explore our contribution to the open source ecosystem. Building tools for the future of AI and Data.
+
+::: {.callout-note}
+More projects are being added regularly. Check back soon for updates!
+:::

@@ -1,48 +1,55 @@
 project:
   type: website
-  title: "Hardy's Blog"
+  title: "TTEON"
   output-dir: _site
 
 website:
-  title: "Hardy's Blog"
-  description: "A modern blog built with Quarto"
+  title: "TTEON"
+  description: "Impact-driven Open Source Ecosystem"
   site-url: "https://tteon.github.io"
   repo-url: "https://github.com/tteon/tteon.github.io"
   repo-actions: [edit, issue]
   
   navbar:
-    title: "Hardy's Blog"
+    title: "TTEON"
     left:
       - href: index.qmd
         text: Home
+      - href: projects.qmd
+        text: Projects
+      - href: impact.qmd
+        text: Impact
       - href: about.qmd
         text: About
     right:
       - icon: github
-        href: https://github.com/tteon/tteon.github.io
+        href: https://github.com/tteon
         aria-label: GitHub
+      - icon: linkedin
+        href: https://linkedin.com/in/yitaejeong
+        aria-label: LinkedIn
 
   page-footer:
     left: |
-      Copyright © 2024 Hardy
+      Copyright © 2025 YiTae Jeong (TTEON).
     right: |
       Built with [Quarto](https://quarto.org/)
 
 format:
   html:
     theme:
-      light: [cosmo, styles.scss]
-      dark: [cosmo, styles-dark.scss]
+      dark: [cosmo, theme.scss] # Use our custom theme as primary for dark mode
     css: styles.css
     toc: true
     toc-depth: 3
     toc-location: right
-    number-sections: true
+    number-sections: false
     code-fold: true
     code-tools: true
     page-layout: full
     smooth-scroll: true
     link-external-newwindow: true
+    mainfont: 'Inter'
 
 listing:
   contents: posts

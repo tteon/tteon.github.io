@@ -1,0 +1,72 @@
+---
+title: "Impact & Vision"
+page-layout: full
+---
+
+<div class="hero-section" style="padding: 4rem 0;">
+  <h1>Driving Innovation in Open Source</h1>
+  <p class="lead">Our mission is to democratize advanced AI technologies and build sustainable developer tools.</p>
+</div>
+
+<div class="row">
+
+<div class="col-md-4">
+<div class="glass-card">
+<h3 style="color: #00f2ea;">500+</h3>
+<p><strong>GitHub Stars</strong> across all repositories</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="glass-card">
+<h3 style="color: #7000ff;">5k+</h3>
+<p><strong>Downloads</strong> on PyPI and Docker Hub</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="glass-card">
+<h3 style="color: #ffffff;">10+</h3>
+<p><strong>Contributors</strong> from the community</p>
+</div>
+</div>
+
+</div>
+
+<br><br>
+
+## Our Core Pillars
+
+::: {.grid}
+
+::: {.g-col-12 .g-col-md-6}
+### 🚀 Acceleration
+We build tools that accelerate the development lifecycle. Our focus on **Developer Experience (DX)** ensures that integrating state-of-the-art AI models is as simple as a few lines of code.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+### 🌐 Knowledge
+We believe in the power of **Knowledge Graphs**. By structuring unstructured data, we unlock new capabilities for LLMs (RAG) and decision-making systems.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+### 🛡️ Privacy
+**Privacy by design**. Our local-first approach ensures that sensitive data never leaves your infrastructure unless you explicitly want it to.
+:::
+
+::: {.g-col-12 .g-col-md-6}
+### 🤝 Community
+Open source is about people. We are committed to fostering a welcoming and inclusive community where everyone can learn and contribute.
+:::
+
+:::
+
+<br><br>
+
+## Roadmap
+
+- [x] **Q1 2025**: GraphRAG Core Release v1.0
+- [ ] **Q2 2025**: Distributed Inference Engine
+- [ ] **Q3 2025**: Cloud-Native Deployment Suite
+- [ ] **Q4 2025**: Enterprise Governance Module
+

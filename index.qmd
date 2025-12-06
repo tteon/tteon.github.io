@@ -1,30 +1,42 @@
 ---
-title: "Hardy's Blog"
+title: "TTEON"
+page-layout: full
 listing:
   contents: posts
   sort: "date desc"
-  type: grid
+  type: default
   categories: true
-  sort-ui: true
-  filter-ui: true
-page-layout: full
+  sort-ui: false
+  filter-ui: false
+  page-size: 3
 ---
 
-# Welcome to My Blog
+<div class="hero-section">
+  <h1>Empowering the<br>Open Source Ecosystem</h1>
+  <p class="lead">Building the next generation of AI-driven developer tools and knowledge graph infrastructure.</p>
+  <br>
+  <a href="projects.qmd" class="cta-button">Explore Projects</a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="impact.qmd" class="cta-button" style="background: transparent; border: 2px solid #00f2ea; color: #00f2ea; box-shadow: none;">Our Impact</a>
+</div>
 
-This is a modern blog built with [Quarto](https://quarto.org/), featuring beautiful typography, responsive design, and excellent readability.
+<div class="container" style="max-width: 1200px; margin: 0 auto;">
 
-## Recent Posts
+  <div class="feature-grid">
+    <div class="glass-card">
+      <h3 style="color: #00f2ea;"><i class="bi bi-cpu"></i> Innovation</h3>
+      <p>Pushing the boundaries of what's possible with Local LLMs and Graph RAG technologies.</p>
+    </div>
+    <div class="glass-card">
+      <h3 style="color: #7000ff;"><i class="bi bi-people"></i> Collaboration</h3>
+      <p>Open standards and community-driven development are at the heart of everything we do.</p>
+    </div>
+    <div class="glass-card">
+      <h3 style="color: #fff;"><i class="bi bi-globe"></i> Sustainability</h3>
+      <p>Creating software that lasts. Efficient, maintainable, and scalable for the long term.</p>
+    </div>
+  </div>
 
-Explore my latest thoughts and insights on technology, programming, and more.
-
-::: {#listing-listing}
-:::
-
-## About This Site
-
-This blog is built with:
-- **Quarto**: An open-source scientific and technical publishing system
-- **Responsive Design**: Optimized for all devices
-- **Modern CSS**: Using CSS variables and smooth animations
-- **GitHub Pages**: Hosted for free with continuous deployment
+  <h2 style="text-align: center; margin-top: 6rem; margin-bottom: 3rem;">Recent Updates</h2>
+  
+</div>
