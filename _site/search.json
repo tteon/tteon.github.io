@@ -1,24 +1,45 @@
 [
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About Me",
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "TTEON",
     "section": "",
-    "text": "Hi! I’m Hardy, a passionate developer and writer.\n\n\nI write about: - Software development - Technology trends - Programming best practices - Open source projects\n\n\n\n\nGitHub: tteon\nEmail: Available upon request\n\nThis blog is my space to share thoughts, tutorials, and insights about the ever-evolving world of technology."
+    "text": "Empowering theOpen Source Ecosystem\n\n\nBuilding the next generation of AI-driven developer tools and knowledge graph infrastructure.\n\n Explore Projects     Our Impact\n\n\n\n&lt;div class=\"glass-card\"&gt;\n  &lt;h3 style=\"color: #00f2ea;\"&gt;&lt;i class=\"bi bi-cpu\"&gt;&lt;/i&gt; Innovation&lt;/h3&gt;\n  &lt;p&gt;Pushing the boundaries of what's possible with Local LLMs and Graph RAG technologies.&lt;/p&gt;\n&lt;/div&gt;\n&lt;div class=\"glass-card\"&gt;\n  &lt;h3 style=\"color: #7000ff;\"&gt;&lt;i class=\"bi bi-people\"&gt;&lt;/i&gt; Collaboration&lt;/h3&gt;\n  &lt;p&gt;Open standards and community-driven development are at the heart of everything we do.&lt;/p&gt;\n&lt;/div&gt;\n&lt;div class=\"glass-card\"&gt;\n  &lt;h3 style=\"color: #fff;\"&gt;&lt;i class=\"bi bi-globe\"&gt;&lt;/i&gt; Sustainability&lt;/h3&gt;\n  &lt;p&gt;Creating software that lasts. Efficient, maintainable, and scalable for the long term.&lt;/p&gt;\n&lt;/div&gt;\n\n\nRecent Updates\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome to My Blog\n\n\n\nwelcome\n\nquarto\n\ngetting-started\n\n\n\nGetting started with a new Quarto blog\n\n\n\n\n\nJan 15, 2024\n\n\nHardy\n\n\n\n\n\nNo matching items"
   },
   {
-    "objectID": "about.html#what-i-do",
-    "href": "about.html#what-i-do",
-    "title": "About Me",
+    "objectID": "impact.html",
+    "href": "impact.html",
+    "title": "Impact & Vision",
     "section": "",
-    "text": "I write about: - Software development - Technology trends - Programming best practices - Open source projects"
+    "text": "Our mission is to democratize advanced AI technologies and build sustainable developer tools."
   },
   {
-    "objectID": "about.html#get-in-touch",
-    "href": "about.html#get-in-touch",
-    "title": "About Me",
+    "objectID": "impact.html#our-core-pillars",
+    "href": "impact.html#our-core-pillars",
+    "title": "Impact & Vision",
+    "section": "Our Core Pillars",
+    "text": "Our Core Pillars\n\n\n🚀 Acceleration\nWe build tools that accelerate the development lifecycle. Our focus on Developer Experience (DX) ensures that integrating state-of-the-art AI models is as simple as a few lines of code.\n\n\n🌐 Knowledge\nWe believe in the power of Knowledge Graphs. By structuring unstructured data, we unlock new capabilities for LLMs (RAG) and decision-making systems.\n\n\n🛡️ Privacy\nPrivacy by design. Our local-first approach ensures that sensitive data never leaves your infrastructure unless you explicitly want it to.\n\n\n🤝 Community\nOpen source is about people. We are committed to fostering a welcoming and inclusive community where everyone can learn and contribute."
+  },
+  {
+    "objectID": "impact.html#roadmap",
+    "href": "impact.html#roadmap",
+    "title": "Impact & Vision",
+    "section": "Roadmap",
+    "text": "Roadmap\n\nQ1 2025: GraphRAG Core Release v1.0\nQ2 2025: Distributed Inference Engine\nQ3 2025: Cloud-Native Deployment Suite\nQ4 2025: Enterprise Governance Module"
+  },
+  {
+    "objectID": "projects.html",
+    "href": "projects.html",
+    "title": "Projects",
     "section": "",
-    "text": "GitHub: tteon\nEmail: Available upon request\n\nThis blog is my space to share thoughts, tutorials, and insights about the ever-evolving world of technology."
+    "text": "Explore our contribution to the open source ecosystem. Building tools for the future of AI and Data.\n\n\n\n\n\n\nNote\n\n\n\nMore projects are being added regularly. Check back soon for updates!"
+  },
+  {
+    "objectID": "projects.html#open-source-portfolio",
+    "href": "projects.html#open-source-portfolio",
+    "title": "Projects",
+    "section": "",
+    "text": "Explore our contribution to the open source ecosystem. Building tools for the future of AI and Data.\n\n\n\n\n\n\nNote\n\n\n\nMore projects are being added regularly. Check back soon for updates!"
   },
   {
     "objectID": "posts/welcome/index.html",
@@ -63,24 +84,38 @@
     "text": "Stay tuned for more posts about:\n\nProgramming tutorials\nTechnology insights\nBest practices\nOpen source projects\n\nThanks for reading!"
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Hardy’s Blog",
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About Me",
     "section": "",
-    "text": "This is a modern blog built with Quarto, featuring beautiful typography, responsive design, and excellent readability.\n\n\nExplore my latest thoughts and insights on technology, programming, and more.\n\n\n\n\n\n\nThis blog is built with: - Quarto: An open-source scientific and technical publishing system - Responsive Design: Optimized for all devices - Modern CSS: Using CSS variables and smooth animations - GitHub Pages: Hosted for free with continuous deployment"
+    "text": "Hi! I’m Hardy, a passionate developer and writer.\n\n\nI write about: - Software development - Technology trends - Programming best practices - Open source projects\n\n\n\n\nGitHub: tteon\nLinkedIn: yitaejeong\nEmail: jeongiitae6@gmail.com\n\nThis blog is my space to share thoughts, tutorials, and insights about the ever-evolving world of technology."
   },
   {
-    "objectID": "index.html#recent-posts",
-    "href": "index.html#recent-posts",
-    "title": "Hardy’s Blog",
+    "objectID": "about.html#what-i-do",
+    "href": "about.html#what-i-do",
+    "title": "About Me",
     "section": "",
-    "text": "Explore my latest thoughts and insights on technology, programming, and more."
+    "text": "I write about: - Software development - Technology trends - Programming best practices - Open source projects"
   },
   {
-    "objectID": "index.html#about-this-site",
-    "href": "index.html#about-this-site",
-    "title": "Hardy’s Blog",
+    "objectID": "about.html#get-in-touch",
+    "href": "about.html#get-in-touch",
+    "title": "About Me",
     "section": "",
-    "text": "This blog is built with: - Quarto: An open-source scientific and technical publishing system - Responsive Design: Optimized for all devices - Modern CSS: Using CSS variables and smooth animations - GitHub Pages: Hosted for free with continuous deployment"
+    "text": "GitHub: tteon\nLinkedIn: yitaejeong\nEmail: jeongiitae6@gmail.com\n\nThis blog is my space to share thoughts, tutorials, and insights about the ever-evolving world of technology."
+  },
+  {
+    "objectID": "tutorials.html",
+    "href": "tutorials.html",
+    "title": "Tutorials",
+    "section": "",
+    "text": "Welcome to the TTEON learning hub. Here you’ll find comprehensive guides, tutorials, and reference manuals for our open source tools.\n\n\n\n\n\n\nTip\n\n\n\nNew to Graph RAG? Start with our Getting Started guide below!"
+  },
+  {
+    "objectID": "tutorials.html#user-manuals-guides",
+    "href": "tutorials.html#user-manuals-guides",
+    "title": "Tutorials",
+    "section": "",
+    "text": "Welcome to the TTEON learning hub. Here you’ll find comprehensive guides, tutorials, and reference manuals for our open source tools.\n\n\n\n\n\n\nTip\n\n\n\nNew to Graph RAG? Start with our Getting Started guide below!"
   }
 ]

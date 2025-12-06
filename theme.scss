@@ -1,18 +1,15 @@
-/* theme.scss */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+/*-- scss:defaults --*/
+$primary: #00f2ea !default;
+$secondary: #7000ff !default;
+$dark-bg: #0a0a0f !default;
+$glass-bg: rgba(255, 255, 255, 0.05) !default;
+$glass-border: rgba(255, 255, 255, 0.1) !default;
+$glass-blur: 12px !default;
+$text-light: #e0e0e0 !default;
+$text-muted: #a0a0a0 !default;
 
-/* Variables & Design Tokens */
-$primary: #00f2ea;
-/* Cyan Neon */
-$secondary: #7000ff;
-/* Purple Neon */
-$dark-bg: #0a0a0f;
-/* Deep Space */
-$glass-bg: rgba(255, 255, 255, 0.05);
-$glass-border: rgba(255, 255, 255, 0.1);
-$glass-blur: 12px;
-$text-light: #e0e0e0;
-$text-muted: #a0a0a0;
+/*-- scss:rules --*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
 
 /* Base Reset & Typography */
 body {

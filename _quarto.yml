@@ -19,12 +19,20 @@ website:
         text: Projects
       - href: impact.qmd
         text: Impact
+      - href: tutorials.qmd
+        text: Tutorials
       - href: about.qmd
         text: About
     right:
       - icon: github
         href: https://github.com/tteon
         aria-label: GitHub
+      - icon: discord
+        href: https://discord.gg/tteon # Placeholder
+        aria-label: Discord
+      - icon: youtube
+        href: https://youtube.com/@tteon # Placeholder
+        aria-label: YouTube
       - icon: linkedin
         href: https://linkedin.com/in/yitaejeong
         aria-label: LinkedIn

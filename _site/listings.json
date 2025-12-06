@@ -1,6 +1,18 @@
 [
   {
-    "listing": "/about.html",
+    "listing": "/index.html",
+    "items": [
+      "/posts/welcome/index.html"
+    ]
+  },
+  {
+    "listing": "/impact.html",
+    "items": [
+      "/posts/welcome/index.html"
+    ]
+  },
+  {
+    "listing": "/projects.html",
     "items": [
       "/posts/welcome/index.html"
     ]
@@ -10,7 +22,13 @@
     "items": []
   },
   {
-    "listing": "/index.html",
+    "listing": "/about.html",
+    "items": [
+      "/posts/welcome/index.html"
+    ]
+  },
+  {
+    "listing": "/tutorials.html",
     "items": [
       "/posts/welcome/index.html"
     ]
