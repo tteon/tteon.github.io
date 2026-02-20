@@ -3,9 +3,9 @@
 @import 'tailwindcss/utilities';
 
 :root {
-    /* Starlight Overrides for a Premium Midnight Violet Theme */
-    --sl-color-bg: #030712;
-    --sl-color-bg-nav: rgba(3, 7, 18, 0.85);
+    /* Starlight Overrides for a Premium 'Pitch Black' Glassmorphic Theme */
+    --sl-color-bg: #000000;
+    --sl-color-bg-nav: rgba(0, 0, 0, 0.6);
     --sl-color-text: #E4E4E7;
     --sl-color-white: #FFFFFF;
     --sl-color-gray-1: #F4F4F5;
@@ -14,8 +14,10 @@
     --sl-color-gray-4: #52525B;
     --sl-color-gray-5: #27272A;
     --sl-color-gray-6: #18181B;
-    --sl-color-accent: #8b5cf6;
-    --sl-color-accent-high: #a78bfa;
+    --sl-color-accent: #22d3ee;
+    /* cyan-400 */
+    --sl-color-accent-high: #a855f7;
+    /* purple-500 */
 }
 
 body {
@@ -31,10 +33,33 @@ body {
 
 /* Glassmorphism Navigation Starlight Override */
 header.header {
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-    background-color: rgba(4, 4, 4, 0.65) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(16px) saturate(200%);
+    -webkit-backdrop-filter: blur(16px) saturate(200%);
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Premium Orbs Animation */
+@keyframes slowPulse {
+
+    0%,
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 0.15;
+    }
+
+    50% {
+        transform: scale(1.1) translateY(-20px);
+        opacity: 0.25;
+    }
+}
+
+.animate-slow-pulse {
+    animation: slowPulse 12s ease-in-out infinite;
+}
+
+.animation-delay-2000 {
+    animation-delay: 2s;
 }
 
 /* Force Dark Mode - Hide Theme Toggle */
