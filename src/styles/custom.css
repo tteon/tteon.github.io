@@ -67,10 +67,27 @@ starlight-theme-select {
     display: none !important;
 }
 
-/* User Request: Hide the empty "SEOCHO" title and Search Bar in the top nav */
-.site-title,
-site-search {
-    display: none !important;
+/* User Request: Premium gradient styling for the restored "SEOCHO" title */
+.site-title {
+    background: linear-gradient(to right, #22d3ee, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800 !important;
+    letter-spacing: -0.05em;
+}
+
+/* Subtle styling for the restored Search Bar to match Glassmorphic theme */
+site-search button {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 9999px !important;
+    transition: all 0.2s ease;
+}
+
+site-search button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 /* Subtle animation delays for staggered fade up */
