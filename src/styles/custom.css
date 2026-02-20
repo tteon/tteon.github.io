@@ -3,9 +3,9 @@
 @import 'tailwindcss/utilities';
 
 :root {
-    /* Starlight Overrides for Dark Mode Only to match Apple/Linear */
-    --sl-color-bg: #040404;
-    --sl-color-bg-nav: rgba(4, 4, 4, 0.8);
+    /* Starlight Overrides for a Premium Midnight Violet Theme */
+    --sl-color-bg: #030712;
+    --sl-color-bg-nav: rgba(3, 7, 18, 0.85);
     --sl-color-text: #E4E4E7;
     --sl-color-white: #FFFFFF;
     --sl-color-gray-1: #F4F4F5;
@@ -14,8 +14,8 @@
     --sl-color-gray-4: #52525B;
     --sl-color-gray-5: #27272A;
     --sl-color-gray-6: #18181B;
-    --sl-color-accent: #3A82F6;
-    --sl-color-accent-high: #60A5FA;
+    --sl-color-accent: #8b5cf6;
+    --sl-color-accent-high: #a78bfa;
 }
 
 body {
@@ -39,6 +39,12 @@ header.header {
 
 /* Force Dark Mode - Hide Theme Toggle */
 starlight-theme-select {
+    display: none !important;
+}
+
+/* User Request: Hide the empty "SEOCHO" title and Search Bar in the top nav */
+.site-title,
+site-search {
     display: none !important;
 }
 
