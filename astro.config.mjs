@@ -14,9 +14,10 @@ export default defineConfig({
                 { label: 'Home', link: '/' },
                 {
                     label: 'Docs', items: [
-                        { label: 'Introduction', link: '/docs/intro/' },
+                        { label: 'Introduction', link: '/docs/index/' },
                         { label: 'Quick Start', link: '/docs/quickstart/' },
-                        { label: 'Architecture', link: '/docs/architecture/' }
+                        { label: 'Architecture', link: '/docs/architecture/' },
+                        { label: 'Workflow', link: '/docs/workflow/' }
                     ]
                 },
                 { label: 'Examples', link: '/examples/' },
