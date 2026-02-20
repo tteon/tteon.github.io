@@ -9,9 +9,6 @@ export default defineConfig({
         starlight({
             title: 'SEOCHO',
             customCss: ['./src/styles/custom.css'],
-            social: {
-                github: 'https://github.com/tteon/seocho',
-            },
             sidebar: [
                 { label: 'Introduction', link: '/docs/intro/' },
                 { label: 'Architecture', link: '/docs/architecture/' },
