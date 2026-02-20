@@ -86,30 +86,30 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
         <pre class="mermaid bg-transparent mx-auto flex justify-center text-sm md:text-base">
 graph TD
     %% Styling
-    classDef external fill:transparent,stroke:#52525B,stroke-width:1px,stroke-dasharray: 5 5,color:#A1A1AA
-    classDef pipeline fill:rgba(58, 130, 246, 0.1),stroke:#3A82F6,stroke-width:1px,color:#60A5FA
-    classDef db fill:rgba(16, 185, 129, 0.1),stroke:#10B981,stroke-width:1px,color:#34D399
-    classDef agent fill:rgba(99, 102, 241, 0.1),stroke:#6366F1,stroke-width:1px,color:#818CF8
+    classDef external fill:transparent,stroke:#52525B,stroke-width:1px,stroke-dasharray:5 5,color:#A1A1AA
+    classDef pipeline fill:#3a82f61a,stroke:#3A82F6,stroke-width:1px,color:#60A5FA
+    classDef db fill:#10b9811a,stroke:#10B981,stroke-width:1px,color:#34D399
+    classDef agent fill:#6366f11a,stroke:#6366F1,stroke-width:1px,color:#818CF8
     classDef user fill:transparent,stroke:none,color:#E4E4E7,font-weight:bold
 
-    User((User Query)):::user
+    User(("User Query")):::user
 
     subgraph DataPlane["Data Extraction Pipeline"]
-        DS[Data Sources<br>CSV / JSON / API]:::external
-        Extractor[LLM Extractor]:::pipeline
-        Linker[Entity Linker<br>& Semantics]:::pipeline
-        DBManager[Database Manager<br>Dynamic Schema]:::pipeline
+        DS["Data Sources<br/>CSV / JSON / API"]:::external
+        Extractor["LLM Extractor"]:::pipeline
+        Linker["Entity Linker<br/>& Semantics"]:::pipeline
+        DBManager["Database Manager<br/>Dynamic Schema"]:::pipeline
     end
 
     subgraph ControlPlane["Parallel Debate Orchestrator"]
-        Router[Router/Debate<br>Controller]:::agent
-        Agent1[Agent kgnormal]:::agent
-        Agent2[Agent kgfibo]:::agent
-        AgentN[Agent n...]:::agent
-        Supervisor[Synthesis<br>Supervisor]:::agent
+        Router["Router/Debate<br/>Controller"]:::agent
+        Agent1["Agent kgnormal"]:::agent
+        Agent2["Agent kgfibo"]:::agent
+        AgentN["Agent n..."]:::agent
+        Supervisor["Synthesis<br/>Supervisor"]:::agent
     end
 
-    Neo4j[(Neo4j / DozerDB<br>Multiple Distinct DBs)]:::db
+    Neo4j[("Neo4j / DozerDB<br/>Multiple Distinct DBs")]:::db
 
     %% Pipeline Flow
     DS --> Extractor
