@@ -15,12 +15,20 @@ Welcome to the central documentation index for SEOCHO. This directory tracks the
 - `WORKFLOW.md`: end-to-end operational workflow
 - custom frontend backend: `evaluation/server.py` + `evaluation/static/*`
 - `GRAPH_MODEL_STRATEGY.md`: graph representation model choices and rollout
+- `SHACL_PRACTICAL_GUIDE.md`: practical readiness and adoption guide for SHACL-like constraints
 - `ISSUE_TASK_SYSTEM.md`: sprint/roadmap issue and task operating model
 - `ADD_PLAYBOOK.md`: engineering execution and landing procedure
 - `CONTEXT_GRAPH_BLUEPRINT.md`: context event model and rollout
 - `QUICKSTART.md`: setup and local run instructions
 - `ROADMAP.md`: planned product/engineering milestones
 - `decisions/DECISION_LOG.md`: architecture decision history
+
+## Docs Sync Integration
+
+- `README.md` and `docs/*` changes are intended to propagate to the website via `.github/workflows/sync-docs-website.yml`.
+- The planned trigger emits `repository_dispatch` to `tteon/tteon.github.io` (`event-type: seocho-docs-sync`).
+- Remote rollout may remain pending until repository-owner credentials with `workflow` scope are applied.
+- Local `tteon.github.io/` workspace can be used for integration testing, but remains outside `seocho` tracking.
 
 ## Archive
 
