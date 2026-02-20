@@ -37,6 +37,11 @@ header.header {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
+/* Force Dark Mode - Hide Theme Toggle */
+starlight-theme-select {
+    display: none !important;
+}
+
 /* Subtle animation delays for staggered fade up */
 .delay-100 {
     animation-delay: 100ms;
