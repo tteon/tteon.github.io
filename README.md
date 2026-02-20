@@ -1,49 +1,27 @@
-# Starlight Starter Kit: Basics
+# SEOCHO Website (tteon.github.io)
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+This repository hosts the official documentation and landing page for the [SEOCHO](https://github.com/tteon/seocho) project.
 
-```
-npm create astro@latest -- --template starlight
-```
+## Tech Stack
+- **Framework**: [Astro](https://astro.build)
+- **Docs Theme**: [Starlight](https://starlight.astro.build)
+- **Styling**: Tailwind CSS + Custom Dark Theme
+- **Deployment**: Automatic via GitHub Actions to GitHub Pages.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+> **Note**: This repository is the *target* of an automated sync process.
+> Do **NOT** edit documentation files (`src/content/docs/*`) directly in this repository if they originate from the main `seocho` repo. Changes should be made to `seocho/docs` and pushed there, which will trigger an Action to copy them here.
 
-## 🚀 Project Structure
+## Local Development
 
-Inside of your Astro + Starlight project, you'll see the following folders and files:
-
-```
-.
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
-│   │   └── docs/
-│   └── content.config.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
-```
-
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
-
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
-
-Static assets, like favicons, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Start the dev server:
+   ```bash
+   npm run dev
+   ```
+3. Build for production:
+   ```bash
+   npm run build
+   ```

@@ -1,10 +1,10 @@
 ---
 // Starlight Page Wrapper to keep the Navbar but have a custom landing
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import ChangelogList from '../components/ChangelogList.astro';
 ---
 
 <StarlightPage frontmatter={{ title: 'SEOCHO', template: 'splash' }} hasSidebar={false}>
-  <!-- Inject Custom Tailwind via script or rely on global astro import -->
   
   <main class="relative min-h-screen text-accent w-full flex flex-col items-center overflow-x-hidden font-sans pb-24">
     
@@ -15,7 +15,7 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 
     <!-- Hero Section -->
     <section class="max-w-5xl mx-auto px-6 pt-32 pb-24 flex flex-col items-center text-center animate-fade-up">
-      <div class="inline-flex items-center px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-sm text-muted mb-8 hover:bg-white/10 transition-colors cursor-pointer">
+      <div class="inline-flex items-center px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-sm text-muted mb-8 cursor-default">
         <span class="mr-2">✨</span> Open Source Agent-Driven Knowledge Graph Platform
       </div>
       
@@ -24,11 +24,11 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
       </h1>
       
       <p class="text-lg md:text-xl text-muted max-w-2xl mb-10 leading-relaxed font-light">
-        SEOCHO is an open-source platform that combines dynamic Neo4j database provisioning with <strong>Parallel Debate</strong> — orchestrating multi-perspective reasoning where specialized agents work together to find the best answers.
+        SEOCHO combines dynamic Neo4j provisioning with <strong>Parallel Debate</strong> — orchestrating multi-perspective reasoning where specialized AI agents work together to extract and structure knowledge.
       </p>
       
       <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-        <a href="/docs/intro" class="inline-flex justify-center items-center px-6 py-3 rounded-md bg-white text-black font-medium hover:bg-gray-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+        <a href="/docs/intro/" class="inline-flex justify-center items-center px-6 py-3 rounded-md bg-white text-black font-medium hover:bg-gray-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.15)]">
           Read the Docs
         </a>
         <a href="https://github.com/tteon/seocho" target="_blank" class="inline-flex justify-center items-center px-6 py-3 rounded-md bg-surface border border-white/10 text-white font-medium hover:bg-white/10 transition-colors">
@@ -38,54 +38,74 @@ import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
       </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="max-w-6xl mx-auto px-6 py-20 w-full animate-fade-up delay-100">
+    <!-- Quickstart Section -->
+    <section class="max-w-4xl mx-auto px-6 py-12 w-full animate-fade-up delay-100">
+      <div class="mb-8 text-center md:text-left">
+        <h2 class="text-3xl font-semibold text-white mb-2">Quickstart</h2>
+        <p class="text-muted text-lg">Get up and running locally in under 5 minutes.</p>
+      </div>
+      
+      <div class="bg-surface/50 border border-white/5 rounded-xl overflow-hidden backdrop-blur-sm p-6 md:p-8 space-y-6">
+        <div>
+          <h3 class="text-white font-medium mb-2">1. Clone & Configure</h3>
+          <div class="bg-black/50 border border-white/10 rounded-md p-4 text-sm font-mono text-gray-300">
+            git clone https://github.com/tteon/seocho.git<br/>
+            cd seocho && cp .env.example .env
+          </div>
+        </div>
+        <div>
+          <h3 class="text-white font-medium mb-2">2. Spin Up Services</h3>
+          <div class="bg-black/50 border border-white/10 rounded-md p-4 text-sm font-mono text-gray-300">
+            make up
+          </div>
+        </div>
+        <div>
+          <h3 class="text-white font-medium mb-2">3. Execute Debate Query</h3>
+          <div class="bg-black/50 border border-white/10 rounded-md p-4 text-sm font-mono text-gray-300 whitespace-pre">
+            curl -X POST http://localhost:8001/run_debate \
+              -H "Content-Type: application/json" \
+              -d '{"{"}"query": "What relationships are in the database?"{"}"}'
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Use-Cases Section -->
+    <section class="max-w-6xl mx-auto px-6 py-20 w-full animate-fade-up delay-200">
       <div class="mb-12 text-center md:text-left">
-        <h2 class="text-3xl font-semibold text-white mb-4">Built for developers and researchers. <br/><span class="text-muted">Designed for scale and reliability.</span></h2>
-        <p class="text-muted text-lg max-w-2xl">Whether you're building a semantic search engine or an intelligent reasoning system, SEOCHO provides the modern primitives you need.</p>
+        <h2 class="text-3xl font-semibold text-white mb-4">Use Cases</h2>
+        <p class="text-muted text-lg max-w-2xl">Adaptable to any unstructured data domain.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Card 1 -->
-        <div class="p-8 rounded-2xl bg-surface border border-white/5 backdrop-blur-sm hover:border-white/15 transition-all group">
-          <div class="w-12 h-12 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
-            <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="p-8 rounded-2xl bg-surface border border-white/5 backdrop-blur-sm">
+          <div class="w-12 h-12 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-6">
+            <span class="text-xl">📈</span>
           </div>
-          <h3 class="text-xl font-medium text-white mb-2">Dynamic Provisioning</h3>
-          <p class="text-muted text-sm leading-relaxed">Instantly spawn isolated Neo4j databases mapped to specific datasets or clients automatically.</p>
+          <h3 class="text-xl font-medium text-white mb-2">Financial Intel</h3>
+          <p class="text-muted text-sm leading-relaxed">Consume SEC filings using `fibo.yaml` to instantly draw relational networks of market correlations, organizational hierarchies, and asset clusters.</p>
         </div>
 
-        <!-- Card 2 -->
-        <div class="p-8 rounded-2xl bg-surface border border-white/5 backdrop-blur-sm hover:border-white/15 transition-all group">
-          <div class="w-12 h-12 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
-            <svg class="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>
+        <div class="p-8 rounded-2xl bg-surface border border-white/5 backdrop-blur-sm">
+          <div class="w-12 h-12 rounded-lg bg-pink-500/10 border border-pink-500/20 flex items-center justify-center mb-6">
+            <span class="text-xl">🧬</span>
           </div>
-          <h3 class="text-xl font-medium text-white mb-2">Parallel Debate</h3>
-          <p class="text-muted text-sm leading-relaxed">Orchestrate multiple specialized agents executing independent reasoning paths in parallel.</p>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="p-8 rounded-2xl bg-surface border border-white/5 backdrop-blur-sm hover:border-white/15 transition-all group">
-          <div class="w-12 h-12 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
-            <svg class="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-          </div>
-          <h3 class="text-xl font-medium text-white mb-2">Built-in Tracing</h3>
-          <p class="text-muted text-sm leading-relaxed">Native integration with Opik for complete observability into your agent's thought processes.</p>
+          <h3 class="text-xl font-medium text-white mb-2">Clinical Extraction</h3>
+          <p class="text-muted text-sm leading-relaxed">Map interactions between drugs, symptoms, and side-effects from clinical trial PDFs directly into a standalone, queryable DozerDB.</p>
         </div>
       </div>
     </section>
 
     <!-- Architecture Section -->
-    <section class="max-w-6xl mx-auto px-6 py-20 w-full animate-fade-up delay-200">
+    <section class="max-w-6xl mx-auto px-6 py-20 w-full animate-fade-up delay-300">
       <div class="mb-12 text-center md:text-left">
-        <h2 class="text-3xl font-semibold text-white mb-4">How SEOCHO Works <br/><span class="text-muted">A modern graph architecture.</span></h2>
-        <p class="text-muted text-lg max-w-2xl">From unstructured data ingest to multi-agent parallel debate routing, see how the entire system flows together on top of Neo4j.</p>
+        <h2 class="text-3xl font-semibold text-white mb-4">Architecture</h2>
+        <p class="text-muted text-lg max-w-2xl">From ingestion to agent debate routing.</p>
       </div>
 
-      <div class="bg-surface border border-white/5 rounded-2xl overflow-hidden backdrop-blur-sm p-8 flex justify-center items-center shadow-lg">
-        <pre class="mermaid bg-transparent mx-auto flex justify-center text-sm md:text-base">
+      <div class="bg-surface border border-white/5 rounded-2xl overflow-hidden backdrop-blur-sm p-4 md:p-8 flex justify-center items-center shadow-lg text-xs md:text-sm">
+        <pre class="mermaid bg-transparent mx-auto">
 graph TD
-    %% Styling
     classDef external fill:transparent,stroke:#52525B,stroke-width:1px,stroke-dasharray:5 5,color:#A1A1AA
     classDef pipeline fill:#3a82f61a,stroke:#3A82F6,stroke-width:1px,color:#60A5FA
     classDef db fill:#10b9811a,stroke:#10B981,stroke-width:1px,color:#34D399
@@ -93,75 +113,90 @@ graph TD
     classDef user fill:transparent,stroke:none,color:#E4E4E7,font-weight:bold
 
     User(("User Query")):::user
-
-    subgraph DataPlane["Data Extraction Pipeline"]
-        DS["Data Sources<br/>CSV / JSON / API"]:::external
-        Extractor["LLM Extractor"]:::pipeline
-        Linker["Entity Linker<br/>& Semantics"]:::pipeline
-        DBManager["Database Manager<br/>Dynamic Schema"]:::pipeline
+    subgraph DataPlane["Extraction Pipeline"]
+        DS["Sources"]:::external-->Extractor["LLM Extractor"]:::pipeline
+        Extractor-->Linker["Entity Linker"]:::pipeline
+        Linker-->DBManager["DB Manager"]:::pipeline
     end
-
     subgraph ControlPlane["Parallel Debate Orchestrator"]
-        Router["Router/Debate<br/>Controller"]:::agent
-        Agent1["Agent kgnormal"]:::agent
-        Agent2["Agent kgfibo"]:::agent
-        AgentN["Agent n..."]:::agent
-        Supervisor["Synthesis<br/>Supervisor"]:::agent
+        Router["Router"]:::agent
+        Agent1["Agent 1"]:::agent
+        Agent2["Agent 2"]:::agent
+        Supervisor["Supervisor"]:::agent
     end
+    Neo4j[("Neo4j DBs")]:::db
 
-    Neo4j[("Neo4j / DozerDB<br/>Multiple Distinct DBs")]:::db
-
-    %% Pipeline Flow
-    DS --> Extractor
-    Extractor --> Linker
-    Linker --> DBManager
     DBManager --> Neo4j
-
-    %% Query Flow
     User --> Router
     Router -->|Fan-Out| Agent1
     Router -->|Fan-Out| Agent2
-    Router -->|Fan-Out| AgentN
-    
     Agent1 -.-> Neo4j
     Agent2 -.-> Neo4j
-    AgentN -.-> Neo4j
-
     Agent1 -->|Collect| Supervisor
     Agent2 -->|Collect| Supervisor
-    AgentN -->|Collect| Supervisor
-
     Supervisor -->|Final Answer| User
         </pre>
       </div>
     </section>
 
+    <!-- FAQ Section -->
+    <section class="max-w-4xl mx-auto px-6 py-20 w-full animate-fade-up delay-300">
+      <div class="mb-8 text-center">
+        <h2 class="text-3xl font-semibold text-white mb-2">Frequently Asked Questions</h2>
+      </div>
+      <div class="space-y-4">
+        <details class="group bg-surface/50 border border-white/5 p-6 rounded-xl cursor-pointer">
+          <summary class="flex justify-between items-center text-white font-medium list-none">
+            What is Parallel Debate?
+            <span class="transition group-open:rotate-180">↓</span>
+          </summary>
+          <p class="text-muted text-sm mt-4 leading-relaxed">It's our orchestration model where we spin up multiple isolated LLM agents. They query the graph simultaneously on their own thoughts, and a Supervisor agent evaluates their conflicting conclusions to give the user the best answer.</p>
+        </details>
+        
+        <details class="group bg-surface/50 border border-white/5 p-6 rounded-xl cursor-pointer">
+          <summary class="flex justify-between items-center text-white font-medium list-none">
+            Why do I need dynamic databases?
+            <span class="transition group-open:rotate-180">↓</span>
+          </summary>
+          <p class="text-muted text-sm mt-4 leading-relaxed">Unlike monolithic DBs, SEOCHO provisions isolated Neo4j instances for distinct datasets, enforcing physical boundaries and protecting schema integrity per topic.</p>
+        </details>
+        
+        <details class="group bg-surface/50 border border-white/5 p-6 rounded-xl cursor-pointer">
+          <summary class="flex justify-between items-center text-white font-medium list-none">
+            Does it integrate with existing Neo4j?
+            <span class="transition group-open:rotate-180">↓</span>
+          </summary>
+          <p class="text-muted text-sm mt-4 leading-relaxed">Yes. While we default to Dockerized DozerDB, SEOCHO's Data Pipeline can map entities and insert into any standard Neo4j graph using the Bolt protocol.</p>
+        </details>
+        
+        <details class="group bg-surface/50 border border-white/5 p-6 rounded-xl cursor-pointer">
+          <summary class="flex justify-between items-center text-white font-medium list-none">
+            What observability tools are used?
+            <span class="transition group-open:rotate-180">↓</span>
+          </summary>
+          <p class="text-muted text-sm mt-4 leading-relaxed">We natively integrate with Opik to provide complete tracing of the prompt payloads, token usage, latency, and full visibility into the agent's thought tree.</p>
+        </details>
+      </div>
+    </section>
+
     <!-- Updates Section -->
-    <section class="max-w-4xl mx-auto px-6 py-20 w-full animate-fade-up delay-200">
+    <section class="max-w-4xl mx-auto px-6 py-12 w-full animate-fade-up delay-300">
       <div class="flex items-end justify-between border-b border-white/10 pb-6 mb-8">
         <div>
-          <h2 class="text-2xl font-semibold text-white mb-2">Changelog</h2>
-          <p class="text-muted text-sm">Latest updates automatically synced via GitHub Actions.</p>
+          <h2 class="text-2xl font-semibold text-white mb-2">Latest Updates</h2>
+          <p class="text-muted text-sm">Synced directly from GitHub Releases and Commits.</p>
         </div>
+        <a href="/changelog/" class="text-sm text-accent hover:text-white transition-colors">View All →</a>
       </div>
 
-      <!-- Import and render updates dynamically -->
-      <div class="bg-surface/50 border border-white/5 rounded-xl overflow-hidden backdrop-blur-sm">
-        <ul class="divide-y divide-white/5" id="updates-list">
-          <!-- Populated Client Side for demo, but can be imported via static Astro import -->
-          <li class="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-white/[0.02] transition-colors">
-            <span class="text-muted text-sm font-mono w-28 shrink-0">2026-02-21</span>
-            <span class="text-white text-sm flex-1">Initial automation templates built and deployed.</span>
-            <span class="text-xs font-mono text-white/40 bg-white/5 px-2 py-1 rounded">#init</span>
-          </li>
-        </ul>
-      </div>
+      <!-- Imported Astro Component feeds off updates.json -->
+      <ChangelogList />
+      
     </section>
   </main>
 </StarlightPage>
 
 <style>
-/* Scoped overrides if necessary */
 :global(.sl-container) {
   max-width: 100% !important;
   margin: 0 !important;
