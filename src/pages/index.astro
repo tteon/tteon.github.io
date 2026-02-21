@@ -2,60 +2,25 @@
 // Starlight Page Wrapper to keep the Navbar but have a custom landing
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
 import ChangelogList from '../components/ChangelogList.astro';
+import LettaHero from '../components/LettaHero.astro';
+import LettaFeatures from '../components/LettaFeatures.astro';
 ---
 
-<StarlightPage frontmatter={{ title: 'SEOCHO', template: 'splash' }} hasSidebar={false}>
+<StarlightPage frontmatter={{ title: 'SEOCHO | The OS for Agentic Knowledge Graphs', template: 'splash' }} hasSidebar={false}>
   
-  <main class="relative min-h-screen text-accent w-full flex flex-col items-center overflow-x-hidden font-sans pb-24 selection:bg-cyan-500/30">
+  <main class="relative min-h-screen w-full flex flex-col items-center overflow-x-hidden font-sans pb-24 selection:bg-zinc-500/30">
     
     <!-- Ultra Premium SVG Grain Noise Overlay -->
     <div class="pointer-events-none fixed inset-0 z-50 h-full w-full opacity-[0.03] mix-blend-overlay" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
 
-    <!-- Pitch Black Background Environment with Slow Pulsing Animated Orbs -->
+    <!-- Pitch Black Background Environment -->
     <div class="absolute inset-0 bg-[#000000] -z-20"></div>
-    <div class="absolute top-24 left-1/4 w-[500px] h-[500px] bg-cyan-600/20 blur-[140px] rounded-full pointer-events-none -z-10 animate-slow-pulse"></div>
-    <div class="absolute top-64 right-1/4 w-[500px] h-[500px] bg-purple-600/20 blur-[140px] rounded-full pointer-events-none -z-10 animate-slow-pulse animation-delay-2000"></div>
 
-    <!-- Hero Section -->
-    <section class="max-w-5xl mx-auto px-6 pt-24 pb-24 flex flex-col items-center text-center animate-fade-up z-10">
-      
-      <!-- Premium Top Developer Navigation Pills -->
-      <nav class="mb-12 inline-flex items-center p-1.5 rounded-full border border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl overflow-x-auto max-w-full">
-        <div class="flex items-center space-x-1 whitespace-nowrap px-2">
-          <a href="/docs/index/" class="px-5 py-2 rounded-full text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/10 transition-all">Docs</a>
-          <div class="w-1 h-1 rounded-full bg-white/20"></div>
-          <a href="/blog/" class="px-5 py-2 rounded-full text-sm font-medium text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 transition-all font-bold">Blog</a>
-          <div class="w-1 h-1 rounded-full bg-white/20"></div>
-          <a href="/docs/quickstart/" class="px-5 py-2 rounded-full text-sm font-medium text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 transition-all">Quickstart</a>
-          <div class="w-1 h-1 rounded-full bg-white/20"></div>
-          <a href="/docs/architecture/" class="px-5 py-2 rounded-full text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/10 transition-all">Architecture</a>
-          <div class="w-1 h-1 rounded-full bg-white/20"></div>
-          <a href="/changelog/" class="px-5 py-2 rounded-full text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/10 transition-all">Changelog</a>
-        </div>
-      </nav>
-
-      <div class="inline-flex items-center px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-xs font-medium tracking-wide text-zinc-300 mb-8 cursor-default hover:bg-white/10 transition-colors shadow-lg shadow-black/50">
-        <span class="mr-2 text-cyan-400">⚡</span> Open Source Agent-Driven Knowledge Graph
-      </div>
-      
-      <h1 class="text-5xl md:text-8xl font-black tracking-tighter text-white mb-6 leading-[1.1]">
-        Transform Raw Data <br/> Into <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600">Structured Knowledge.</span>
-      </h1>
-      
-      <p class="text-lg md:text-xl text-zinc-400 max-w-2xl mb-12 leading-relaxed font-light">
-        SEOCHO combines dynamic Neo4j provisioning with <strong>Parallel Debate</strong> — orchestrating multi-perspective reasoning where specialized AI agents work together to extract truth.
-      </p>
-      
-      <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-        <a href="/docs/index/" class="group relative inline-flex justify-center items-center px-8 py-4 rounded-lg bg-white text-black font-semibold hover:bg-zinc-200 transition-all overflow-hidden shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:shadow-[0_0_60px_rgba(255,255,255,0.2)] hover:-translate-y-0.5">
-          <span class="relative z-10">Read the Docs</span>
-        </a>
-        <a href="https://github.com/tteon/seocho" target="_blank" class="group inline-flex justify-center items-center px-8 py-4 rounded-lg bg-black/40 border border-white/10 backdrop-blur-md text-white font-semibold hover:bg-white/5 hover:border-white/20 transition-all hover:-translate-y-0.5 shadow-xl">
-          <svg class="w-5 h-5 mr-3 opacity-70 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" /></svg>
-          View on GitHub
-        </a>
-      </div>
-    </section>
+    <!-- Letta Aesthetic Components -->
+    <div class="landing-override w-full">
+      <LettaHero />
+      <LettaFeatures />
+    </div>
 
     <!-- Quickstart Section (Glass Panel) -->
     <section class="max-w-4xl mx-auto px-6 py-16 w-full animate-fade-up delay-100 z-10">
@@ -64,58 +29,30 @@ import ChangelogList from '../components/ChangelogList.astro';
         <p class="text-zinc-400 text-lg font-light">Get up and running locally in under 5 minutes.</p>
       </div>
       
-      <div class="bg-black/40 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl p-8 md:p-10 shadow-2xl relative group hover:border-white/20 transition-colors">
+      <div class="bg-[#040404] border border-white/10 rounded-2xl overflow-hidden p-8 md:p-10 shadow-2xl relative group transition-colors">
         <div class="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none"></div>
         <div class="space-y-8 relative z-10">
           <div>
-            <h3 class="text-white font-semibold mb-3 flex items-center"><span class="flex items-center justify-center w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 text-xs mr-3">1</span> Clone & Configure</h3>
-            <div class="bg-black/60 border border-white/5 rounded-lg p-4 text-sm font-mono text-zinc-300 shadow-inner">
+            <h3 class="text-zinc-100 font-semibold mb-3 flex items-center"><span class="flex items-center justify-center w-6 h-6 rounded-md bg-white/10 text-white text-xs mr-3 border border-white/10">1</span> Clone & Configure</h3>
+            <div class="bg-white/5 border border-white/5 rounded-lg p-4 text-sm font-mono text-zinc-300 shadow-inner">
               git clone https://github.com/tteon/seocho.git<br/>
               cd seocho && cp .env.example .env
             </div>
           </div>
           <div>
-            <h3 class="text-white font-semibold mb-3 flex items-center"><span class="flex items-center justify-center w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 text-xs mr-3">2</span> Spin Up Services</h3>
-            <div class="bg-black/60 border border-white/5 rounded-lg p-4 text-sm font-mono text-zinc-300 shadow-inner">
+            <h3 class="text-zinc-100 font-semibold mb-3 flex items-center"><span class="flex items-center justify-center w-6 h-6 rounded-md bg-white/10 text-white text-xs mr-3 border border-white/10">2</span> Spin Up Services</h3>
+            <div class="bg-white/5 border border-white/5 rounded-lg p-4 text-sm font-mono text-zinc-300 shadow-inner">
               make up
             </div>
           </div>
           <div>
-            <h3 class="text-white font-semibold mb-3 flex items-center"><span class="flex items-center justify-center w-6 h-6 rounded-full bg-purple-500/20 text-purple-400 text-xs mr-3">3</span> Execute Debate Query</h3>
-            <div class="bg-black/60 border border-white/5 rounded-lg p-4 text-sm font-mono text-zinc-300 shadow-inner whitespace-pre overflow-x-auto">
+            <h3 class="text-zinc-100 font-semibold mb-3 flex items-center"><span class="flex items-center justify-center w-6 h-6 rounded-md bg-white/10 text-white text-xs mr-3 border border-white/10">3</span> Execute Debate Query</h3>
+            <div class="bg-white/5 border border-white/5 rounded-lg p-4 text-sm font-mono text-zinc-300 shadow-inner whitespace-pre overflow-x-auto">
 curl -X POST http://localhost:8001/run_debate \
   -H "Content-Type: application/json" \
   -d '{'{"'}query": "What relationships are in the database?"{'}'}'
             </div>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Use-Cases Section -->
-    <section class="max-w-6xl mx-auto px-6 py-24 w-full animate-fade-up delay-200 z-10">
-      <div class="mb-14 text-center md:text-left">
-        <h2 class="text-3xl font-bold tracking-tight text-white mb-3">Domain Adaptability</h2>
-        <p class="text-zinc-400 text-lg font-light max-w-2xl">Effortlessly map unstructured data clusters into native graphs.</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="p-10 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-xl group hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all duration-300 shadow-xl overflow-hidden relative">
-          <div class="absolute -right-10 -top-10 w-40 h-40 bg-cyan-500/10 blur-3xl rounded-full group-hover:bg-cyan-500/20 transition-all"></div>
-          <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-400/20 to-blue-500/20 border border-cyan-400/30 flex items-center justify-center mb-8 transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
-            <span class="text-2xl text-cyan-400">📈</span>
-          </div>
-          <h3 class="text-2xl font-semibold text-white mb-3 tracking-tight">Financial Intelligence</h3>
-          <p class="text-zinc-400 text-sm leading-relaxed font-light">Consume SEC filings using strict ontologies (`fibo.yaml`) to instantly draw relational networks of market correlations, organizational hierarchies, and asset clusters seamlessly.</p>
-        </div>
-
-        <div class="p-10 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-xl group hover:border-purple-500/30 hover:bg-purple-500/5 transition-all duration-300 shadow-xl overflow-hidden relative">
-          <div class="absolute -right-10 -top-10 w-40 h-40 bg-purple-500/10 blur-3xl rounded-full group-hover:bg-purple-500/20 transition-all"></div>
-          <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-400/20 to-pink-500/20 border border-purple-400/30 flex items-center justify-center mb-8 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-            <span class="text-2xl text-purple-400">🧬</span>
-          </div>
-          <h3 class="text-2xl font-semibold text-white mb-3 tracking-tight">Clinical Extraction</h3>
-          <p class="text-zinc-400 text-sm leading-relaxed font-light">Map complex interactions between drugs, symptoms, and side-effects from deep clinical trial manuscripts directly into an isolated, queryable DozerDB instance automatically.</p>
         </div>
       </div>
     </section>
@@ -127,14 +64,14 @@ curl -X POST http://localhost:8001/run_debate \
         <p class="text-zinc-400 text-lg font-light max-w-2xl">From document ingestion to asynchronous agent debate routing.</p>
       </div>
 
-      <div class="bg-black/40 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl p-8 md:p-12 flex justify-center items-center shadow-2xl text-xs md:text-sm relative">
+      <div class="bg-[#040404] border border-white/10 rounded-2xl overflow-hidden p-8 md:p-12 flex justify-center items-center shadow-2xl text-xs md:text-sm relative">
         <div class="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none"></div>
         <pre class="mermaid bg-transparent mx-auto relative z-10">
 graph TD
     classDef external fill:transparent,stroke:#52525B,stroke-width:1px,stroke-dasharray:5 5,color:#A1A1AA
-    classDef pipeline fill:#0891b220,stroke:#06b6d4,stroke-width:1px,color:#22d3ee
-    classDef db fill:#16653420,stroke:#22c55e,stroke-width:1px,color:#4ade80
-    classDef agent fill:#7e22ce20,stroke:#a855f7,stroke-width:1px,color:#c084fc
+    classDef pipeline fill:#ffffff10,stroke:#d4d4d8,stroke-width:1px,color:#e4e4e7
+    classDef db fill:#ffffff05,stroke:#a1a1aa,stroke-width:1px,color:#d4d4d8
+    classDef agent fill:#ffffff15,stroke:#f4f4f5,stroke-width:1px,color:#ffffff
     classDef user fill:transparent,stroke:none,color:#E4E4E7,font-weight:bold
 
     User(("User Query")):::user
@@ -171,7 +108,7 @@ graph TD
           <h2 class="text-2xl font-bold tracking-tight text-white mb-2">Latest Updates</h2>
           <p class="text-zinc-500 text-sm font-light">Continuously integrated signals from GitHub Releases.</p>
         </div>
-        <a href="/changelog/" class="text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors flex items-center">View All <span class="ml-1 text-lg leading-none">→</span></a>
+        <a href="/changelog/" class="text-sm font-medium text-zinc-300 hover:text-white transition-colors flex items-center">View All <span class="ml-1 text-lg leading-none">→</span></a>
       </div>
 
       <ChangelogList />
@@ -183,32 +120,32 @@ graph TD
         <h2 class="text-3xl font-bold tracking-tight text-white mb-2">FAQ</h2>
       </div>
       <div class="space-y-4">
-        <details class="group bg-black/40 border border-white/10 p-6 md:p-8 rounded-2xl cursor-pointer backdrop-blur-xl hover:bg-white/[0.02] transition-colors">
-          <summary class="flex justify-between items-center text-white font-semibold list-none text-lg">
+        <details class="group bg-[#040404] border border-white/10 p-6 md:p-8 rounded-2xl cursor-pointer hover:bg-white/[0.02] transition-colors">
+          <summary class="flex justify-between items-center text-zinc-100 font-semibold list-none text-lg">
             What exactly is Parallel Debate?
             <span class="transition-transform group-open:rotate-180 text-zinc-500">↓</span>
           </summary>
           <p class="text-zinc-400 text-sm mt-4 leading-relaxed font-light border-t border-white/5 pt-4">It's an orchestration framework where multiple isolated LLM agents execute reasoning paths concurrently against the graph database. A Supervisor agent then evaluates conflicting conclusions from these agents to provide the single most grounded answer.</p>
         </details>
         
-        <details class="group bg-black/40 border border-white/10 p-6 md:p-8 rounded-2xl cursor-pointer backdrop-blur-xl hover:bg-white/[0.02] transition-colors">
-          <summary class="flex justify-between items-center text-white font-semibold list-none text-lg">
+        <details class="group bg-[#040404] border border-white/10 p-6 md:p-8 rounded-2xl cursor-pointer hover:bg-white/[0.02] transition-colors">
+          <summary class="flex justify-between items-center text-zinc-100 font-semibold list-none text-lg">
             Why do I need dynamic databases?
             <span class="transition-transform group-open:rotate-180 text-zinc-500">↓</span>
           </summary>
           <p class="text-zinc-400 text-sm mt-4 leading-relaxed font-light border-t border-white/5 pt-4">Unlike monolithic deployment strategies, SEOCHO provisions entirely isolated Neo4j/DozerDB instances for distinctly separate datasets on the fly. This enforces hardened physical boundaries and protects schema integrity per ingestion cluster.</p>
         </details>
         
-        <details class="group bg-black/40 border border-white/10 p-6 md:p-8 rounded-2xl cursor-pointer backdrop-blur-xl hover:bg-white/[0.02] transition-colors">
-          <summary class="flex justify-between items-center text-white font-semibold list-none text-lg">
+        <details class="group bg-[#040404] border border-white/10 p-6 md:p-8 rounded-2xl cursor-pointer hover:bg-white/[0.02] transition-colors">
+          <summary class="flex justify-between items-center text-zinc-100 font-semibold list-none text-lg">
             Does it integrate with my existing Neo4j?
             <span class="transition-transform group-open:rotate-180 text-zinc-500">↓</span>
           </summary>
           <p class="text-zinc-400 text-sm mt-4 leading-relaxed font-light border-t border-white/5 pt-4">Yes. While we default to containerized DozerDB endpoints, SEOCHO's Data Pipeline can map semantic entities and perform insertions into any standard Neo4j or Aura graph engine via the Bolt protocol specifications.</p>
         </details>
         
-        <details class="group bg-black/40 border border-white/10 p-6 md:p-8 rounded-2xl cursor-pointer backdrop-blur-xl hover:bg-white/[0.02] transition-colors">
-          <summary class="flex justify-between items-center text-white font-semibold list-none text-lg">
+        <details class="group bg-[#040404] border border-white/10 p-6 md:p-8 rounded-2xl cursor-pointer hover:bg-white/[0.02] transition-colors">
+          <summary class="flex justify-between items-center text-zinc-100 font-semibold list-none text-lg">
             What observability tools are used?
             <span class="transition-transform group-open:rotate-180 text-zinc-500">↓</span>
           </summary>
