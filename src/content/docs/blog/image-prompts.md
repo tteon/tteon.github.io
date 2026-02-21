@@ -1,5 +1,6 @@
 ---
 title: "Image Prompts for Landing Page"
+date: 2026-02-21
 ---
 # Prompts for 3D Graph / Network Assets
 
