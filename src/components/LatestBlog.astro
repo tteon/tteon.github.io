@@ -13,11 +13,12 @@ const blogPosts = allDocs
 let recentPosts = blogPosts.slice(0, 3).map(post => {
   const dDate = post.data?.date;
   const dateStr = dDate ? new Date(dDate).toISOString().split('T')[0] : 'Recent';
+  const postUrl = post.id ? `/blog/${post.id.replace('blog/', '').replace('.md', '').replace('.mdx', '')}/` : '/blog/';
   return {
     title: post.data?.title || 'SEOCHO Update',
     excerpt: post.data?.excerpt || post.data?.description || 'Discover the latest releases and updates from the SEOCHO engineering team.',
     date: dateStr,
-    url: `/blog/${post.slug.replace('blog/', '')}/`
+    url: postUrl
   };
 });
 
