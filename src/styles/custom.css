@@ -144,6 +144,57 @@ site-search button:hover {
     animation-delay: 300ms;
 }
 
+/* 
+ * UI Refinements requested by User
+ */
+
+/* 1. Hide the "Blog" link from the Starlight Top Header (Desktop & Mobile) */
+site-search~a[href="/blog/"],
+header .sl-flex a[href="/blog/"],
+starlight-header a[href="/blog/"] {
+    display: none !important;
+}
+
+/* 2. Fix Starlight / Pagefind Search Modal Styling (especially the 'X' clear button & spacing) */
+#starlight__searchdialog {
+    --pagefind-ui-bg: #09090b !important;
+    /* Extremely dark zinc background for the modal */
+    --pagefind-ui-border: rgba(255, 255, 255, 0.1) !important;
+    --pagefind-ui-text: #e4e4e7 !important;
+    --pagefind-ui-primary: #ffffff !important;
+}
+
+/* Fix the ugly 'Clear' X button layout in the search input */
+.pagefind-ui__search-clear {
+    border-radius: 9999px !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    width: 24px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin-right: 10px !important;
+}
+
+.pagefind-ui__search-clear:hover {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Ensure the search input box inside the modal looks premium */
+.pagefind-ui__search-input {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    padding-left: 48px !important;
+    /* space for the glass icon */
+}
+
+.pagefind-ui__search-input:focus {
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05) !important;
+}
+
 /* Landing Page Overrides (Letta style) */
 /* When .landing-override is present, hide the Starlight sidebar and force full width */
 :root:has(.landing-override) starlight-sidebar {
