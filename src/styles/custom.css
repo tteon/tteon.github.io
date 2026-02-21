@@ -102,3 +102,37 @@ site-search button:hover {
 .delay-300 {
     animation-delay: 300ms;
 }
+
+/* Landing Page Overrides (Letta style) */
+/* When .landing-override is present, hide the Starlight sidebar and force full width */
+:root:has(.landing-override) starlight-sidebar {
+    display: none !important;
+}
+
+:root:has(.landing-override) .main-frame {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 0 !important;
+}
+
+:root:has(.landing-override) .main-pane {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+:root:has(.landing-override) .content-panel {
+    padding: 0 !important;
+}
+
+:root:has(.landing-override) .sl-container {
+    max-width: none !important;
+    margin: 0 !important;
+}
+
+:root:has(.landing-override) .sl-markdown-content {
+    h1:first-child, .heading-wrapper {
+        display: none !important; /* Hide the default generated H1 title from frontmatter on landing */
+    }
+}

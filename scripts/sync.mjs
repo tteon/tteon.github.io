@@ -4,11 +4,15 @@ import { execSync } from 'child_process';
 
 const SEOCHO_REPO_DIR = path.join(process.cwd(), 'temp_seocho');
 const TARGET_DOCS_DIR = path.join(process.cwd(), 'src', 'content', 'docs', 'docs');
+const TARGET_BLOG_DIR = path.join(process.cwd(), 'src', 'content', 'docs', 'blog');
 const UPDATES_JSON_PATH = path.join(process.cwd(), 'src', 'data', 'updates.json');
 
 // Ensure target directories exist
 if (!fs.existsSync(TARGET_DOCS_DIR)) {
     fs.mkdirSync(TARGET_DOCS_DIR, { recursive: true });
+}
+if (!fs.existsSync(TARGET_BLOG_DIR)) {
+    fs.mkdirSync(TARGET_BLOG_DIR, { recursive: true });
 }
 if (!fs.existsSync(path.dirname(UPDATES_JSON_PATH))) {
     fs.mkdirSync(path.dirname(UPDATES_JSON_PATH), { recursive: true });
@@ -41,7 +45,20 @@ const fileMappings = [
     {
         src: 'docs/WORKFLOW.md',
         dest: 'workflow.md',
+        isBlog: false,
         frontmatter: `---\ntitle: Workflow\ndescription: End-to-end Operational Workflow.\n---\n\n> *Synced automatically from \`seocho/docs/WORKFLOW.md\`*\n\n`
+    },
+    {
+        src: 'docs/PHILOSOPHY.md',
+        dest: 'philosophy.md',
+        isBlog: true,
+        frontmatter: `---\ntitle: "SEOCHO Design Philosophy & Operating Principles"\ndate: ${new Date().toISOString().split('T')[0]}\nauthors:\n  - seocho\nexcerpt: Extract domain rules and high-value semantics from heterogeneous data into a SHACL-like semantic layer.\n---\n\n> *Synced automatically from \`seocho/docs/PHILOSOPHY.md\`*\n\n`
+    },
+    {
+        src: 'docs/PHILOSOPHY_FEASIBILITY_REVIEW.md',
+        dest: 'feasibility-review-framework.md',
+        isBlog: true,
+        frontmatter: `---\ntitle: "Feasibility Review Framework & Rubrics"\ndate: ${new Date().toISOString().split('T')[0]}\nauthors:\n  - seocho\nexcerpt: Multi-role feasibility review framework and Go/No-Go rubric for graph data implementations.\n---\n\n> *Synced automatically from \`seocho/docs/PHILOSOPHY_FEASIBILITY_REVIEW.md\`*\n\n`
     }
 ];
 
@@ -49,7 +66,8 @@ const fileMappings = [
 console.log('Processing and wrapping markdown files...');
 for (const map of fileMappings) {
     const sourcePath = path.join(SEOCHO_REPO_DIR, map.src);
-    const destPath = path.join(TARGET_DOCS_DIR, map.dest);
+    const destDir = map.isBlog ? TARGET_BLOG_DIR : TARGET_DOCS_DIR;
+    const destPath = path.join(destDir, map.dest);
 
     if (fs.existsSync(sourcePath)) {
         let content = fs.readFileSync(sourcePath, 'utf8');
@@ -58,7 +76,7 @@ for (const map of fileMappings) {
         content = content.replace(/^#\s(.*?)\n/m, '');
 
         fs.writeFileSync(destPath, map.frontmatter + content);
-        console.log(`✅ Synced: ${map.src} -> ${map.dest}`);
+        console.log(`✅ Synced: ${map.src} -> ${path.join(path.basename(destDir), map.dest)}`);
     } else {
         console.warn(`⚠️ Warning: Source file not found ${map.src}`);
     }

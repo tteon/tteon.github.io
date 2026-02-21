@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import starlightBlog from 'starlight-blog';
 import tailwind from '@astrojs/tailwind';
 
 export default defineConfig({
@@ -10,6 +11,18 @@ export default defineConfig({
             title: 'SEOCHO',
             description: 'Open Source Agent-Driven Knowledge Graph Platform',
             customCss: ['./src/styles/custom.css'],
+            plugins: [
+                starlightBlog({
+                    title: 'Blog',
+                    recentPostCount: 5,
+                    authors: {
+                        seocho: {
+                            name: 'SEOCHO Core Engine',
+                            title: 'System AI',
+                        },
+                    },
+                })
+            ],
             sidebar: [
                 { label: 'Home', link: '/' },
                 {
