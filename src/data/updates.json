@@ -1,9 +1,1 @@
-[
-  {
-    "date": "2026-02-20",
-    "message": "Sync integration established. Awaiting first release.",
-    "hash": "init",
-    "url": "https://github.com/tteon/seocho/releases",
-    "body": "..."
-  }
-]
+[  {""hash"":""033c6c5"",""date"":""2026-02-21"",""message"":""feat: implement P1 readiness routing, health split, and elementId migration"",""url"":""https://github.com/tteon/seocho/commit/033c6c58aa57ba1453335ebce16fbf3c7adaa4a6""},  {""hash"":""44fb77a"",""date"":""2026-02-21"",""message"":""fix: add agent sdk adapter and debate readiness contract"",""url"":""https://github.com/tteon/seocho/commit/44fb77a2735515f51efb0761d0f5dc68cf59ee35""},  {""hash"":""cbf3e8f"",""date"":""2026-02-21"",""message"":""docs: clarify quickstart for custom-port environments"",""url"":""https://github.com/tteon/seocho/commit/cbf3e8fb7db2d561506a8dbdb7a39a088b882c2f""},  {""hash"":""7f968fd"",""date"":""2026-02-21"",""message"":""docs: add user-first quickstart and architecture priority docs"",""url"":""https://github.com/tteon/seocho/commit/7f968fd944af7c1b0b0a3ddf81ee3d574479d312""},  {""hash"":""a3b7b7f"",""date"":""2026-02-21"",""message"":""Fix debate runtime compatibility and skip missing databases"",""url"":""https://github.com/tteon/seocho/commit/a3b7b7f4d9ac35d2c0e286dfeb798a9acdac07b2""}]
