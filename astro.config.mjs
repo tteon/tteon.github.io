@@ -23,9 +23,9 @@ export default defineConfig({
                     },
                 })
             ],
-            social: {
-                github: 'https://github.com/TTEON/seocho'
-            },
+            social: [
+                { icon: 'github', label: 'GitHub', href: 'https://github.com/TTEON/seocho' }
+            ],
             sidebar: [
                 { label: 'Home', link: '/' },
                 {
