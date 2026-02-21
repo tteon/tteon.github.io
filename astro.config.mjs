@@ -30,6 +30,7 @@ export default defineConfig({
                         { label: 'Introduction', link: '/docs/index/' },
                         { label: 'Tutorial', link: '/docs/tutorial/' },
                         { label: 'Quick Start', link: '/docs/quickstart/' },
+                        { label: 'Open Source Playbook', link: '/docs/open_source_playbook/' },
                         { label: 'Architecture', link: '/docs/architecture/' },
                         { label: 'Workflow', link: '/docs/workflow/' },
                         { label: 'Philosophy', link: '/docs/philosophy/' }
