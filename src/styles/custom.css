@@ -2,6 +2,9 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap');
+
 :root {
     /* Starlight Overrides for a Premium 'Pitch Black' Glassmorphic Theme */
     --sl-color-bg: #000000;
@@ -18,17 +21,27 @@
     /* cyan-400 */
     --sl-color-accent-high: #a855f7;
     /* purple-500 */
+
+    /* Letta Aesthetic Typography */
+    --sl-font: 'Geist', sans-serif;
+    --sl-font-mono: 'Geist Mono', monospace;
 }
 
 body {
     background-color: var(--sl-color-bg);
     color: var(--sl-color-text);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-family: var(--sl-font);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-image:
         radial-gradient(ellipse at 50% -20%, rgba(255, 255, 255, 0.08), transparent 60%);
     background-attachment: fixed;
+}
+
+code,
+pre,
+.font-mono {
+    font-family: var(--sl-font-mono) !important;
 }
 
 /* Glassmorphism Navigation Starlight Override */

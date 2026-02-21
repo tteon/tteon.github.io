@@ -44,57 +44,45 @@ Primary modules:
 
 ## End-to-End Data Flow
 
-```
-[External Data]
-       │
-       ▼
-  DataSource (CSV/JSON/Parquet/API)
-       │
-       ▼
-  OntologyPromptBridge (ontology → LLM prompt injection)
-       │
-       ▼
-  EntityExtractor (LLM-based entity/relationship extraction)
-       │
-       ▼
-  EntityLinker (LLM-based entity resolution)
-       │
-       ▼
-  EntityDeduplicator (embedding similarity dedup)
-       │
-       ▼
-  RuleConstraints (SHACL-like inference + validation)
-       │
-       ▼
-  DatabaseManager (Neo4j DB creation + schema + load)
-       │
-       ▼
-  AgentFactory (DB별 전용 Agent 생성)
-       │
-       ▼
-  User Question → Router/DebateOrchestrator → AgentPool → SharedMemory → Supervisor → Answer
+```mermaid
+graph TD
+    classDef default fill:#040404,stroke:#3f3f46,stroke-width:1px,color:#d4d4d8;
+    classDef user fill:transparent,stroke:none,color:#fff,font-weight:bold;
+    classDef highlight fill:#ffffff05,stroke:#a1a1aa,stroke-width:1px,color:#fff;
+    
+    External["[External Data]"] --> DS["DataSource (CSV/JSON/Parquet/API)"]
+    DS --> Bridge["OntologyPromptBridge<br/>(ontology → LLM prompt injection)"]
+    Bridge --> Extractor["EntityExtractor<br/>(LLM-based entity/relationship extraction)"]
+    Extractor --> Linker["EntityLinker<br/>(LLM-based entity resolution)"]
+    Linker --> Dedup["EntityDeduplicator<br/>(embedding similarity dedup)"]
+    Dedup --> Rules["RuleConstraints<br/>(SHACL-like inference + validation)"]
+    Rules --> DB["DatabaseManager<br/>(Neo4j DB creation + schema + load)"]
+    DB --> Factory["AgentFactory<br/>(DB별 전용 Agent 생성)"]
+    
+    User(("User Question")):::user --> Orchestrator["Router / DebateOrchestrator"]
+    Factory -.-> Orchestrator
+    Orchestrator --> Pool["AgentPool"]
+    Pool --> Mem["SharedMemory"]
+    Mem --> Sup["Supervisor"]
+    Sup --> Ans(("Answer")):::user
 ```
 
 ## Query-Time Semantic Flow (New)
 
 For graph QA with hard entity disambiguation requirements:
 
-```
-User Question
-    │
-    ▼
-Semantic Layer
-- extract question entities
-- fulltext lookup on DozerDB/Neo4j
-- semantic dedup/disambiguation with label hints
-    │
-    ▼
-RouterAgent
-    ├── LPGAgent (property graph neighborhood path)
-    └── RDFAgent (RDF/ontology-oriented path)
-             │
-             ▼
-AnswerGenerationAgent (final synthesis)
+```mermaid
+graph TD
+    classDef default fill:#040404,stroke:#3f3f46,stroke-width:1px,color:#d4d4d8;
+    classDef agent fill:#ffffff05,stroke:#71717a,stroke-width:1px,color:#fff;
+    classDef layer fill:#ffffff10,stroke:#a1a1aa,stroke-width:1px,color:#fff;
+    
+    Q(("User Question")):::layer --> SL["Semantic Layer<br>- extract question entities<br>- fulltext lookup on DozerDB/Neo4j<br>- semantic dedup/disambiguation with label hints"]:::layer
+    SL --> Router["RouterAgent"]:::agent
+    Router -->|default| LPG["LPGAgent<br>(property graph neighborhood path)"]:::agent
+    Router -->|RDF hints| RDF["RDFAgent<br>(RDF/ontology-oriented path)"]:::agent
+    LPG --> Ans["AnswerGenerationAgent<br>(final synthesis)"]:::agent
+    RDF --> Ans
 ```
 
 Why this path exists:
@@ -160,8 +148,15 @@ Why this path exists:
 
 ### 1. Legacy Router Mode (`POST /run_agent`)
 
-```
-User → Router → {GraphAgent, VectorAgent, WebAgent, TableAgent} → Supervisor → Answer
+```mermaid
+flowchart LR
+    classDef default fill:#040404,stroke:#3f3f46,stroke-width:1px,color:#d4d4d8;
+    classDef user fill:transparent,stroke:none,color:#fff,font-weight:bold;
+    
+    User(("User")):::user --> Router["Router"]
+    Router --> Agents{"GraphAgent<br/>VectorAgent<br/>WebAgent<br/>TableAgent"}
+    Agents --> Supervisor["Supervisor"]
+    Supervisor --> Answer(("Answer")):::user
 ```
 
 - Legacy static 7-agent pipeline.
@@ -170,8 +165,16 @@ User → Router → {GraphAgent, VectorAgent, WebAgent, TableAgent} → Supervis
 
 ### 2. Parallel Debate Mode (`POST /run_debate`)
 
-```
-User → DebateOrchestrator → [Agent_db1 ∥ Agent_db2 ∥ ... ∥ Agent_dbN] → SharedMemory → Supervisor → Answer
+```mermaid
+flowchart LR
+    classDef default fill:#040404,stroke:#3f3f46,stroke-width:1px,color:#d4d4d8;
+    classDef user fill:transparent,stroke:none,color:#fff,font-weight:bold;
+    
+    User(("User")):::user --> Orchestrator["DebateOrchestrator"]
+    Orchestrator --> Agents["[Agent_db1 ∥ Agent_db2 ∥ ... ∥ Agent_dbN]"]
+    Agents --> Mem["SharedMemory"]
+    Mem --> Sup["Supervisor"]
+    Sup --> Answer(("Answer")):::user
 ```
 
 - All database-bound agents execute concurrently via `asyncio.gather()`.
@@ -181,8 +184,15 @@ User → DebateOrchestrator → [Agent_db1 ∥ Agent_db2 ∥ ... ∥ Agent_dbN] 
 
 ### 3. Semantic Graph QA Mode (`POST /run_agent_semantic`)
 
-```
-User → SemanticLayer → RouterAgent → {LPGAgent | RDFAgent | both} → AnswerGenerationAgent
+```mermaid
+flowchart LR
+    classDef default fill:#040404,stroke:#3f3f46,stroke-width:1px,color:#d4d4d8;
+    classDef user fill:transparent,stroke:none,color:#fff,font-weight:bold;
+    
+    User(("User")):::user --> SemanticLayer["SemanticLayer"]
+    SemanticLayer --> RouterAgent["RouterAgent"]
+    RouterAgent --> Agents{"LPGAgent<br/>RDFAgent<br/>both"}
+    Agents --> AnswerGenerationAgent["AnswerGenerationAgent"]
 ```
 
 - 4-agent model aligned with current query-time disambiguation requirement
@@ -286,14 +296,23 @@ Each individual recursive span carries heavy `metadata` (e.g., db_name, agent_na
 
 ### Frontend Trace Topology
 
-```
-FANOUT (yellow) ─┬─ DEBATE: Agent_kgnormal (blue)
-                 ├─ DEBATE: Agent_kgfibo   (blue)
-                 └─ DEBATE: Agent_xxx      (blue)
-                          │
-                 COLLECT (orange) ← 모든 DEBATE
-                          │
-                 SYNTHESIS: Supervisor (green)
+```mermaid
+graph TD
+    classDef default fill:#040404,stroke:#3f3f46,stroke-width:1px,color:#d4d4d8;
+    classDef fanout fill:#fef08a10,stroke:#eab308,stroke-width:1px,color:#fef08a;
+    classDef debate fill:#bfdbfe10,stroke:#3b82f6,stroke-width:1px,color:#bfdbfe;
+    classDef collect fill:#fed7aa10,stroke:#f97316,stroke-width:1px,color:#fed7aa;
+    classDef synth fill:#bbf7d010,stroke:#22c55e,stroke-width:1px,color:#bbf7d0;
+
+    F["FANOUT (yellow)"]:::fanout --> D1["DEBATE: Agent_kgnormal (blue)"]:::debate
+    F --> D2["DEBATE: Agent_kgfibo (blue)"]:::debate
+    F --> D3["DEBATE: Agent_xxx (blue)"]:::debate
+    
+    D1 --> C["COLLECT (orange)"]:::collect
+    D2 --> C
+    D3 --> C
+    
+    C --> S["SYNTHESIS: Supervisor (green)"]:::synth
 ```
 
 Edge routing in the UI is rendered strictly via the `metadata.parent` (for the fan-out trajectory) and `metadata.sources` (for the collection synthesis loop) properties on the payload.

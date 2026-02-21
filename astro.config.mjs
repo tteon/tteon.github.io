@@ -28,9 +28,11 @@ export default defineConfig({
                 {
                     label: 'Docs', items: [
                         { label: 'Introduction', link: '/docs/index/' },
+                        { label: 'Tutorial', link: '/docs/tutorial/' },
                         { label: 'Quick Start', link: '/docs/quickstart/' },
                         { label: 'Architecture', link: '/docs/architecture/' },
-                        { label: 'Workflow', link: '/docs/workflow/' }
+                        { label: 'Workflow', link: '/docs/workflow/' },
+                        { label: 'Philosophy', link: '/docs/philosophy/' }
                     ]
                 },
                 { label: 'Examples', link: '/examples/' },

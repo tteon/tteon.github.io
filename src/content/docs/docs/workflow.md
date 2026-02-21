@@ -51,6 +51,17 @@ Primary surfaces:
 
 ## End-to-End Workflow
 
+```mermaid
+flowchart TD
+    classDef default fill:#040404,stroke:#3f3f46,stroke-width:1px,color:#d4d4d8;
+    classDef step fill:#ffffff05,stroke:#71717a,stroke-width:1px,color:#fff;
+    
+    A["1. Intake<br/>(Scope, PB, Review)"]:::step --> B["2. Ingestion & Graph Build<br/>(Extract, SHACL, DB Load)"]:::step
+    B --> C["3. Agent Execution<br/>(Router / Debate / Semantic)"]:::step
+    C --> D["4. Validation & Landing<br/>(Code Gates, Sync, Push)"]:::step
+    D --> E["5. Governance Loop<br/>(ADRs, Metrics)"]:::step
+```
+
 1. Intake
 - define issue scope and acceptance criteria
 - assign `workspace_id`
