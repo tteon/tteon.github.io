@@ -24,28 +24,34 @@
         </div>
 
         {/* Feature 2 */}
-        <div class="relative group rounded-2xl border border-white/10 bg-white/5 p-8 overflow-hidden hover:bg-white/[0.07] transition-colors md:col-span-2">
+        <div class="relative group rounded-2xl border border-white/10 bg-white/5 p-8 overflow-hidden hover:bg-white/[0.07] transition-colors md:col-span-2 flex flex-col sm:flex-row gap-6 items-center">
             <div class="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-transparent to-purple-500/0 group-hover:from-purple-500/10 transition-colors duration-500"></div>
-            <div class="relative z-10">
+            <div class="relative z-10 flex-1">
                 <div class="w-12 h-12 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center mb-6 text-2xl">
                     ⚖️
                 </div>
                 <h3 class="text-xl font-semibold text-white mb-3">Semantic Debate Engine</h3>
-                <p class="text-zinc-400 leading-relaxed font-light max-w-xl">
+                <p class="text-zinc-400 leading-relaxed font-light">
                     Multiple LLM agents (Generator, Verifier) debate complex queries against the topology contract before returning answers. Guaranteed hallucination reduction.
                 </p>
+            </div>
+            <div class="relative z-10 w-full sm:w-1/2 flex-shrink-0">
+                <img src="/images/debate-engine.png" alt="Semantic Debate Engine" class="w-full h-auto object-contain rounded-xl border border-white/10 opacity-90 group-hover:opacity-100 transition-opacity drop-shadow-[0_0_30px_rgba(168,85,247,0.15)]" />
             </div>
         </div>
 
         {/* Feature 3 */}
-        <div class="relative group rounded-2xl border border-white/10 bg-white/5 p-8 overflow-hidden hover:bg-white/[0.07] transition-colors md:col-span-2">
+        <div class="relative group rounded-2xl border border-white/10 bg-white/5 p-8 overflow-hidden hover:bg-white/[0.07] transition-colors md:col-span-2 flex flex-col sm:flex-row gap-6 items-center">
             <div class="absolute inset-0 bg-gradient-to-br from-current/0 via-transparent to-current/0 transition-colors duration-500"></div>
-            <div class="relative z-10">
+            <div class="relative z-10 w-full sm:w-1/2 flex-shrink-0 order-last sm:order-first">
+                <img src="/images/semantic-routing.png" alt="Deterministic Routing" class="w-full h-auto object-contain rounded-xl border border-white/10 opacity-90 group-hover:opacity-100 transition-opacity drop-shadow-[0_0_30px_rgba(34,211,238,0.15)]" />
+            </div>
+            <div class="relative z-10 flex-1">
                 <div class="w-12 h-12 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center mb-6 text-2xl">
                     ⚡
                 </div>
                 <h3 class="text-xl font-semibold text-white mb-3">Deterministic Routing</h3>
-                <p class="text-zinc-400 leading-relaxed font-light max-w-xl">
+                <p class="text-zinc-400 leading-relaxed font-light">
                     Query surfaces are policy-gated. A semantic router maps queries to the exact graph workspace instantly. No heuristic lineage reconstruction.
                 </p>
             </div>
