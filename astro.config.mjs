@@ -31,7 +31,7 @@ export default defineConfig({
                 { label: 'Home', link: '/' },
                 {
                     label: 'Docs', items: [
-                        { label: 'Introduction', link: '/docs/index/' },
+                        { label: 'Introduction', link: '/docs/' },
                         { label: 'Quick Start', link: '/docs/quickstart/' },
                         { label: 'Bring Your Data', link: '/docs/apply_your_data/' },
                         { label: 'Python SDK', link: '/docs/python_sdk/' },

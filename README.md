@@ -8,8 +8,23 @@ This repository hosts the official documentation and landing page for the [SEOCH
 - **Styling**: Tailwind CSS + Custom Dark Theme
 - **Deployment**: Automatic via GitHub Actions to GitHub Pages.
 
-> **Note**: This repository is the *target* of an automated sync process.
-> Do **NOT** edit documentation files (`src/content/docs/*`) directly in this repository if they originate from the main `seocho` repo. Changes should be made to `seocho/docs` and pushed there, which will trigger an Action to copy them here.
+## Source Of Truth
+
+This repository is the website presentation layer.
+
+- public domain: `https://seocho.blog`
+- main repo source of truth: `/home/hadry/lab/seocho`
+- core source docs usually come from `/home/hadry/lab/seocho/README.md` and
+  `/home/hadry/lab/seocho/docs/*`
+
+Current sync policy is local-helper based, not remote auto-sync:
+
+- `scripts/sync.mjs` can mirror selected docs into this repo
+- mirrored pages should say `Source mirrored from ...`
+- if you improve a mirrored page here, check whether the same contract change
+  belongs in the main repo too
+
+Read [AGENTS.md](AGENTS.md) before making doc or site changes.
 
 ## Local Development
 
@@ -24,4 +39,9 @@ This repository hosts the official documentation and landing page for the [SEOCH
 3. Build for production:
    ```bash
    npm run build
+   ```
+4. Run doc quality and built-link checks:
+   ```bash
+   bash scripts/check-doc-quality.sh
+   bash scripts/check-built-links.sh
    ```

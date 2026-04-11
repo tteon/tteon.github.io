@@ -53,4 +53,4 @@ git pull origin main
 make e2e-smoke
 ```
 
-Read the full details in our updated [Docs section](/docs/index/).
+Read the full details in our updated [Docs section](/docs/).

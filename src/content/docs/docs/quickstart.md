@@ -16,6 +16,20 @@ If you want the Python SDK path immediately, continue with
 If your first question is how to load your own records, continue with
 [`/docs/apply_your_data/`](/docs/apply_your_data/).
 
+## Execution Path At A Glance
+
+```mermaid
+flowchart LR
+    A[make setup-env] --> B[make up or seocho serve]
+    B --> C[raw_ingest or add]
+    C --> D[semantic retrieval]
+    D --> E{enough evidence?}
+    E -- yes --> F[grounded answer]
+    E -- no --> G[reasoning_mode repair loop]
+    G --> F
+    F --> H[advanced debate only for explicit cross-graph comparison]
+```
+
 ## 1. Prerequisites
 
 - Docker and Docker Compose
@@ -65,6 +79,18 @@ The default product path is:
 - run semantic retrieval
 - use bounded repair only when needed
 - reserve debate for explicit advanced use
+
+```mermaid
+flowchart TD
+    Q[developer question] --> M{mode}
+    M -->|simple memory| A[ask or chat]
+    M -->|graph grounded| S[semantic]
+    S --> R{retrieval weak?}
+    R -->|yes| P[reasoning_mode=True]
+    R -->|no| G[return grounded answer]
+    P --> G
+    M -->|explicit graph comparison| D[advanced debate]
+```
 
 ## 5. First Success: Direct API Path
 
@@ -124,7 +150,7 @@ print(semantic.semantic_context["reasoning"])
 ```
 
 If your next step is loading your own production-like records instead of sample
-data, read `/docs/apply_your_data/`.
+data, read [`/docs/apply_your_data/`](/docs/apply_your_data/).
 
 ## 7. Use Debate Only as an Advanced Mode
 

@@ -17,7 +17,7 @@ If you already have the runtime running at `http://localhost:8001`, you can
 start here immediately.
 
 If your first question is how to load your own records safely, read
-`/docs/apply_your_data/` alongside this guide.
+[`/docs/apply_your_data/`](/docs/apply_your_data/) alongside this guide.
 
 ## 1. Install
 
@@ -80,7 +80,7 @@ print(result.records_processed)
 ```
 
 If you want a fuller ingestion guide with target-graph and record-shape advice,
-continue with `/docs/apply_your_data/`.
+continue with [`/docs/apply_your_data/`](/docs/apply_your_data/).
 
 ## 4. Ask the Simple Way
 

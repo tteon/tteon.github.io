@@ -28,3 +28,6 @@ jobs:
 
       - name: Build site
         run: npm run build
+
+      - name: Check built internal links
+        run: bash scripts/check-built-links.sh
