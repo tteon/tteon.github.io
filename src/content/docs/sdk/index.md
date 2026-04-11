@@ -1,95 +1,46 @@
 ---
 title: SDK Overview
-description: Ontology-first Python SDK for knowledge graph construction and querying
+description: Overview of the public Python SDK and how it fits the SEOCHO runtime.
 ---
 
-# SEOCHO SDK
+# Python SDK Overview
 
-Python SDK that puts **ontology at the center** of knowledge graph construction and querying. Define your schema once — it drives extraction prompts, query prompts, graph constraints, and validation automatically.
+The public Python SDK is a developer-facing client for the running SEOCHO
+runtime.
 
-## Install
+It is not just a thin wrapper around a chatbot endpoint. The intended order is:
 
-```bash
-pip install seocho
-```
+1. ingest your data
+2. query through the semantic layer
+3. enable bounded repair for harder graph questions
+4. use advanced debate only when you explicitly need graph comparison
 
-## 30-Second Example
+## Start Here
 
-```python
-from seocho import Seocho, Ontology, NodeDef, RelDef, P
-from seocho.graph_store import Neo4jGraphStore
-from seocho.llm_backend import OpenAIBackend
+- [`/docs/python_sdk/`](/docs/python_sdk/) for the main quickstart
+- [`/docs/apply_your_data/`](/docs/apply_your_data/) if your immediate goal is to load your own records
+- [`/sdk/api-reference/`](/sdk/api-reference/) for the method-level surface
+- [`/sdk/examples/`](/sdk/examples/) for copy-pasteable usage patterns
 
-# 1. Define your ontology
-ontology = Ontology(
-    name="my_knowledge_base",
-    nodes={
-        "Company": NodeDef(
-            description="A business entity",
-            properties={"name": P(str, unique=True), "sector": P(str)},
-        ),
-        "Person": NodeDef(
-            description="An individual",
-            properties={"name": P(str, unique=True), "role": P(str)},
-        ),
-    },
-    relationships={
-        "WORKS_AT": RelDef(
-            source="Person", target="Company",
-            cardinality="MANY_TO_ONE",
-        ),
-    },
-)
+## Mental Model
 
-# 2. Connect
-store = Neo4jGraphStore("bolt://localhost:7687", "neo4j", "password")
-llm = OpenAIBackend(model="gpt-4o")
-s = Seocho(ontology=ontology, graph_store=store, llm=llm)
+Use these surfaces in order:
 
-# 3. Index your data — ontology shapes the extraction prompt
-s.add("Jay Y. Lee is the chairman of Samsung Electronics.")
+- `add(...)` and `raw_ingest(...)` to load data
+- `ask(...)` and `chat(...)` for simple memory-first interactions
+- `semantic(...)` for graph-grounded retrieval
+- `reasoning_mode=True` and `repair_budget` when the query is harder
+- `advanced(...)` when you explicitly want multi-agent comparison
+- `plan(...).on_graph(...).with_repair_budget(...).run()` when you want one explicit execution plan
 
-# 4. Query — ontology shapes the Cypher generation prompt
-answer = s.ask("Who leads Samsung?")
-print(answer)
-# → "Jay Y. Lee is the chairman of Samsung Electronics."
-```
+## Working With Graph Targets
 
-## How It Works
+The SDK is graph-aware:
 
-```
-Your Data                    Your Ontology
-    │                             │
-    ▼                             ▼
-┌──────────┐  ontology context  ┌────────────────┐
-│ s.add()  │ ◄──────────────── │ ExtractionStrat │
-└────┬─────┘                    └────────────────┘
-     │ extracted nodes/rels           │
-     ▼                                ▼
-┌──────────┐  SHACL validation  ┌────────────────┐
-│ Validate │ ◄──────────────── │ onto.to_shacl() │
-└────┬─────┘                    └────────────────┘
-     │ validated data                 │
-     ▼                                ▼
-┌──────────┐  constraints       ┌────────────────┐
-│ DozerDB  │ ◄──────────────── │ Cypher gen      │
-└──────────┘                    └────────────────┘
+- ingest goes to a `target_database`
+- semantic and debate flows can target `graph_ids`
+- `client.graphs()` exposes graph metadata such as `graph_id`, `database`,
+  `ontology_id`, and `vocabulary_profile`
 
-┌──────────┐  schema context    ┌────────────────┐
-│ s.ask()  │ ◄──────────────── │ QueryStrategy   │
-└────┬─────┘                    └────────────────┘
-     │ Cypher + results               │
-     ▼                                ▼
-┌──────────┐                    ┌────────────────┐
-│ Answer   │ ◄──────────────── │ Answer synth    │
-└──────────┘                    └────────────────┘
-```
-
-The ontology feeds into **every stage** — extraction prompts know what entity types exist, query prompts know the schema and constraints, and validation catches mismatches before they hit the database.
-
-## Next Steps
-
-- [Getting Started](/sdk/getting-started/) — Full setup walkthrough
-- [Ontology Guide](/sdk/ontology-guide/) — Design your schema
-- [API Reference](/sdk/api-reference/) — Complete method reference
-- [Examples](/sdk/examples/) — Real-world patterns
+That means you can keep datasets separated, then compare them later only when
+needed.

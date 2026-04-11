@@ -38,6 +38,16 @@ const fileMappings = [
         frontmatter: `---\ntitle: Quickstart\ndescription: Get SEOCHO up and running in 5 minutes.\n---\n\n> *Synced automatically from \`seocho/docs/QUICKSTART.md\`*\n\n`
     },
     {
+        src: 'docs/APPLY_YOUR_DATA.md',
+        dest: 'apply_your_data.md',
+        frontmatter: `---\ntitle: Bring Your Data\ndescription: How to load your own records into SEOCHO and query them safely.\n---\n\n> *Synced automatically from \`seocho/docs/APPLY_YOUR_DATA.md\`*\n\n`
+    },
+    {
+        src: 'docs/PYTHON_INTERFACE_QUICKSTART.md',
+        dest: 'python_sdk.md',
+        frontmatter: `---\ntitle: Python SDK\ndescription: Developer-first guide to ingest data and query SEOCHO through the Python SDK.\n---\n\n> *Synced automatically from \`seocho/docs/PYTHON_INTERFACE_QUICKSTART.md\`*\n\n`
+    },
+    {
         src: 'docs/ARCHITECTURE.md',
         dest: 'architecture.md',
         frontmatter: `---\ntitle: Architecture\ndescription: System Architecture and Module Map.\n---\n\n> *Synced automatically from \`seocho/docs/ARCHITECTURE.md\`*\n\n`

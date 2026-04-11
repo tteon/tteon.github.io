@@ -1,261 +1,170 @@
 ---
 title: API Reference
-description: Complete method reference for the SEOCHO SDK
+description: Public Python SDK reference for ingestion, semantic retrieval, and advanced debate.
 ---
 
 # API Reference
 
-## Seocho
-
-The main client. Works in two modes:
+## Client Construction
 
 ```python
-# Local mode — all processing in-process
-s = Seocho(ontology=onto, graph_store=store, llm=llm)
+from seocho import Seocho
 
-# HTTP mode — delegates to a running SEOCHO server
-s = Seocho(base_url="http://localhost:8001")
-```
-
-### Core Methods
-
-#### `s.add(content, *, database, category, metadata) → Memory`
-
-Extract entities and relationships from text, then write to the graph.
-
-```python
-mem = s.add(
-    "Samsung was founded in 1938 by Lee Byung-chul.",
-    database="company_kg",
-    category="history",
-)
-print(mem.memory_id)     # unique ID
-print(mem.entities)      # [{"id": "samsung", "label": "Company"}, ...]
-```
-
-#### `s.ask(message, *, database) → str`
-
-Ask a natural-language question. Generates ontology-aware Cypher, executes it, and synthesizes an answer.
-
-```python
-answer = s.ask("When was Samsung founded?", database="company_kg")
-# → "Samsung was founded in 1938."
-```
-
-#### `s.extract(content, *, category, metadata) → dict`
-
-Extract without writing to the graph. Useful for inspection and debugging.
-
-```python
-result = s.extract("Elon Musk runs Tesla.")
-# {"nodes": [...], "relationships": [...]}
-```
-
-*Local mode only.*
-
-#### `s.query(cypher, *, params, database) → list[dict]`
-
-Execute raw Cypher against the graph store.
-
-```python
-records = s.query(
-    "MATCH (p:Person)-[:WORKS_AT]->(c:Company) RETURN p.name, c.name",
-    database="company_kg",
+client = Seocho(
+    base_url="http://localhost:8001",
+    workspace_id="default",
+    user_id="alex",
 )
 ```
 
-*Local mode only.*
-
-#### `s.ensure_constraints(*, database) → dict`
-
-Apply ontology-derived constraints (UNIQUE, INDEX) to the database.
+Module-level convenience:
 
 ```python
-result = s.ensure_constraints(database="company_kg")
-# {"success": 3, "errors": []}
+import seocho
+
+seocho.configure(base_url="http://localhost:8001", workspace_id="default")
 ```
 
-*Local mode only.*
+## Ingestion
 
-#### `s.close()`
+### `add(content, *, metadata=None, ...) -> Memory`
 
-Release all resources.
-
----
-
-## Ontology
-
-### Constructors
+Memory-style text ingestion.
 
 ```python
-# From code
-onto = Ontology(name="domain", nodes={...}, relationships={...})
-
-# From files
-onto = Ontology.from_jsonld("schema.jsonld")  # canonical
-onto = Ontology.from_yaml("schema.yaml")
-onto = Ontology.from_dict({...})
+memory = client.add("Alex manages the Seoul retail account.")
 ```
 
-### Serialization
+### `raw_ingest(records, *, target_database, ...) -> RawIngestResult`
+
+Batch ingestion for repeatable datasets.
 
 ```python
-onto.to_jsonld("schema.jsonld")    # save as JSON-LD (canonical)
-onto.to_yaml("schema.yaml")       # save as YAML
-doc = onto.to_jsonld()             # returns dict without saving
-data = onto.to_dict()              # plain dict
+result = client.raw_ingest(records, target_database="accounts_graph")
 ```
 
-### Prompt Context
+## Memory and Search
+
+### `ask(message, *, graph_ids=None, databases=None) -> str`
+
+Fast developer-facing memory answer.
+
+### `chat(message, *, graph_ids=None, databases=None) -> ChatResponse`
+
+Structured chat response with evidence information.
+
+### `search(query, *, graph_ids=None, databases=None) -> list[SearchResult]`
+
+Memory search without full answer generation.
+
+## Semantic Retrieval
+
+### `semantic(query, *, graph_ids=None, databases=None, entity_overrides=None, reasoning_mode=False, repair_budget=0) -> SemanticRunResponse`
+
+Primary graph-grounded query surface.
 
 ```python
-onto.to_extraction_context()  # → dict for extraction prompts
-onto.to_query_context()       # → dict for query prompts
-onto.to_linking_context()     # → dict for entity linking prompts
-```
-
-### Validation
-
-```python
-onto.validate()                    # → list[str] — ontology consistency errors
-onto.validate_extraction(data)     # → list[str] — check nodes/rels against schema
-onto.validate_with_shacl(data)     # → list[str] — full SHACL validation (types + cardinality)
-```
-
-### Constraints & Shapes
-
-```python
-onto.to_cypher_constraints()  # → list[str] — CREATE CONSTRAINT / INDEX statements
-onto.to_shacl()               # → dict — derived SHACL shapes
-```
-
-### Denormalization
-
-```python
-onto.denormalization_plan()                        # → dict — what's safe to embed
-onto.to_denormalized_view(nodes, relationships)    # → list[dict] — flattened nodes
-onto.normalize_view(denormalized_nodes)            # → (nodes, rels) — back to normalized
-```
-
-### Label Safety
-
-```python
-onto.is_valid_label("Company")     # True
-onto.sanitize_label("Unknown")     # "Entity" (fallback)
-```
-
----
-
-## NodeDef
-
-```python
-NodeDef(
-    description="Human-readable description",
-    properties={"name": P(str, unique=True)},
-    aliases=["Alt Name 1", "Alt Name 2"],
-    broader=["ParentType"],
-    same_as="schema:Organization",
+semantic = client.semantic(
+    "Who manages the Seoul retail account?",
+    graph_ids=["kgnormal"],
+    reasoning_mode=True,
+    repair_budget=2,
 )
 ```
 
-| Attribute | Type | Description |
-|---|---|---|
-| `description` | str | Shown in LLM prompts |
-| `properties` | dict[str, P] | Property definitions |
-| `aliases` | list[str] | Alternative names for LLM extraction |
-| `broader` | list[str] | Parent types (hierarchy) |
-| `same_as` | str \| None | Standard vocabulary mapping (e.g. `schema:Person`) |
-| `.unique_properties` | list[str] | Properties with UNIQUE constraint |
-| `.indexed_properties` | list[str] | Properties with INDEX |
-| `.required_properties` | list[str] | Properties that must be present |
+Important fields on the response:
 
----
+- `response`
+- `route`
+- `semantic_context`
+- `semantic_context["reasoning"]`
+- `semantic_context["evidence_bundle_preview"]`
 
-## RelDef
+## Advanced Debate
+
+### `advanced(query, *, graph_ids=None) -> DebateRunResponse`
+
+Explicit advanced mode for cross-graph comparison.
 
 ```python
-RelDef(
-    source="Person",
-    target="Company",
-    cardinality="MANY_TO_ONE",
-    description="Employment relationship",
-    aliases=["works for", "employed by"],
-    same_as="schema:worksFor",
+advanced = client.advanced(
+    "Compare what the baseline and finance graphs know about ACME.",
+    graph_ids=["kgnormal", "kgfibo"],
 )
 ```
 
-| Attribute | Type | Description |
-|---|---|---|
-| `source` | str | Source node label |
-| `target` | str | Target node label |
-| `cardinality` | str | ONE_TO_ONE, ONE_TO_MANY, MANY_TO_ONE, MANY_TO_MANY |
-| `description` | str | Shown in LLM prompts |
-| `aliases` | list[str] | Alternative names for LLM |
-| `same_as` | str \| None | Standard vocabulary mapping |
+Important fields:
 
----
+- `response`
+- `debate_state`
+- `debate_results`
+- `agent_statuses`
 
-## P (Property)
+## Planning Surface
+
+### `plan(query) -> ExecutionPlanBuilder`
+
+Builder for an explicit execution plan.
 
 ```python
-P(type, unique=False, index=False, required=False, description="", aliases=[])
+result = (
+    client.plan("Who manages the Seoul retail account?")
+    .on_graph("kgnormal")
+    .with_repair_budget(2)
+    .run()
+)
 ```
 
-| Parameter | Type | Default | Effect |
-|---|---|---|---|
-| `type` | type \| PropertyType | str | Python type: `str`, `int`, `float`, `bool` |
-| `unique` | bool | False | UNIQUE constraint + auto-required |
-| `index` | bool | False | Database index for fast lookups |
-| `required` | bool | False | Must be present in extracted data |
-| `description` | str | "" | Shown in LLM prompts |
-| `aliases` | list[str] | [] | Alternative property names |
+Useful builder methods:
 
----
+- `.on_graph(...)`
+- `.on_graphs(...)`
+- `.with_ontology(...)`
+- `.with_vocabulary(...)`
+- `.with_repair_budget(...)`
+- `.direct()`
+- `.react()`
+- `.advanced()`
+- `.run()`
 
-## GraphStore
+## Graph and Runtime Inspection
 
-Abstract interface. Use `Neo4jGraphStore` for DozerDB/Neo4j:
+### `graphs() -> list[GraphTarget]`
 
-```python
-from seocho.graph_store import Neo4jGraphStore
+Inspect available graph targets and their semantic metadata.
 
-store = Neo4jGraphStore("bolt://localhost:7687", "neo4j", "password")
-store.write(nodes, relationships, database="mydb")
-store.query("MATCH (n) RETURN n LIMIT 5", database="mydb")
-store.ensure_constraints(ontology, database="mydb")
-store.get_schema(database="mydb")
-store.close()
-```
+### `databases() -> list[str]`
 
----
+List runtime databases.
 
-## LLMBackend
+### `agents() -> list[str]`
 
-Abstract interface. Use `OpenAIBackend`:
+List currently available graph-specialist agents.
 
-```python
-from seocho.llm_backend import OpenAIBackend
+### `ensure_fulltext_indexes(...) -> FulltextIndexResponse`
 
-llm = OpenAIBackend(model="gpt-4o", api_key="sk-...")  # api_key optional if env set
-response = llm.complete(system="You are...", user="Extract...")
-print(response.text)
-print(response.usage)  # {"prompt_tokens": 150, "completion_tokens": 80, ...}
-parsed = response.json()  # auto-strips markdown fences
-```
+Ensure full-text lookup surfaces exist for retrieval.
 
----
+## Platform Runtime Surfaces
 
-## PromptStrategy
+### `platform_chat(message, *, mode="semantic", ...) -> PlatformChatResponse`
 
-For advanced users who want to customize prompt generation:
+Structured chat surface used by the platform UI.
+
+### `session_history(session_id) -> PlatformSessionResponse`
+
+Fetch chat session history.
+
+### `reset_session(session_id) -> PlatformSessionResponse`
+
+Reset a chat session.
+
+## Async Client
 
 ```python
-from seocho.prompt_strategy import ExtractionStrategy, QueryStrategy, LinkingStrategy
+from seocho import AsyncSeocho
 
-ext = ExtractionStrategy(ontology, category="finance")
-system_prompt, user_prompt = ext.render("Some text to extract...")
-
-qs = QueryStrategy(ontology, schema_info={"total_nodes": 5000})
-system_prompt, user_prompt = qs.render("Who is the CEO of Samsung?")
-system_prompt, user_prompt = qs.render_answer(question, cypher_results)
+client = AsyncSeocho()
+semantic = await client.semantic("What is ACME related to?")
+await client.aclose()
 ```

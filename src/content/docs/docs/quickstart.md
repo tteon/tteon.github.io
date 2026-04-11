@@ -1,193 +1,170 @@
 ---
-title: Quick Start
+title: Quickstart
 description: Get SEOCHO up and running in 5 minutes.
 ---
 
-# Quick Start
+> *Synced automatically from `seocho/docs/QUICKSTART.md`*
 
-Two paths to get started — pick the one that fits:
+# SEOCHO Quick Start
 
-| Path | When to use | Time |
-|------|-------------|------|
-| **[A. Python SDK](#a-python-sdk)** | You want to index and query data from Python code | 3 min |
-| **[B. Docker Stack](#b-docker-stack)** | You want the full platform with UI, multi-agent debate, etc. | 5 min |
+Goal: one successful local run in under 5 minutes.
 
----
+If you only read one runtime document first, read this one.
 
-## A. Python SDK
+If you want the Python SDK path immediately, continue with
+`docs/PYTHON_INTERFACE_QUICKSTART.md`.
+If your first question is how to load your own records, continue with
+`docs/APPLY_YOUR_DATA.md`.
 
-### 1. Install
+## 1. Prerequisites
 
-```bash
-pip install seocho
-```
+- Docker and Docker Compose
+- `OPENAI_API_KEY` recommended
+- `curl` and `jq` for optional API checks
 
-### 2. Define your schema
+Without `OPENAI_API_KEY`, SEOCHO can still boot in local fallback mode for
+basic verification.
 
-```python
-from seocho import Ontology, NodeDef, RelDef, P
-
-ontology = Ontology(
-    name="my_domain",
-    nodes={
-        "Person":  NodeDef(properties={"name": P(str, unique=True)}),
-        "Company": NodeDef(properties={"name": P(str, unique=True)}),
-    },
-    relationships={
-        "WORKS_AT": RelDef(source="Person", target="Company"),
-    },
-)
-```
-
-### 3. Connect and index
-
-```python
-from seocho import Seocho
-from seocho.graph_store import Neo4jGraphStore
-from seocho.llm_backend import OpenAIBackend
-
-s = Seocho(
-    ontology=ontology,
-    graph_store=Neo4jGraphStore("bolt://localhost:7687", "neo4j", "password"),
-    llm=OpenAIBackend(model="gpt-4o"),
-)
-
-s.ensure_constraints()
-s.add("Marie Curie worked at the University of Paris.")
-```
-
-### 4. Query
-
-```python
-print(s.ask("Where did Marie Curie work?"))
-# → "Marie Curie worked at the University of Paris."
-```
-
-That's it. For more details see the [SDK documentation](/sdk/).
-
----
-
-## B. Docker Stack
-
-The full platform gives you multi-agent debate, a web UI, and all extraction services.
-
-### Prerequisites
-
-- Docker + Docker Compose
-- OpenAI API key (`OPENAI_API_KEY`)
-- `jq` (optional, for pretty API responses)
-
-### 1. Clone and configure
+## 2. Setup
 
 ```bash
 git clone https://github.com/tteon/seocho.git
 cd seocho
-
-cp .env.example .env
-# edit .env — required: OPENAI_API_KEY=sk-...
+make setup-env
 ```
 
-### 2. Start services
+## 3. Start the Runtime
 
 ```bash
 make up
 docker compose ps
 ```
 
-Expected services: `neo4j`, `extraction-service`, `semantic-service`, `evaluation-interface`
-
-### 3. Verify
+Or through the local CLI:
 
 ```bash
-curl -sS http://localhost:8001/databases | jq .
+pip install -e ".[dev]"
+seocho serve
 ```
 
-Default URLs:
+Expected local surfaces:
 
 - Platform UI: `http://localhost:8501`
-- API docs: `http://localhost:8001/docs`
+- Backend API docs: `http://localhost:8001/docs`
 - DozerDB browser: `http://localhost:7474`
 
-### 4. Ingest data
+## 4. First Success: UI Path
+
+1. Open `http://localhost:8501`
+2. Use the ingest panel or click the sample flow
+3. Ask a semantic question
+
+The default product path is:
+
+- ingest data
+- run semantic retrieval
+- use bounded repair only when needed
+- reserve debate for explicit advanced use
+
+## 5. First Success: Direct API Path
+
+Ingest two records:
 
 ```bash
 curl -sS -X POST http://localhost:8001/platform/ingest/raw \
   -H "Content-Type: application/json" \
   -d '{
-    "workspace_id":"default",
-    "target_database":"kgruntime",
-    "records":[
-      {"id":"raw_1","content":"ACME acquired Beta in 2024."},
-      {"id":"raw_2","content":"Beta provides risk analytics to ACME."}
+    "workspace_id": "default",
+    "target_database": "kgruntime",
+    "records": [
+      {"id": "r1", "content": "ACME acquired Beta in 2024."},
+      {"id": "r2", "content": "Beta provides risk analytics to ACME."}
     ]
   }' | jq .
 ```
 
-### 5. Ensure fulltext index
+Ask through the semantic endpoint:
 
 ```bash
-curl -sS -X POST http://localhost:8001/indexes/fulltext/ensure \
+curl -sS -X POST http://localhost:8001/run_agent_semantic \
   -H "Content-Type: application/json" \
   -d '{
-    "workspace_id":"default",
-    "databases":["kgruntime"],
-    "index_name":"entity_fulltext",
-    "create_if_missing":true
-  }' | jq .
+    "workspace_id": "default",
+    "query": "What is ACME related to?",
+    "databases": ["kgruntime"],
+    "reasoning_mode": true,
+    "repair_budget": 2
+  }' | jq '{route, response, reasoning: .semantic_context.reasoning}'
 ```
 
-### 6. Ask questions
+## 6. First Success: Python SDK Path
 
-**Semantic mode:**
+```python
+from seocho import Seocho
 
-```bash
-curl -sS -X POST http://localhost:8501/api/chat/send \
-  -H "Content-Type: application/json" \
-  -d '{
-    "session_id":"qs_1",
-    "message":"Show entities in kgruntime",
-    "mode":"semantic",
-    "workspace_id":"default",
-    "databases":["kgruntime"]
-  }' | jq '{assistant_message}'
+client = Seocho(base_url="http://localhost:8001", workspace_id="default")
+
+client.raw_ingest(
+    [
+        {"id": "r1", "content": "ACME acquired Beta in 2024."},
+        {"id": "r2", "content": "Beta provides risk analytics to ACME."},
+    ],
+    target_database="kgruntime",
+)
+
+semantic = client.semantic(
+    "What is ACME related to?",
+    databases=["kgruntime"],
+    reasoning_mode=True,
+    repair_budget=2,
+)
+
+print(semantic.response)
+print(semantic.semantic_context["reasoning"])
 ```
 
-**Debate mode:**
+If your next step is loading your own production-like records instead of sample
+data, read `/docs/apply_your_data/`.
 
-```bash
-curl -sS -X POST http://localhost:8501/api/chat/send \
-  -H "Content-Type: application/json" \
-  -d '{
-    "session_id":"qs_2",
-    "message":"Compare known entities across databases",
-    "mode":"debate",
-    "workspace_id":"default"
-  }' | jq '{assistant_message}'
+## 7. Use Debate Only as an Advanced Mode
+
+If you explicitly want cross-graph comparison:
+
+```python
+advanced = client.advanced(
+    "Compare what each graph knows about ACME.",
+    graph_ids=["kgnormal", "kgfibo"],
+)
+
+print(advanced.debate_state)
 ```
 
-### 7. Smoke test
+## 8. Validate the Runtime
 
 ```bash
 make e2e-smoke
 ```
 
-### 8. Or use the Python SDK against the running server
+## 9. Troubleshooting
 
-```python
-from seocho import Seocho
+Check service state:
 
-s = Seocho(base_url="http://localhost:8001")
-s.add("ACME acquired Beta in 2024.", database="kgruntime")
-print(s.ask("What happened with ACME?"))
+```bash
+docker compose ps
+docker compose logs --tail=200 extraction-service
+docker compose logs --tail=200 evaluation-interface
 ```
 
----
+Common issues:
 
-## Next Steps
+- `OPENAI_API_KEY` missing or placeholder only
+- port collision on `8001`, `8501`, `7474`, or `7687`
+- graph database not ready yet
 
-| Goal | Link |
-|------|------|
-| Design a richer ontology | [Ontology Guide](/sdk/ontology-guide/) |
-| Full SDK method reference | [API Reference](/sdk/api-reference/) |
-| Real-world examples | [Examples](/sdk/examples/) |
-| Architecture deep-dive | [Architecture](/docs/architecture/) |
+## 10. Read Next
+
+- `docs/PYTHON_INTERFACE_QUICKSTART.md`
+- `docs/APPLY_YOUR_DATA.md`
+- `docs/TUTORIAL_FIRST_RUN.md`
+- `docs/BEGINNER_PIPELINES_DEMO.md`
+- `docs/ARCHITECTURE.md`

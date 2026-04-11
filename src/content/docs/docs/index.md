@@ -1,41 +1,43 @@
 ---
 title: Docs Home
-description: Central Documentation Index for SEOCHO
+description: Developer-first documentation for loading data into SEOCHO and querying it safely.
 ---
 
-Welcome to the SEOCHO documentation. Choose your starting point:
+> *Synced automatically from `seocho/docs/README.md`*
 
-## For Developers (Python SDK)
+SEOCHO is easiest to understand as a developer runtime:
 
-| Doc | Description |
-|-----|-------------|
-| [SDK Overview](/sdk/) | Ontology-first SDK — what it is and how it works |
-| [Getting Started](/sdk/getting-started/) | Zero to knowledge graph in 5 minutes |
-| [Ontology Guide](/sdk/ontology-guide/) | Design your schema, JSON-LD storage, SHACL validation |
-| [API Reference](/sdk/api-reference/) | Complete method reference |
-| [Examples](/sdk/examples/) | Real-world patterns: news, research, CSV batch |
+- put your data into a graph target
+- query through the semantic layer first
+- enable bounded repair for hard questions
+- use advanced debate only when you explicitly want cross-graph comparison
 
-## For Platform Operators (Docker Stack)
+## Start Here
 
-| Doc | Description |
-|-----|-------------|
-| [Quick Start](/docs/quickstart/) | Full platform setup with Docker Compose |
-| [Architecture](/docs/architecture/) | System architecture and module map |
-| [Tutorial](/docs/tutorial/) | End-to-end first run walkthrough |
-| [Workflow](/docs/workflow/) | Operational workflow and landing procedures |
+- [`/docs/quickstart/`](/docs/quickstart/): shortest successful local run
+- [`/docs/apply_your_data/`](/docs/apply_your_data/): how to ingest your own records
+- [`/docs/python_sdk/`](/docs/python_sdk/): Python SDK for runtime access
 
-## Design & Governance
+## Recommended Reading Order
 
-| Doc | Description |
-|-----|-------------|
-| [Philosophy](/docs/philosophy/) | Core design philosophy and operating principles |
-| [Open Source Playbook](/docs/open_source_playbook/) | Engineering execution guide |
+1. Quick Start
+2. Bring Your Data
+3. Python SDK
+4. Architecture
+5. Workflow
 
-## Reference Documents (in repo)
+## Developer Query Flow
 
-These live in `docs/` in the [seocho repository](https://github.com/tteon/seocho):
+For developer-facing query execution, use this order:
 
-- `BEADS_OPERATING_MODEL.md` — Sprint/roadmap task tracking system
-- `GRAPH_MODEL_STRATEGY.md` — Graph representation and rollout
-- `CONTEXT_GRAPH_BLUEPRINT.md` — Context event model
-- `decisions/DECISION_LOG.md` — Architecture decision history (ADR-0026 through ADR-0035)
+1. semantic layer first
+2. bounded repair when slot fill is insufficient
+3. explicit advanced debate only for cross-graph comparison
+
+## Core References
+
+- [`/docs/architecture/`](/docs/architecture/): system modules and runtime flow
+- [`/docs/workflow/`](/docs/workflow/): operator workflow and automation rules
+- [`/docs/open_source_playbook/`](/docs/open_source_playbook/): contribution path
+- [`/sdk/api-reference/`](/sdk/api-reference/): public SDK surface
+- [`/sdk/examples/`](/sdk/examples/): copy-pasteable runtime examples

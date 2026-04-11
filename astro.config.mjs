@@ -32,8 +32,10 @@ export default defineConfig({
                 {
                     label: 'Docs', items: [
                         { label: 'Introduction', link: '/docs/index/' },
-                        { label: 'Tutorial', link: '/docs/tutorial/' },
                         { label: 'Quick Start', link: '/docs/quickstart/' },
+                        { label: 'Bring Your Data', link: '/docs/apply_your_data/' },
+                        { label: 'Python SDK', link: '/docs/python_sdk/' },
+                        { label: 'Tutorial', link: '/docs/tutorial/' },
                         { label: 'Open Source Playbook', link: '/docs/open_source_playbook/' },
                         { label: 'Architecture', link: '/docs/architecture/' },
                         { label: 'Workflow', link: '/docs/workflow/' },
@@ -44,7 +46,7 @@ export default defineConfig({
                     label: 'Python SDK', items: [
                         { label: 'Overview', link: '/sdk/' },
                         { label: 'Getting Started', link: '/sdk/getting-started/' },
-                        { label: 'Ontology Guide', link: '/sdk/ontology-guide/' },
+                        { label: 'Ontology and Semantic Artifacts', link: '/sdk/ontology-guide/' },
                         { label: 'API Reference', link: '/sdk/api-reference/' },
                         { label: 'Examples', link: '/sdk/examples/' },
                     ]

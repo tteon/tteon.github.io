@@ -1,99 +1,82 @@
 ---
 title: Examples
-description: Practical patterns for building knowledge graphs with SEOCHO
+description: Runtime-first examples for ingesting data and querying SEOCHO.
 ---
 
 # Examples
 
-## Python SDK
-
-Ready-to-run patterns — see [SDK Examples](/sdk/examples/) for full code.
-
-| Pattern | What it shows |
-|---------|---------------|
-| **News Article Indexing** | Multi-entity extraction with Person, Organization, Location, Event |
-| **Research Paper Extraction** | Academic domain: Paper, Author, Method, Dataset |
-| **Manual Pipeline** | Step-by-step extract → SHACL validate → write |
-| **CSV Batch Indexing** | Bulk import from structured data files |
-| **JSON-LD Ontology** | Version-controlled schema files for teams |
-| **Denormalized Export** | Flatten graph data for vector search or tabular export |
-
-### Minimal example
+## 1. Raw Records to a Graph Target
 
 ```python
-from seocho import Seocho, Ontology, NodeDef, RelDef, P
-from seocho.graph_store import Neo4jGraphStore
-from seocho.llm_backend import OpenAIBackend
+from seocho import Seocho
 
-onto = Ontology(
-    name="demo",
-    nodes={
-        "Person":  NodeDef(properties={"name": P(str, unique=True)}),
-        "Company": NodeDef(properties={"name": P(str, unique=True)}),
-    },
-    relationships={
-        "WORKS_AT": RelDef(source="Person", target="Company"),
-    },
+client = Seocho(base_url="http://localhost:8001", workspace_id="default")
+
+result = client.raw_ingest(
+    [
+        {"id": "doc-1", "content": "ACME acquired Beta in 2024."},
+        {"id": "doc-2", "content": "Beta provides risk analytics to ACME."},
+    ],
+    target_database="accounts_graph",
 )
 
-s = Seocho(
-    ontology=onto,
-    graph_store=Neo4jGraphStore("bolt://localhost:7687", "neo4j", "pass"),
-    llm=OpenAIBackend(model="gpt-4o"),
-)
-
-s.add("Elon Musk is the CEO of Tesla and SpaceX.")
-print(s.ask("What companies does Elon Musk lead?"))
+print(result.status)
 ```
 
-## Platform (Docker Stack)
+## 2. Semantic Query with Bounded Repair
 
-### Ingest raw data
+```python
+semantic = client.semantic(
+    "What is ACME related to?",
+    databases=["accounts_graph"],
+    reasoning_mode=True,
+    repair_budget=2,
+)
+
+print(semantic.route)
+print(semantic.response)
+print(semantic.semantic_context["reasoning"])
+```
+
+## 3. Explicit Cross-Graph Comparison
+
+```python
+advanced = client.advanced(
+    "Compare what the baseline and finance graphs know about ACME.",
+    graph_ids=["kgnormal", "kgfibo"],
+)
+
+print(advanced.debate_state)
+```
+
+## 4. Direct API Usage
 
 ```bash
-curl -X POST http://localhost:8001/platform/ingest/raw \
+curl -sS -X POST http://localhost:8001/platform/ingest/raw \
   -H "Content-Type: application/json" \
   -d '{
     "workspace_id": "default",
-    "target_database": "mydb",
+    "target_database": "accounts_graph",
     "records": [
-      {"id": "1", "content": "ACME acquired Beta Corp in 2024."}
+      {"id": "doc-1", "content": "ACME acquired Beta in 2024."}
     ]
   }'
 ```
 
-### Semantic query
-
 ```bash
-curl -X POST http://localhost:8501/api/chat/send \
+curl -sS -X POST http://localhost:8001/run_agent_semantic \
   -H "Content-Type: application/json" \
   -d '{
-    "session_id": "demo",
-    "message": "What companies are mentioned?",
-    "mode": "semantic",
     "workspace_id": "default",
-    "databases": ["mydb"]
+    "query": "What is ACME related to?",
+    "databases": ["accounts_graph"],
+    "reasoning_mode": true,
+    "repair_budget": 2
   }'
 ```
 
-### Multi-agent debate
+## Next
 
-```bash
-curl -X POST http://localhost:8501/api/chat/send \
-  -H "Content-Type: application/json" \
-  -d '{
-    "session_id": "demo",
-    "message": "Compare entities across all databases",
-    "mode": "debate",
-    "workspace_id": "default"
-  }'
-```
-
-## Domain Examples
-
-| Domain | Ontology approach |
-|--------|------------------|
-| **Financial** | FIBO ontology with Organization, Asset, Transaction entities |
-| **Medical** | Drug, Symptom, Side-Effect extraction from clinical manuscripts |
-| **Legal** | Contract, Party, Clause, Obligation relationship mapping |
-| **HR/Org** | Employee, Department, Role hierarchy with MANY_TO_ONE cardinality |
+- [`/docs/apply_your_data/`](/docs/apply_your_data/)
+- [`/docs/python_sdk/`](/docs/python_sdk/)
+- [`/sdk/examples/`](/sdk/examples/)

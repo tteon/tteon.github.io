@@ -1,113 +1,79 @@
 ---
-title: Getting Started
-description: Set up SEOCHO SDK and index your first data in 5 minutes
+title: SDK Getting Started
+description: Install the Python package, configure the client, ingest records, and query safely.
 ---
 
-# Getting Started
+# SDK Getting Started
 
-This guide gets you from zero to a working knowledge graph in 5 minutes.
+## Install
 
-## Prerequisites
-
-- Python 3.11+
-- A running Neo4j or DozerDB instance
-- An OpenAI API key
-
-## Step 1: Install
+Published package:
 
 ```bash
 pip install seocho
 ```
 
-## Step 2: Define Your Ontology
+Repository install:
 
-An ontology tells SEOCHO what entities and relationships exist in your domain. Start simple — you can always expand later.
-
-```python
-from seocho import Ontology, NodeDef, RelDef, P
-
-ontology = Ontology(
-    name="my_domain",
-    nodes={
-        "Person":  NodeDef(properties={"name": P(str, unique=True)}),
-        "Company": NodeDef(properties={"name": P(str, unique=True)}),
-    },
-    relationships={
-        "WORKS_AT": RelDef(source="Person", target="Company"),
-    },
-)
+```bash
+pip install -e ".[dev]"
 ```
 
-**What `P(str, unique=True)` means:** Property of type string, must be unique in the database. This single declaration drives:
-- The extraction prompt (tells the LLM what to look for)
-- The query prompt (tells the LLM the schema)
-- A Neo4j UNIQUE constraint
-- Post-extraction validation
-
-## Step 3: Connect and Index
+## Configure
 
 ```python
 from seocho import Seocho
-from seocho.graph_store import Neo4jGraphStore
-from seocho.llm_backend import OpenAIBackend
 
-s = Seocho(
-    ontology=ontology,
-    graph_store=Neo4jGraphStore("bolt://localhost:7687", "neo4j", "password"),
-    llm=OpenAIBackend(model="gpt-4o"),
+client = Seocho(base_url="http://localhost:8001", workspace_id="default")
+```
+
+Or with the module-level API:
+
+```python
+import seocho
+
+seocho.configure(base_url="http://localhost:8001", workspace_id="default")
+```
+
+## Ingest Records
+
+```python
+client.raw_ingest(
+    [
+        {"id": "r1", "content": "ACME acquired Beta in 2024."},
+        {"id": "r2", "content": "Beta provides risk analytics to ACME."},
+    ],
+    target_database="accounts_graph",
+)
+```
+
+## Query Through the Semantic Layer
+
+```python
+semantic = client.semantic(
+    "What is ACME related to?",
+    databases=["accounts_graph"],
+    reasoning_mode=True,
+    repair_budget=2,
 )
 
-# Apply schema constraints to the database
-s.ensure_constraints()
-
-# Index a document
-s.add("Marie Curie worked at the University of Paris.")
+print(semantic.route)
+print(semantic.response)
 ```
 
-That's it. SEOCHO:
-1. Sent your text to the LLM with an ontology-aware extraction prompt
-2. Got back `Person(name="Marie Curie")` and `Company(name="University of Paris")`
-3. Linked and deduplicated entities
-4. Wrote them to Neo4j with a `WORKS_AT` relationship
-
-## Step 4: Query
+## Use Advanced Debate Explicitly
 
 ```python
-answer = s.ask("Where did Marie Curie work?")
-print(answer)
-# → "Marie Curie worked at the University of Paris."
+advanced = client.advanced(
+    "Compare what the baseline and finance graphs know about ACME.",
+    graph_ids=["kgnormal", "kgfibo"],
+)
+
+print(advanced.debate_state)
 ```
 
-Behind the scenes, SEOCHO generated a Cypher query using your ontology as context — it knows `Person` and `Company` exist, that `WORKS_AT` connects them, and that `name` is the unique lookup key.
+## Next
 
-## Step 5: Inspect What Was Extracted
-
-```python
-# Run extraction without writing to the graph
-result = s.extract("Elon Musk is the CEO of Tesla and SpaceX.")
-print(result)
-```
-
-```json
-{
-  "nodes": [
-    {"id": "elon_musk", "label": "Person", "properties": {"name": "Elon Musk"}},
-    {"id": "tesla", "label": "Company", "properties": {"name": "Tesla"}},
-    {"id": "spacex", "label": "Company", "properties": {"name": "SpaceX"}}
-  ],
-  "relationships": [
-    {"source": "elon_musk", "target": "tesla", "type": "WORKS_AT"},
-    {"source": "elon_musk", "target": "spacex", "type": "WORKS_AT"}
-  ]
-}
-```
-
-## What's Next
-
-| I want to... | Read this |
-|---|---|
-| Design a richer ontology | [Ontology Guide](/sdk/ontology-guide/) |
-| Validate data before writing | [Ontology Guide → Validation](/sdk/ontology-guide/#validation) |
-| Save my ontology as a file | [Ontology Guide → JSON-LD](/sdk/ontology-guide/#json-ld) |
-| See the full method list | [API Reference](/sdk/api-reference/) |
-| See real-world patterns | [Examples](/sdk/examples/) |
+- [`/docs/apply_your_data/`](/docs/apply_your_data/)
+- [`/sdk/api-reference/`](/sdk/api-reference/)
+- [`/sdk/examples/`](/sdk/examples/)
