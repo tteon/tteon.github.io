@@ -180,3 +180,31 @@ vs = FAISSVectorStore(model="text-embedding-3-small")
 vs.add("doc-1", "Samsung is a Korean tech company.")
 results = vs.search("Korean electronics", limit=5)
 ```
+
+---
+
+## Experiment Workbench
+
+```python
+from seocho.experiment import Workbench, WorkbenchResults
+
+wb = Workbench(input_texts=["text..."])
+wb.vary("ontology", ["v1.jsonld", "v2.jsonld"])
+wb.vary("model", ["gpt-4o", "gpt-4o-mini"])
+wb.vary("chunk_size", [4000, 8000])
+wb.vary("temperature", [0.0, 0.2])
+
+results = wb.run_all()
+```
+
+| Method | Description |
+|--------|-------------|
+| `wb.vary(axis, values)` | Add a parameter axis to explore |
+| `wb.total_combinations` | Number of runs that will execute |
+| `wb.run_all()` | Execute all combinations → `WorkbenchResults` |
+| `wb.on_run(callback)` | Progress callback `(run_idx, total, params)` |
+| `results.best_by(metric)` | Highest scoring result |
+| `results.worst_by(metric)` | Lowest scoring result |
+| `results.leaderboard()` | Ranked table (human-readable) |
+| `results.to_dataframe()` | Pandas DataFrame (requires pandas) |
+| `results.save(path)` | Save to directory (results.json + summary.md) |

@@ -119,6 +119,60 @@ flat = ontology.to_denormalized_view(nodes, relationships)
 # Person now has company_name, company_ticker embedded
 ```
 
+## Experiment Workbench
+
+Find the best combination of ontology, model, chunk size, and other settings:
+
+```python
+from seocho.experiment import Workbench
+
+wb = Workbench(input_texts=["Samsung CEO Jay Y. Lee met NVIDIA's Jensen Huang in Seoul."])
+wb.vary("ontology", ["schema_v1.jsonld", "schema_v2.jsonld"])
+wb.vary("model", ["gpt-4o", "gpt-4o-mini"])
+wb.vary("chunk_size", [4000, 8000])
+wb.vary("temperature", [0.0, 0.2])
+
+results = wb.run_all()  # 2*2*2*2 = 16 runs
+print(results.leaderboard())
+```
+
+Output:
+
+```
+  #     Score   Nodes   Rels  Errors    Time  Config
+──────────────────────────────────────────────────────────────────────
+  1     95.0%       4      2       0    1.2s  ontology=v2 | model=gpt-4o | chunk_size=8000 | temperature=0.0
+  2     92.0%       4      2       0    0.8s  ontology=v2 | model=gpt-4o-mini | chunk_size=8000 | temperature=0.0
+  3     88.0%       3      1       0    1.1s  ontology=v1 | model=gpt-4o | chunk_size=4000 | temperature=0.0
+  ...
+```
+
+### Analysis
+
+```python
+# Best result
+best = results.best_by("extraction_score")
+print(f"Best: {best.params}")
+
+# Pandas DataFrame for deeper analysis
+df = results.to_dataframe()
+print(df.groupby("model")["score"].mean())
+
+# Save for later comparison
+results.save("./experiments/run_001")
+```
+
+### CLI
+
+```bash
+seocho experiment \
+  --input ./test_articles/ \
+  --ontology v1.jsonld --ontology v2.jsonld \
+  --model gpt-4o --model gpt-4o-mini \
+  --chunk-size 4000 --chunk-size 8000 \
+  --output ./experiments/run_001
+```
+
 ## HTTP Mode
 
 ```python
