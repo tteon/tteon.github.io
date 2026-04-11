@@ -1,170 +1,183 @@
 ---
 title: API Reference
-description: Public Python SDK reference for ingestion, semantic retrieval, and advanced debate.
+description: Complete method reference for the SEOCHO Python SDK
 ---
 
 # API Reference
 
-## Client Construction
+## Seocho
+
+### Construction
 
 ```python
-from seocho import Seocho
+# Local mode — all processing in-process
+s = Seocho(ontology=onto, graph_store=store, llm=llm)
 
-client = Seocho(
-    base_url="http://localhost:8001",
-    workspace_id="default",
-    user_id="alex",
+# With vector search
+s = Seocho(ontology=onto, graph_store=store, llm=llm, vector_store=vs)
+
+# HTTP mode — delegates to a running server
+s = Seocho(base_url="http://localhost:8001")
+```
+
+### Indexing
+
+| Method | Description |
+|--------|-------------|
+| `s.add(content, *, database, category, metadata, strict_validation)` | Index text with chunking + validation |
+| `s.add_batch(documents, *, database, strict_validation, on_progress)` | Batch index multiple documents |
+| `s.index_file(path, *, database, force)` | Index a single file (.txt, .md, .csv, .json, .jsonl) |
+| `s.index_directory(directory, *, database, recursive, force, on_file)` | Index all supported files in a directory |
+| `s.reindex(source_id, content, *, database)` | Delete old data and re-index fresh |
+| `s.delete_source(source_id, *, database)` | Remove all graph data for a source |
+| `s.extract(content, *, category)` | Extract without writing (inspection/debugging) |
+
+### Querying
+
+| Method | Description |
+|--------|-------------|
+| `s.ask(message, *, database, reasoning_mode, repair_budget)` | Natural language → Cypher → answer |
+| `s.query(cypher, *, params, database)` | Execute raw Cypher |
+| `s.search_similar(query, *, limit)` | Vector similarity search (requires vector_store) |
+
+### Graph Management
+
+| Method | Description |
+|--------|-------------|
+| `s.ensure_constraints(*, database)` | Apply ontology-derived UNIQUE/INDEX constraints |
+| `s.register_ontology(database, ontology)` | Bind per-database ontology |
+| `s.get_ontology(database)` | Get ontology for a database |
+
+### HTTP-Mode Methods
+
+| Method | Description |
+|--------|-------------|
+| `s.chat(message)` | Structured chat response |
+| `s.search(query)` | Memory search |
+| `s.semantic(query, *, databases, reasoning_mode)` | Graph-grounded retrieval |
+| `s.debate(query, *, graph_ids)` | Multi-agent debate |
+| `s.platform_chat(message, *, mode)` | Platform UI chat |
+| `s.raw_ingest(records, *, target_database)` | Batch ingestion via server |
+| `s.graphs()` | List graph targets |
+| `s.databases()` | List databases |
+| `s.health()` | Runtime health check |
+
+---
+
+## Ontology
+
+### Construction
+
+```python
+Ontology(name="domain", nodes={...}, relationships={...})
+Ontology.from_jsonld("schema.jsonld")  # canonical format
+Ontology.from_yaml("schema.yaml")
+Ontology.from_dict({...})
+```
+
+### Serialization
+
+| Method | Description |
+|--------|-------------|
+| `to_jsonld(path?)` | Export as JSON-LD (canonical) |
+| `to_yaml(path)` | Export as YAML |
+| `to_dict()` | Plain dict |
+
+### Prompt Context
+
+| Method | Description |
+|--------|-------------|
+| `to_extraction_context()` | Dict for extraction prompts |
+| `to_query_context()` | Dict for query prompts (schema + hints) |
+| `to_linking_context()` | Dict for entity linking prompts |
+
+### Validation
+
+| Method | Description |
+|--------|-------------|
+| `validate()` | Ontology consistency check |
+| `validate_extraction(data)` | Check nodes/rels against schema |
+| `validate_with_shacl(data)` | Full SHACL validation (types + cardinality) |
+| `score_extraction(data)` | Quality scores (0.0–1.0) per node/rel |
+
+### Constraints & Shapes
+
+| Method | Description |
+|--------|-------------|
+| `to_cypher_constraints()` | Cypher CREATE CONSTRAINT/INDEX statements |
+| `to_shacl()` | Derived SHACL shapes |
+
+### Denormalization
+
+| Method | Description |
+|--------|-------------|
+| `denormalization_plan()` | What's safe to embed (based on cardinality) |
+| `to_denormalized_view(nodes, rels)` | Flatten graph data |
+| `normalize_view(denorm_nodes)` | Reverse to normalized form |
+
+---
+
+## NodeDef
+
+```python
+NodeDef(
+    description="Human-readable",
+    properties={"name": P(str, unique=True)},
+    aliases=["Alt Name"],
+    same_as="schema:Organization",
 )
 ```
 
-Module-level convenience:
+## RelDef
 
 ```python
-import seocho
-
-seocho.configure(base_url="http://localhost:8001", workspace_id="default")
-```
-
-## Ingestion
-
-### `add(content, *, metadata=None, ...) -> Memory`
-
-Memory-style text ingestion.
-
-```python
-memory = client.add("Alex manages the Seoul retail account.")
-```
-
-### `raw_ingest(records, *, target_database, ...) -> RawIngestResult`
-
-Batch ingestion for repeatable datasets.
-
-```python
-result = client.raw_ingest(records, target_database="accounts_graph")
-```
-
-## Memory and Search
-
-### `ask(message, *, graph_ids=None, databases=None) -> str`
-
-Fast developer-facing memory answer.
-
-### `chat(message, *, graph_ids=None, databases=None) -> ChatResponse`
-
-Structured chat response with evidence information.
-
-### `search(query, *, graph_ids=None, databases=None) -> list[SearchResult]`
-
-Memory search without full answer generation.
-
-## Semantic Retrieval
-
-### `semantic(query, *, graph_ids=None, databases=None, entity_overrides=None, reasoning_mode=False, repair_budget=0) -> SemanticRunResponse`
-
-Primary graph-grounded query surface.
-
-```python
-semantic = client.semantic(
-    "Who manages the Seoul retail account?",
-    graph_ids=["kgnormal"],
-    reasoning_mode=True,
-    repair_budget=2,
+RelDef(
+    source="Person", target="Company",
+    cardinality="MANY_TO_ONE",
+    same_as="schema:worksFor",
 )
 ```
 
-Important fields on the response:
-
-- `response`
-- `route`
-- `semantic_context`
-- `semantic_context["reasoning"]`
-- `semantic_context["evidence_bundle_preview"]`
-
-## Advanced Debate
-
-### `advanced(query, *, graph_ids=None) -> DebateRunResponse`
-
-Explicit advanced mode for cross-graph comparison.
+## P (Property)
 
 ```python
-advanced = client.advanced(
-    "Compare what the baseline and finance graphs know about ACME.",
-    graph_ids=["kgnormal", "kgfibo"],
-)
+P(type, unique=False, index=False, required=False, description="", aliases=[])
 ```
 
-Important fields:
+Types: `str`, `int`, `float`, `bool` or `PropertyType` enum.
 
-- `response`
-- `debate_state`
-- `debate_results`
-- `agent_statuses`
+---
 
-## Planning Surface
-
-### `plan(query) -> ExecutionPlanBuilder`
-
-Builder for an explicit execution plan.
+## GraphStore
 
 ```python
-result = (
-    client.plan("Who manages the Seoul retail account?")
-    .on_graph("kgnormal")
-    .with_repair_budget(2)
-    .run()
-)
+from seocho.graph_store import Neo4jGraphStore
+
+store = Neo4jGraphStore("bolt://localhost:7687", "neo4j", "password")
+store.write(nodes, rels, database="mydb")
+store.query("MATCH (n) RETURN n LIMIT 5", database="mydb")
+store.ensure_constraints(ontology, database="mydb")
+store.delete_by_source(source_id, database="mydb")
+store.close()
 ```
 
-Useful builder methods:
-
-- `.on_graph(...)`
-- `.on_graphs(...)`
-- `.with_ontology(...)`
-- `.with_vocabulary(...)`
-- `.with_repair_budget(...)`
-- `.direct()`
-- `.react()`
-- `.advanced()`
-- `.run()`
-
-## Graph and Runtime Inspection
-
-### `graphs() -> list[GraphTarget]`
-
-Inspect available graph targets and their semantic metadata.
-
-### `databases() -> list[str]`
-
-List runtime databases.
-
-### `agents() -> list[str]`
-
-List currently available graph-specialist agents.
-
-### `ensure_fulltext_indexes(...) -> FulltextIndexResponse`
-
-Ensure full-text lookup surfaces exist for retrieval.
-
-## Platform Runtime Surfaces
-
-### `platform_chat(message, *, mode="semantic", ...) -> PlatformChatResponse`
-
-Structured chat surface used by the platform UI.
-
-### `session_history(session_id) -> PlatformSessionResponse`
-
-Fetch chat session history.
-
-### `reset_session(session_id) -> PlatformSessionResponse`
-
-Reset a chat session.
-
-## Async Client
+## LLMBackend
 
 ```python
-from seocho import AsyncSeocho
+from seocho.llm_backend import OpenAIBackend
 
-client = AsyncSeocho()
-semantic = await client.semantic("What is ACME related to?")
-await client.aclose()
+llm = OpenAIBackend(model="gpt-4o", timeout=120.0)
+response = llm.complete(system="...", user="...")
+print(response.text)
+parsed = response.json()  # auto-strips markdown fences
+```
+
+## VectorStore
+
+```python
+from seocho.vector_store import FAISSVectorStore
+
+vs = FAISSVectorStore(model="text-embedding-3-small")
+vs.add("doc-1", "Samsung is a Korean tech company.")
+results = vs.search("Korean electronics", limit=5)
 ```

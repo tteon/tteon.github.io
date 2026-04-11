@@ -1,94 +1,130 @@
 ---
 title: Examples
-description: Copy-pasteable SDK examples for loading data and querying graphs.
+description: Copy-pasteable patterns for building knowledge graphs with SEOCHO
 ---
 
 # Examples
 
-## Batch Ingest Your Own Records
+## Index Files from a Directory
+
+The easiest way to bring your own data:
 
 ```python
-from seocho import Seocho
+from seocho import Seocho, Ontology, NodeDef, RelDef, P
+from seocho.graph_store import Neo4jGraphStore
+from seocho.llm_backend import OpenAIBackend
 
-client = Seocho(base_url="http://localhost:8001", workspace_id="default")
-
-result = client.raw_ingest(
-    [
-        {"id": "doc-1", "content": "ACME acquired Beta in 2024."},
-        {"id": "doc-2", "content": "Beta provides risk analytics to ACME."},
-    ],
-    target_database="accounts_graph",
+ontology = Ontology(
+    name="my_domain",
+    nodes={
+        "Person":  NodeDef(properties={"name": P(str, unique=True)}),
+        "Company": NodeDef(properties={"name": P(str, unique=True)}),
+    },
+    relationships={
+        "WORKS_AT": RelDef(source="Person", target="Company"),
+    },
 )
 
-print(result.status)
-print(result.records_processed)
-```
-
-## One-Off Memory Add
-
-```python
-memory = client.add(
-    "Alex manages the Seoul retail account.",
-    metadata={"source": "crm_note"},
+s = Seocho(
+    ontology=ontology,
+    graph_store=Neo4jGraphStore("bolt://localhost:7687", "neo4j", "pass"),
+    llm=OpenAIBackend(model="gpt-4o"),
 )
 
-print(memory.memory_id)
+# Index a whole directory
+results = s.index_directory("./my_data/", database="mydb")
+print(f"Indexed {results['files_indexed']} files")
+
+# Re-run — only changed files are processed
+results = s.index_directory("./my_data/", database="mydb")
+# files_unchanged: 5, files_indexed: 0
 ```
 
-## Semantic Query with Repair
+### Supported formats
+
+| Format | How it's processed |
+|--------|--------------------|
+| `.txt`, `.md` | Entire file → one document |
+| `.csv` | Each row → one document (auto-detects `content` column) |
+| `.json` | Array of objects → each is a document |
+| `.jsonl` | One JSON object per line |
+
+## News Article Pipeline
 
 ```python
-semantic = client.semantic(
-    "What is Neo4j related to GraphRAG?",
-    graph_ids=["kgnormal"],
+ontology = Ontology(
+    name="news",
+    nodes={
+        "Person":       NodeDef(properties={"name": P(str, unique=True), "title": P(str)}),
+        "Organization": NodeDef(properties={"name": P(str, unique=True), "sector": P(str)}),
+        "Event":        NodeDef(properties={"name": P(str, unique=True), "date": P(str)}),
+    },
+    relationships={
+        "WORKS_AT":    RelDef(source="Person", target="Organization", cardinality="MANY_TO_ONE"),
+        "INVOLVED_IN": RelDef(source="Person", target="Event"),
+    },
+)
+
+s = Seocho(ontology=ontology, graph_store=store, llm=llm)
+
+for article in articles:
+    s.add(article, database="news_kg")
+
+print(s.ask("What happened at WWDC?", database="news_kg"))
+```
+
+## Extract and Validate Before Writing
+
+```python
+extracted = s.extract("Tesla reported Q4 revenue of $25.2B.")
+scores = ontology.score_extraction(extracted)
+print(f"Quality: {scores['overall']}")
+
+errors = ontology.validate_with_shacl(extracted)
+if errors:
+    print("Issues:", errors)
+```
+
+## Reasoning Mode (Auto-Retry)
+
+```python
+answer = s.ask(
+    "Which companies are in chip supply?",
+    database="news_kg",
     reasoning_mode=True,
     repair_budget=2,
 )
-
-print(semantic.route)
-print(semantic.semantic_context["reasoning"])
-print(semantic.response)
 ```
 
-## Explicit Execution Plan
+## Multi-Ontology per Database
 
 ```python
-result = (
-    client.plan("Who manages the Seoul retail account?")
-    .on_graph("kgnormal")
-    .with_repair_budget(2)
-    .run()
-)
+s.register_ontology("finance_db", Ontology.from_jsonld("finance.jsonld"))
+s.register_ontology("hr_db", Ontology.from_jsonld("hr.jsonld"))
 
-print(result.route)
-print(result.response)
+s.add("Q4 revenue was $10B", database="finance_db")
+s.add("Alice joined engineering", database="hr_db")
 ```
 
-## Cross-Graph Comparison
+## Incremental Re-indexing
 
 ```python
-advanced = client.advanced(
-    "Compare what the baseline and finance graphs know about ACME.",
-    graph_ids=["kgnormal", "kgfibo"],
-)
-
-print(advanced.debate_state)
-print(advanced.response)
+mem = s.add("Initial version.", database="mydb")
+s.reindex(mem.memory_id, "Updated version.", database="mydb")
+s.delete_source(mem.memory_id, database="mydb")
 ```
 
-## Module-Level Convenience API
+## Denormalized Export
 
 ```python
-import seocho
-
-seocho.configure(base_url="http://localhost:8001", workspace_id="default")
-
-print(seocho.ask("What do you know about ACME?"))
+flat = ontology.to_denormalized_view(nodes, relationships)
+# Person now has company_name, company_ticker embedded
 ```
 
-## Inspect Graph Targets
+## HTTP Mode
 
 ```python
-for graph in client.graphs():
-    print(graph.graph_id, graph.database, graph.ontology_id, graph.vocabulary_profile)
+s = Seocho(base_url="http://localhost:8001")
+s.add("Some content")
+print(s.ask("What do you know?"))
 ```
