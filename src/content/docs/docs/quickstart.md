@@ -18,16 +18,14 @@ If your first question is how to load your own records, continue with
 
 ## Execution Path At A Glance
 
-```mermaid
-flowchart LR
-    A[make setup-env] --> B[make up or seocho serve]
-    B --> C[raw_ingest or add]
-    C --> D[semantic retrieval]
-    D --> E{enough evidence?}
-    E -- yes --> F[grounded answer]
-    E -- no --> G[reasoning_mode repair loop]
-    G --> F
-    F --> H[advanced debate only for explicit cross-graph comparison]
+```
+setup-env ──▶ start services ──▶ ingest data ──▶ semantic retrieval
+                                                       │
+                                              enough evidence?
+                                              yes ──▶ grounded answer
+                                              no  ──▶ reasoning repair ──▶ grounded answer
+                                                                                │
+                                              (advanced debate only for explicit cross-graph comparison)
 ```
 
 ## 1. Prerequisites
@@ -80,16 +78,18 @@ The default product path is:
 - use bounded repair only when needed
 - reserve debate for explicit advanced use
 
-```mermaid
-flowchart TD
-    Q[developer question] --> M{mode}
-    M -->|simple memory| A[ask or chat]
-    M -->|graph grounded| S[semantic]
-    S --> R{retrieval weak?}
-    R -->|yes| P[reasoning_mode=True]
-    R -->|no| G[return grounded answer]
-    P --> G
-    M -->|explicit graph comparison| D[advanced debate]
+```
+Developer Question
+    │
+    ├── simple memory ──▶ ask() or chat()
+    │
+    ├── graph grounded ──▶ semantic()
+    │                        │
+    │                   retrieval weak?
+    │                   no  ──▶ grounded answer
+    │                   yes ──▶ reasoning_mode=True ──▶ grounded answer
+    │
+    └── explicit graph comparison ──▶ advanced debate
 ```
 
 ## 5. First Success: Direct API Path
