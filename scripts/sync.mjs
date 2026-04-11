@@ -30,45 +30,45 @@ const fileMappings = [
     {
         src: 'docs/README.md',
         dest: 'index.md',
-        frontmatter: `---\ntitle: Docs Home\ndescription: Central Documentation Index for SEOCHO\n---\n\n> *Synced automatically from \`seocho/docs/README.md\`*\n\n`
+        frontmatter: `---\ntitle: Docs Home\ndescription: Central Documentation Index for SEOCHO\n---\n\n> *Source mirrored from \`seocho/docs/README.md\`*\n\n`
     },
     {
         src: 'docs/QUICKSTART.md',
         dest: 'quickstart.md',
-        frontmatter: `---\ntitle: Quickstart\ndescription: Get SEOCHO up and running in 5 minutes.\n---\n\n> *Synced automatically from \`seocho/docs/QUICKSTART.md\`*\n\n`
+        frontmatter: `---\ntitle: Quickstart\ndescription: Get SEOCHO up and running in 5 minutes.\n---\n\n> *Source mirrored from \`seocho/docs/QUICKSTART.md\`*\n\n`
     },
     {
         src: 'docs/APPLY_YOUR_DATA.md',
         dest: 'apply_your_data.md',
-        frontmatter: `---\ntitle: Bring Your Data\ndescription: How to load your own records into SEOCHO and query them safely.\n---\n\n> *Synced automatically from \`seocho/docs/APPLY_YOUR_DATA.md\`*\n\n`
+        frontmatter: `---\ntitle: Bring Your Data\ndescription: How to load your own records into SEOCHO and query them safely.\n---\n\n> *Source mirrored from \`seocho/docs/APPLY_YOUR_DATA.md\`*\n\n`
     },
     {
         src: 'docs/PYTHON_INTERFACE_QUICKSTART.md',
         dest: 'python_sdk.md',
-        frontmatter: `---\ntitle: Python SDK\ndescription: Developer-first guide to ingest data and query SEOCHO through the Python SDK.\n---\n\n> *Synced automatically from \`seocho/docs/PYTHON_INTERFACE_QUICKSTART.md\`*\n\n`
+        frontmatter: `---\ntitle: Python SDK\ndescription: Developer-first guide to ingest data and query SEOCHO through the Python SDK.\n---\n\n> *Source mirrored from \`seocho/docs/PYTHON_INTERFACE_QUICKSTART.md\`*\n\n`
     },
     {
         src: 'docs/ARCHITECTURE.md',
         dest: 'architecture.md',
-        frontmatter: `---\ntitle: Architecture\ndescription: System Architecture and Module Map.\n---\n\n> *Synced automatically from \`seocho/docs/ARCHITECTURE.md\`*\n\n`
+        frontmatter: `---\ntitle: Architecture\ndescription: System Architecture and Module Map.\n---\n\n> *Source mirrored from \`seocho/docs/ARCHITECTURE.md\`*\n\n`
     },
     {
         src: 'docs/WORKFLOW.md',
         dest: 'workflow.md',
         isBlog: false,
-        frontmatter: `---\ntitle: Workflow\ndescription: End-to-end Operational Workflow.\n---\n\n> *Synced automatically from \`seocho/docs/WORKFLOW.md\`*\n\n`
+        frontmatter: `---\ntitle: Workflow\ndescription: End-to-end Operational Workflow.\n---\n\n> *Source mirrored from \`seocho/docs/WORKFLOW.md\`*\n\n`
     },
     {
         src: 'docs/PHILOSOPHY.md',
         dest: 'philosophy.md',
         isBlog: true,
-        frontmatter: `---\ntitle: "SEOCHO Design Philosophy & Operating Principles"\ndate: ${new Date().toISOString().split('T')[0]}\nauthors:\n  - seocho\nexcerpt: Extract domain rules and high-value semantics from heterogeneous data into a SHACL-like semantic layer.\n---\n\n> *Synced automatically from \`seocho/docs/PHILOSOPHY.md\`*\n\n`
+        frontmatter: `---\ntitle: "SEOCHO Design Philosophy & Operating Principles"\ndate: ${new Date().toISOString().split('T')[0]}\nauthors:\n  - seocho\nexcerpt: Extract domain rules and high-value semantics from heterogeneous data into a SHACL-like semantic layer.\n---\n\n> *Source mirrored from \`seocho/docs/PHILOSOPHY.md\`*\n\n`
     },
     {
         src: 'docs/PHILOSOPHY_FEASIBILITY_REVIEW.md',
         dest: 'feasibility-review-framework.md',
         isBlog: true,
-        frontmatter: `---\ntitle: "Feasibility Review Framework & Rubrics"\ndate: ${new Date().toISOString().split('T')[0]}\nauthors:\n  - seocho\nexcerpt: Multi-role feasibility review framework and Go/No-Go rubric for graph data implementations.\n---\n\n> *Synced automatically from \`seocho/docs/PHILOSOPHY_FEASIBILITY_REVIEW.md\`*\n\n`
+        frontmatter: `---\ntitle: "Feasibility Review Framework & Rubrics"\ndate: ${new Date().toISOString().split('T')[0]}\nauthors:\n  - seocho\nexcerpt: Multi-role feasibility review framework and Go/No-Go rubric for graph data implementations.\n---\n\n> *Source mirrored from \`seocho/docs/PHILOSOPHY_FEASIBILITY_REVIEW.md\`*\n\n`
     }
 ];
 

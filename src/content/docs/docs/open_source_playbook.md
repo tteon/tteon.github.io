@@ -119,11 +119,18 @@ If you changed runtime API or orchestration behavior, include at least one integ
 
 Source-of-truth docs live in this repository.
 
-For stable website publishing, update these together:
+For stable website publishing, keep these routes and their mirrored repo docs in
+sync:
 
-- `docs/README.md`
-- `docs/QUICKSTART.md`
-- `docs/ARCHITECTURE.md`
-- `docs/WORKFLOW.md`
+- [`/docs/quickstart/`](/docs/quickstart/)
+- [`/docs/apply_your_data/`](/docs/apply_your_data/)
+- [`/docs/python_sdk/`](/docs/python_sdk/)
+- [`/docs/architecture/`](/docs/architecture/)
+- [`/docs/workflow/`](/docs/workflow/)
 
-Then push to `main` after running local quality gates.
+Run the website checks before publish:
+
+```bash
+bash scripts/check-doc-quality.sh
+npm run build
+```
