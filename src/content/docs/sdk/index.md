@@ -89,7 +89,7 @@ The ontology feeds into **every stage** — extraction prompts know what entity 
 
 ## Next Steps
 
-- [Getting Started](/docs/sdk/getting-started/) — Full setup walkthrough
-- [Ontology Guide](/docs/sdk/ontology-guide/) — Design your schema
-- [API Reference](/docs/sdk/api-reference/) — Complete method reference
-- [Examples](/docs/sdk/examples/) — Real-world patterns
+- [Getting Started](/sdk/getting-started/) — Full setup walkthrough
+- [Ontology Guide](/sdk/ontology-guide/) — Design your schema
+- [API Reference](/sdk/api-reference/) — Complete method reference
+- [Examples](/sdk/examples/) — Real-world patterns

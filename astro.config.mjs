@@ -42,11 +42,11 @@ export default defineConfig({
                 },
                 {
                     label: 'Python SDK', items: [
-                        { label: 'Overview', link: '/docs/sdk/' },
-                        { label: 'Getting Started', link: '/docs/sdk/getting-started/' },
-                        { label: 'Ontology Guide', link: '/docs/sdk/ontology-guide/' },
-                        { label: 'API Reference', link: '/docs/sdk/api-reference/' },
-                        { label: 'Examples', link: '/docs/sdk/examples/' },
+                        { label: 'Overview', link: '/sdk/' },
+                        { label: 'Getting Started', link: '/sdk/getting-started/' },
+                        { label: 'Ontology Guide', link: '/sdk/ontology-guide/' },
+                        { label: 'API Reference', link: '/sdk/api-reference/' },
+                        { label: 'Examples', link: '/sdk/examples/' },
                     ]
                 },
                 { label: 'Examples', link: '/examples/' },

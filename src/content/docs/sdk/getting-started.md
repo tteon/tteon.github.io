@@ -106,8 +106,8 @@ print(result)
 
 | I want to... | Read this |
 |---|---|
-| Design a richer ontology | [Ontology Guide](/docs/sdk/ontology-guide/) |
-| Validate data before writing | [Ontology Guide → Validation](/docs/sdk/ontology-guide/#validation) |
-| Save my ontology as a file | [Ontology Guide → JSON-LD](/docs/sdk/ontology-guide/#json-ld) |
-| See the full method list | [API Reference](/docs/sdk/api-reference/) |
-| See real-world patterns | [Examples](/docs/sdk/examples/) |
+| Design a richer ontology | [Ontology Guide](/sdk/ontology-guide/) |
+| Validate data before writing | [Ontology Guide → Validation](/sdk/ontology-guide/#validation) |
+| Save my ontology as a file | [Ontology Guide → JSON-LD](/sdk/ontology-guide/#json-ld) |
+| See the full method list | [API Reference](/sdk/api-reference/) |
+| See real-world patterns | [Examples](/sdk/examples/) |

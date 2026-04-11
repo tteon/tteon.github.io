@@ -9,11 +9,11 @@ Welcome to the SEOCHO documentation. Choose your starting point:
 
 | Doc | Description |
 |-----|-------------|
-| [SDK Overview](/docs/sdk/) | Ontology-first SDK — what it is and how it works |
-| [Getting Started](/docs/sdk/getting-started/) | Zero to knowledge graph in 5 minutes |
-| [Ontology Guide](/docs/sdk/ontology-guide/) | Design your schema, JSON-LD storage, SHACL validation |
-| [API Reference](/docs/sdk/api-reference/) | Complete method reference |
-| [Examples](/docs/sdk/examples/) | Real-world patterns: news, research, CSV batch |
+| [SDK Overview](/sdk/) | Ontology-first SDK — what it is and how it works |
+| [Getting Started](/sdk/getting-started/) | Zero to knowledge graph in 5 minutes |
+| [Ontology Guide](/sdk/ontology-guide/) | Design your schema, JSON-LD storage, SHACL validation |
+| [API Reference](/sdk/api-reference/) | Complete method reference |
+| [Examples](/sdk/examples/) | Real-world patterns: news, research, CSV batch |
 
 ## For Platform Operators (Docker Stack)
 

@@ -56,35 +56,35 @@
           <div class="w-3 h-3 rounded-full bg-zinc-700"></div>
           <div class="w-3 h-3 rounded-full bg-zinc-700"></div>
         </div>
-        <div class="mx-auto text-xs text-zinc-500 font-mono">seocho-core-engine</div>
+        <div class="mx-auto text-xs text-zinc-500 font-mono">seocho — ontology-first SDK</div>
       </div>
       <div class="p-6 text-sm font-mono text-zinc-300 overflow-x-auto">
-<pre class="!bg-transparent !m-0 !p-0"><code class="language-python">from seocho import CoreEngine, GraphNode
+        <Fragment set:html={`<pre class="!bg-transparent !m-0 !p-0"><code class="language-python">from seocho import Seocho, Ontology, NodeDef, RelDef, P
+from seocho.graph_store import Neo4jGraphStore
+from seocho.llm_backend import OpenAIBackend
 
-<span class="text-zinc-500"># 1. Initialize the engine with graph backend</span>
-engine = CoreEngine(
-    graph_uri="bolt://neo4j:7687",
-    ontology_path="./ontology.ttl"
+<span class="text-zinc-500"># 1. Define your domain ontology</span>
+ontology = Ontology(
+    name="compliance",
+    nodes={"Regulation": NodeDef(properties={"name": P(str, unique=True)}),
+           "Process":    NodeDef(properties={"name": P(str, unique=True)})},
+    relationships={"GOVERNED_BY": RelDef(source="Process", target="Regulation")},
 )
 
-<span class="text-zinc-500"># 2. Define semantic routing rule</span>
-engine.add_route(
-    name="compliance_check",
-    condition=lambda q: "regulation" in q.intent,
-    target_graph="fss_regulatory_graph"
+<span class="text-zinc-500"># 2. Connect — ontology drives everything</span>
+s = Seocho(
+    ontology=ontology,
+    graph_store=Neo4jGraphStore("bolt://localhost:7687", "neo4j", "pass"),
+    llm=OpenAIBackend(model="gpt-4o"),
 )
 
-<span class="text-zinc-500"># 3. Create persistent agent over the graph</span>
-agent = engine.create_agent(
-    name="ComplianceOfficer",
-    system_prompt="You enforce internal philosophy using semantic trace DAGs.",
-    memory_type="infinite_graph"
-)
+<span class="text-zinc-500"># 3. Index data — ontology shapes the extraction prompt</span>
+s.add("The onboarding flow must comply with FSS Rule 42.")
 
-<span class="text-zinc-500"># Execute</span>
-response = agent.run("Does the new onboarding flow violate FSS rule 42?");
-print(response.decision) <span class="text-emerald-400"># -> CONDITIONAL_GO</span>
-</code></pre>
+<span class="text-zinc-500"># 4. Query — ontology shapes the Cypher generation</span>
+answer = s.ask("Does onboarding comply with FSS Rule 42?")
+print(answer) <span class="text-emerald-400"># → factual answer from your graph</span>
+</code></pre>`} />
       </div>
     </div>
   </div>

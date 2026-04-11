@@ -63,7 +63,7 @@ print(s.ask("Where did Marie Curie work?"))
 # → "Marie Curie worked at the University of Paris."
 ```
 
-That's it. For more details see the [SDK documentation](/docs/sdk/).
+That's it. For more details see the [SDK documentation](/sdk/).
 
 ---
 
@@ -187,7 +187,7 @@ print(s.ask("What happened with ACME?"))
 
 | Goal | Link |
 |------|------|
-| Design a richer ontology | [Ontology Guide](/docs/sdk/ontology-guide/) |
-| Full SDK method reference | [API Reference](/docs/sdk/api-reference/) |
-| Real-world examples | [Examples](/docs/sdk/examples/) |
+| Design a richer ontology | [Ontology Guide](/sdk/ontology-guide/) |
+| Full SDK method reference | [API Reference](/sdk/api-reference/) |
+| Real-world examples | [Examples](/sdk/examples/) |
 | Architecture deep-dive | [Architecture](/docs/architecture/) |

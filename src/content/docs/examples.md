@@ -7,7 +7,7 @@ description: Practical patterns for building knowledge graphs with SEOCHO
 
 ## Python SDK
 
-Ready-to-run patterns — see [SDK Examples](/docs/sdk/examples/) for full code.
+Ready-to-run patterns — see [SDK Examples](/sdk/examples/) for full code.
 
 | Pattern | What it shows |
 |---------|---------------|
