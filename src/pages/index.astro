@@ -77,30 +77,54 @@ graph TD
     classDef db fill:#ffffff05,stroke:#a1a1aa,stroke-width:1px,color:#d4d4d8
     classDef agent fill:#ffffff15,stroke:#f4f4f5,stroke-width:1px,color:#ffffff
     classDef user fill:transparent,stroke:none,color:#E4E4E7,font-weight:bold
+    classDef mode fill:#ffffff05,stroke:#a1a1aa,stroke-width:1px,color:#ffffff,stroke-dasharray:5 5
 
-    User(("User Query")):::user
-    subgraph DataPlane["Data Extraction Pipeline"]
-        DS["Raw Sources"]:::external-->Extractor["LLM Extractor"]:::pipeline
-        Extractor-->Linker["Entity Linker & Semantic Deduplication"]:::pipeline
-        Linker-->DBManager["Dynamic DB Provisioner"]:::pipeline
-    end
-    subgraph ControlPlane["Parallel Debate Orchestrator"]
-        Router["Debate Router"]:::agent
-        Agent1["Agent (Domain A)"]:::agent
-        Agent2["Agent (Domain B)"]:::agent
-        Supervisor["Synthesis Supervisor"]:::agent
-    end
-    Neo4j[("Neo4j / DozerDB Partitions")]:::db
+    User(("User Query")):::user -->|Chat| UI[Custom Platform :8501]:::external
+    UI -->|Toggle| Mode{"Execution Mode"}:::mode
 
-    DBManager --> Neo4j
-    User --> Router
-    Router -->|Fan-Out Async| Agent1
-    Router -->|Fan-Out Async| Agent2
-    Agent1 -.-> Neo4j
-    Agent2 -.-> Neo4j
-    Agent1 -->|Collect State| Supervisor
-    Agent2 -->|Collect State| Supervisor
-    Supervisor -->|Resolved Answer| User
+    Mode -->|Router| Router[Router Agent]:::agent
+    Mode -->|Debate| Debate[DebateOrchestrator]:::agent
+    Mode -->|Semantic QA| Sem[Semantic Layer]:::agent
+
+    subgraph Router_Mode[Router Mode]
+        Router --> Graph[GraphAgent]:::agent
+        Router --> Vector[VectorAgent]:::agent
+        Router --> Web[WebAgent]:::agent
+        Graph --> DBA[GraphDBA]:::pipeline
+        DBA -->|Cypher| Neo4j[(Neo4j / DozerDB Partitions)]:::db
+        Vector -->|Search| FAISS[(FAISS)]:::db
+        DBA --> Sup1[Supervisor]:::agent
+        Vector --> Sup1
+    end
+
+    subgraph Debate_Mode[Parallel Debate Mode]
+        Debate -->|Fan-out| A1[Agent_kgnormal]:::agent
+        Debate -->|Fan-out| A2[Agent_kgfibo]:::agent
+        Debate -->|Fan-out| AN[Agent_...]:::agent
+        A1 --> Collect[Collect]:::pipeline
+        A2 --> Collect
+        AN --> Collect
+        Collect --> Sup2[Supervisor Synthesis]:::agent
+    end
+
+    subgraph Semantic_Mode[Semantic Agent Flow]
+        Sem --> DedupResolve[Entity Dedup & Fulltext Resolve]:::pipeline
+        DedupResolve --> Route2[RouterAgent]:::agent
+        Route2 --> LPG[LPGAgent]:::agent
+        Route2 --> RDF[RDFAgent]:::agent
+        LPG --> Ans[AnswerGenerationAgent]:::agent
+        RDF --> Ans
+    end
+
+    subgraph Pipeline[Data Extraction Pipeline]
+        DS[Raw Sources]:::external --> Bridge[OntologyPromptBridge]:::pipeline
+        Bridge --> Extract[EntityExtractor]:::pipeline
+        Extract --> Link[EntityLinker]:::pipeline
+        Link --> Dedup[EntityDeduplicator]:::pipeline
+        Dedup --> DBM[DatabaseManager]:::pipeline
+        DBM -->|CREATE DB| Neo4j
+        DBM --> AF[AgentFactory]:::pipeline
+    end
         </pre>
       </div>
     </section>

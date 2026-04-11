@@ -14,6 +14,7 @@ export default defineConfig({
             plugins: [
                 starlightBlog({
                     title: 'Blog',
+                    navigation: 'none',
                     recentPostCount: 5,
                     authors: {
                         seocho: {
@@ -37,6 +38,15 @@ export default defineConfig({
                         { label: 'Architecture', link: '/docs/architecture/' },
                         { label: 'Workflow', link: '/docs/workflow/' },
                         { label: 'Philosophy', link: '/docs/philosophy/' }
+                    ]
+                },
+                {
+                    label: 'Python SDK', items: [
+                        { label: 'Overview', link: '/docs/sdk/' },
+                        { label: 'Getting Started', link: '/docs/sdk/getting-started/' },
+                        { label: 'Ontology Guide', link: '/docs/sdk/ontology-guide/' },
+                        { label: 'API Reference', link: '/docs/sdk/api-reference/' },
+                        { label: 'Examples', link: '/docs/sdk/examples/' },
                     ]
                 },
                 { label: 'Examples', link: '/examples/' },
