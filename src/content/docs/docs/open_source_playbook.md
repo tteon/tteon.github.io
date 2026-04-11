@@ -3,7 +3,7 @@ title: Open Source Playbook
 description: Extension guide for ontology, data, agent, and runtime integration.
 ---
 
-> *Synced automatically from `seocho/docs/OPEN_SOURCE_PLAYBOOK.md`*
+> *Source mirrored from `seocho/docs/OPEN_SOURCE_PLAYBOOK.md`*
 
 # SEOCHO Open Source Playbook
 
@@ -51,7 +51,7 @@ curl -sS -X POST http://localhost:8001/indexes/fulltext/ensure \
 ### 2.3 Query with semantic mode
 
 ```bash
-curl -sS -X POST http://localhost:8501/api/chat/send \
+curl -sS -X POST http://localhost:8001/platform/chat/send \
   -H "Content-Type: application/json" \
   -d '{
     "session_id":"oss_semantic_1",

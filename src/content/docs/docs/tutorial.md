@@ -3,7 +3,7 @@ title: First Run Tutorial
 description: End-to-end tutorial to start services, verify APIs, and run agent chat.
 ---
 
-> *Synced automatically from `seocho/docs/TUTORIAL_FIRST_RUN.md`*
+> *Source mirrored from `seocho/docs/TUTORIAL_FIRST_RUN.md`*
 
 This tutorial walks through a practical first run:
 

@@ -3,7 +3,7 @@ title: Bring Your Data
 description: How to load your own records into SEOCHO and query them safely.
 ---
 
-> *Synced automatically from `seocho/docs/APPLY_YOUR_DATA.md`*
+> *Source mirrored from `seocho/docs/APPLY_YOUR_DATA.md`*
 
 # Apply Your Data to SEOCHO
 

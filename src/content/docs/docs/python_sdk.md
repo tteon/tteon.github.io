@@ -3,7 +3,7 @@ title: Python SDK
 description: Developer-first guide to ingest data and query SEOCHO through the Python SDK.
 ---
 
-> *Synced automatically from `seocho/docs/PYTHON_INTERFACE_QUICKSTART.md`*
+> *Source mirrored from `seocho/docs/PYTHON_INTERFACE_QUICKSTART.md`*
 
 # Python Interface Quickstart
 

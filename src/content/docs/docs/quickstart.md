@@ -3,7 +3,7 @@ title: Quickstart
 description: Get SEOCHO up and running in 5 minutes.
 ---
 
-> *Synced automatically from `seocho/docs/QUICKSTART.md`*
+> *Source mirrored from `seocho/docs/QUICKSTART.md`*
 
 # SEOCHO Quick Start
 
@@ -12,9 +12,9 @@ Goal: one successful local run in under 5 minutes.
 If you only read one runtime document first, read this one.
 
 If you want the Python SDK path immediately, continue with
-`docs/PYTHON_INTERFACE_QUICKSTART.md`.
+[`/docs/python_sdk/`](/docs/python_sdk/).
 If your first question is how to load your own records, continue with
-`docs/APPLY_YOUR_DATA.md`.
+[`/docs/apply_your_data/`](/docs/apply_your_data/).
 
 ## 1. Prerequisites
 
@@ -163,8 +163,7 @@ Common issues:
 
 ## 10. Read Next
 
-- `docs/PYTHON_INTERFACE_QUICKSTART.md`
-- `docs/APPLY_YOUR_DATA.md`
-- `docs/TUTORIAL_FIRST_RUN.md`
-- `docs/BEGINNER_PIPELINES_DEMO.md`
-- `docs/ARCHITECTURE.md`
+- [`/docs/python_sdk/`](/docs/python_sdk/)
+- [`/docs/apply_your_data/`](/docs/apply_your_data/)
+- [`/docs/tutorial/`](/docs/tutorial/)
+- [`/docs/architecture/`](/docs/architecture/)

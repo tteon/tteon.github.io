@@ -6,7 +6,7 @@ authors:
 excerpt: Multi-role feasibility review framework and Go/No-Go rubric for graph data implementations.
 ---
 
-> *Synced automatically from `seocho/docs/PHILOSOPHY_FEASIBILITY_REVIEW.md`*
+> *Source mirrored from `seocho/docs/PHILOSOPHY_FEASIBILITY_REVIEW.md`*
 
 
 This document operationalizes philosophy-level decisions into an execution review framework for multi-role experts.

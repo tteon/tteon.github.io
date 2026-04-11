@@ -6,7 +6,7 @@ authors:
 excerpt: Extract domain rules and high-value semantics from heterogeneous data into a SHACL-like semantic layer.
 ---
 
-> *Synced automatically from `seocho/docs/PHILOSOPHY.md`*
+> *Source mirrored from `seocho/docs/PHILOSOPHY.md`*
 
 
 This document captures the non-negotiable design philosophy for SEOCHO and how it maps to implementation.

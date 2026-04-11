@@ -3,7 +3,7 @@ title: Architecture
 description: System Architecture and Module Map.
 ---
 
-> *Synced automatically from `seocho/docs/ARCHITECTURE.md`*
+> *Source mirrored from `seocho/docs/ARCHITECTURE.md`*
 
 
 ## Overview

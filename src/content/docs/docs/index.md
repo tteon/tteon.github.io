@@ -3,7 +3,7 @@ title: Docs Home
 description: Developer-first documentation for loading data into SEOCHO and querying it safely.
 ---
 
-> *Synced automatically from `seocho/docs/README.md`*
+> *Source mirrored from `seocho/docs/README.md`*
 
 SEOCHO is easiest to understand as a developer runtime:
 
