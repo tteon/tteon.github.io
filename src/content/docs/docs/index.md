@@ -3,40 +3,39 @@ title: Docs Home
 description: Central Documentation Index for SEOCHO
 ---
 
-> *Synced automatically from `seocho/docs/README.md`*
+Welcome to the SEOCHO documentation. Choose your starting point:
 
+## For Developers (Python SDK)
 
-Welcome to the central documentation index for SEOCHO. This directory tracks the active systems, decisions, and capabilities comprising our multi-agent platform.
+| Doc | Description |
+|-----|-------------|
+| [SDK Overview](/docs/sdk/) | Ontology-first SDK — what it is and how it works |
+| [Getting Started](/docs/sdk/getting-started/) | Zero to knowledge graph in 5 minutes |
+| [Ontology Guide](/docs/sdk/ontology-guide/) | Design your schema, JSON-LD storage, SHACL validation |
+| [API Reference](/docs/sdk/api-reference/) | Complete method reference |
+| [Examples](/docs/sdk/examples/) | Real-world patterns: news, research, CSV batch |
 
-## Active Docs
+## For Platform Operators (Docker Stack)
 
-- `ARCHITECTURE.md`: system architecture and module map
-- `TUTORIAL_FIRST_RUN.md`: first end-to-end run guide
-- `WORKFLOW.md`: end-to-end operational workflow
-- `PHILOSOPHY.md`: core design philosophy charter and operating principles
-- `PHILOSOPHY_FEASIBILITY_REVIEW.md`: multi-role feasibility review framework and Go/No-Go rubric
-- custom frontend backend: `evaluation/server.py` + `evaluation/static/*`
-- `GRAPH_MODEL_STRATEGY.md`: graph representation model choices and rollout
-- `SHACL_PRACTICAL_GUIDE.md`: practical readiness and adoption guide for SHACL-like constraints
-- `ISSUE_TASK_SYSTEM.md`: sprint/roadmap issue and task operating model
-- `ADD_PLAYBOOK.md`: engineering execution and landing procedure
-- `CONTEXT_GRAPH_BLUEPRINT.md`: context event model and rollout
-- `QUICKSTART.md`: setup and local run instructions
-- `ROADMAP.md`: planned product/engineering milestones
-- `decisions/DECISION_LOG.md`: architecture decision history
+| Doc | Description |
+|-----|-------------|
+| [Quick Start](/docs/quickstart/) | Full platform setup with Docker Compose |
+| [Architecture](/docs/architecture/) | System architecture and module map |
+| [Tutorial](/docs/tutorial/) | End-to-end first run walkthrough |
+| [Workflow](/docs/workflow/) | Operational workflow and landing procedures |
 
-## Docs Sync Integration
+## Design & Governance
 
-- `README.md` and `docs/*` changes are intended to propagate to the website via `.github/workflows/sync-docs-website.yml`.
-- The planned trigger emits `repository_dispatch` to `tteon/tteon.github.io` (`event-type: seocho-docs-sync`).
-- Remote rollout may remain pending until repository-owner credentials with `workflow` scope are applied.
-- Local `tteon.github.io/` workspace can be used for integration testing, but remains outside `seocho` tracking.
+| Doc | Description |
+|-----|-------------|
+| [Philosophy](/docs/philosophy/) | Core design philosophy and operating principles |
+| [Open Source Playbook](/docs/open_source_playbook/) | Engineering execution guide |
 
-## Archive
+## Reference Documents (in repo)
 
-Archived docs are moved under `docs/archive/` when no longer part of current
-operational guidance.
+These live in `docs/` in the [seocho repository](https://github.com/tteon/seocho):
 
-Current archive status:
-
-- no archived docs tracked
+- `BEADS_OPERATING_MODEL.md` — Sprint/roadmap task tracking system
+- `GRAPH_MODEL_STRATEGY.md` — Graph representation and rollout
+- `CONTEXT_GRAPH_BLUEPRINT.md` — Context event model
+- `decisions/DECISION_LOG.md` — Architecture decision history (ADR-0026 through ADR-0035)

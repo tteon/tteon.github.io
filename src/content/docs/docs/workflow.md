@@ -1,12 +1,11 @@
 ---
 title: Workflow
-description: End-to-end Operational Workflow.
+description: End-to-end operational workflow for SEOCHO
 ---
 
-> *Synced automatically from `seocho/docs/WORKFLOW.md`*
+# Workflow
 
-
-This document is the canonical workflow reference for SEOCHO operations.
+Canonical workflow reference for SEOCHO operations.
 
 ## Stack Baseline
 
@@ -17,112 +16,107 @@ This document is the canonical workflow reference for SEOCHO operations.
 
 ## Planes
 
-## Control Plane
+### Control Plane
 
-Responsibilities:
+- Agent definitions and routing policy
+- Runtime authorization policy
+- Deployment, versioning, and quality gates
+- Decision records (ADRs) and change governance
 
-- agent definitions and routing policy
-- runtime authorization policy (app-level RBAC/ABAC)
-- deployment, versioning, and quality gates
-- decision records (ADRs) and change governance
+Surfaces: `extraction/agent_server.py`, `extraction/policy.py`, `docs/decisions/`, `docs/BEADS_OPERATING_MODEL.md`
 
-Primary surfaces:
+### Data Plane
 
-- `extraction/agent_server.py`
-- `extraction/policy.py`
-- `docs/decisions/`
-- `docs/ADD_PLAYBOOK.md`
+- Data ingestion from CSV/JSON/API
+- Extraction, linking, deduplication
+- Rule inference and validation
+- Graph load/query execution against DozerDB
 
-## Data Plane
-
-Responsibilities:
-
-- data ingestion from CSV/JSON/API
-- extraction, linking, deduplication
-- rule inference and validation annotations
-- graph load/query execution against DozerDB
-
-Primary surfaces:
-
-- `extraction/pipeline.py`
-- `extraction/rule_constraints.py`
-- `extraction/data_source.py`
-- `extraction/graph_loader.py`
+Surfaces: `extraction/pipeline.py`, `extraction/rule_constraints.py`, `extraction/data_source.py`, `extraction/graph_loader.py`
 
 ## End-to-End Workflow
 
-```mermaid
-flowchart TD
-    classDef default fill:#040404,stroke:#3f3f46,stroke-width:1px,color:#d4d4d8;
-    classDef step fill:#ffffff05,stroke:#71717a,stroke-width:1px,color:#fff;
-    
-    A["1. Intake<br/>(Scope, PB, Review)"]:::step --> B["2. Ingestion & Graph Build<br/>(Extract, SHACL, DB Load)"]:::step
-    B --> C["3. Agent Execution<br/>(Router / Debate / Semantic)"]:::step
-    C --> D["4. Validation & Landing<br/>(Code Gates, Sync, Push)"]:::step
-    D --> E["5. Governance Loop<br/>(ADRs, Metrics)"]:::step
-```
+### 1. Intake
 
-1. Intake
-- define issue scope and acceptance criteria
-- assign `workspace_id`
-- capture work item using standardized scripts:
-  - `scripts/pm/new-issue.sh`
-  - `scripts/pm/new-task.sh`
-- confirm philosophy alignment against `docs/PHILOSOPHY.md` (ontology evidence, router/graph mapping, traceability)
-- for architecture-significant work, run a panel feasibility review using `docs/PHILOSOPHY_FEASIBILITY_REVIEW.md`
+- Define issue scope and acceptance criteria
+- Assign `workspace_id`
+- Fill or update `docs/*` sections using `DEV-*` prefixes
+- Capture work item: `scripts/pm/new-issue.sh` / `scripts/pm/new-task.sh`
+- For graph-grounded work, align with `docs/GRAPH_RAG_AGENT_HANDOFF_SPEC.md`
+- Confirm philosophy alignment against `docs/PHILOSOPHY.md`
 
-2. Ingestion and graph build
-- run extraction pipeline
-- apply SHACL-like rule inference/validation
-- run readiness check with `/rules/assess` before promoting profile to governance baseline
-- save reusable rule profiles (`/rules/profiles`)
-- load graph into DozerDB
+### 2. Ingestion and Graph Build
 
-3. Agent execution
-- run `/run_agent` or `/run_debate`
-- for query-time entity disambiguation, run `/run_agent_semantic`
-- for custom interactive UX, run `/platform/chat/send`
-- enforce runtime policy checks
-- capture traces in Opik
+- Run extraction pipeline or ingest raw text via `/platform/ingest/raw`
+- Parse heterogeneous sources (`text`/`csv`/`pdf`) to normalized text
+- Run LLM 3-pass semantic extraction:
+  1. Ontology candidate extraction
+  2. SHACL candidate extraction
+  3. Entity graph extraction with ontology + SHACL context
+- Evaluate relatedness against known entities; link only when gate passes
+- Select semantic artifact policy (`auto`, `draft_only`, `approved_only`)
+- For governance review: persist draft artifacts and promote via `/semantic/artifacts/*`
+- Apply SHACL-like rule inference/validation
+- Run readiness check with `/rules/assess`
+- Save rule profiles (`/rules/profiles`) in durable registry
+- Export governance artifacts (`/rules/export/cypher`, `/rules/export/shacl`)
+- Load graph into DozerDB
 
-Semantic path summary:
+### 3. Agent Execution
 
-- semantic layer extracts entities from question
-- ensure fulltext index exists (`/indexes/fulltext/ensure`) for target DBs
-- fulltext search resolves graph entity candidates
-- optional ontology-hint artifact generated offline via `scripts/ontology/build_ontology_hints.py`
-- dedup/disambiguation reranks candidates
-- router dispatches to LPG or RDF specialist agent
-- answer generation agent synthesizes final response
+- Run `/run_agent` (router mode) or `/run_debate` (parallel debate)
+- For query-time entity disambiguation: `/run_agent_semantic`
+- For interactive UX: `/platform/chat/send`
+- Monitor health: `/health/runtime`, `/health/batch`
+- Enforce runtime policy checks
+- Capture traces in Opik
 
-4. Validation and landing
-- run code and ops gates
-- run runtime flow smoke gate (`make e2e-smoke`) when API/UI/data-plane contracts change
-- run quickstart reproducibility check (raw ingest -> semantic/debate chat) before release notes
-- run sprint label lint (`scripts/pm/lint-items.sh --sprint <id>`)
-- run agent docs lint (`scripts/pm/lint-agent-docs.sh`)
-- close issue, rebase, sync, push
-- verify branch is up to date with origin
+**Semantic path:**
 
-Operational notes:
+1. Extract entities from question
+2. Ensure fulltext index (`/indexes/fulltext/ensure`)
+3. Fulltext search resolves candidates
+4. Dedup/disambiguation reranks
+5. Router dispatches to LPG or RDF agent
+6. Answer agent synthesizes response
 
-- use `scripts/pm/lint-items.sh` with internal `bd --no-daemon` execution to avoid local daemon startup stalls.
-- current dev quality gates in `Makefile` run against `extraction-service`.
-- keep graph procedure privileges scoped (`apoc.*,n10s.*`) in `docker-compose.yml`.
+### 4. Validation and Landing
 
-## Docs Website Sync
+- Run code and ops gates
+- Run runtime smoke gate: `make e2e-smoke`
+- Run quickstart reproducibility check (raw ingest → semantic/debate chat)
+- Optional one-command landing: `scripts/land.sh --task-id <id> --fix --pull --push`
+- Run sprint label lint: `scripts/pm/lint-items.sh --sprint <id>`
+- Close issue, rebase, sync, push
 
-- source of truth: `README.md` + `docs/*` in this repository
-- publish-critical docs for seocho.blog sync:
-  - `docs/README.md`
-  - `docs/QUICKSTART.md`
-  - `docs/ARCHITECTURE.md`
-  - `docs/WORKFLOW.md`
-- trigger design: push to `main` touching docs paths via `.github/workflows/sync-docs-website.yml`
-- action design: `repository_dispatch` (`seocho-docs-sync`) to `tteon/tteon.github.io`
-- rollout note: remote activation may be pending until repository owner applies a `workflow`-scoped token (`DOCS_SYNC_TOKEN`)
+## CI Automation
 
-5. Governance loop
-- log architecture decisions as ADRs
-- track context graph events and quality metrics
-- schedule follow-up issues for unresolved risks
+### Claude Daily Review
+
+- **Schedule**: daily at 01:00 UTC (10:00 KST)
+- **Scope**: test gaps, type hints, dead code, doc drift
+- **Output**: draft PR on `claude/daily-review` branch
+
+### Claude Weekly SDK Review
+
+- **Schedule**: Monday at 02:00 UTC (11:00 KST)
+- **Scope**: API surface audit, ontology consistency, prompt quality, refactor opportunities
+- **Output**: draft PR on `claude/weekly-sdk-review` branch
+
+### Python Package Publish
+
+- **Trigger**: manual `workflow_dispatch` or `v*` tag push
+- **Gate**: `python -m build` + `twine check dist/*`
+- **Targets**: TestPyPI and PyPI via trusted publishing
+
+### Comment-Based Merge
+
+- **Trigger**: `/go` comment on PR
+- **Auth**: commenter must have write/maintain/admin permission
+- **Method**: squash merge with branch protection
+
+## Governance Loop
+
+- Log architecture decisions as ADRs
+- Track context graph events and quality metrics
+- Schedule follow-up issues for unresolved risks
