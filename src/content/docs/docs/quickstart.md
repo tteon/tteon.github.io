@@ -3,62 +3,103 @@ title: Quick Start
 description: Get SEOCHO up and running in 5 minutes.
 ---
 
-> *Synced automatically from `seocho/docs/QUICKSTART.md`*
+# Quick Start
 
-# SEOCHO Quick Start
+Two paths to get started — pick the one that fits:
 
-This guide is optimized for one goal:
-raw data in -> graph build -> semantic/debate answer out.
+| Path | When to use | Time |
+|------|-------------|------|
+| **[A. Python SDK](#a-python-sdk)** | You want to index and query data from Python code | 3 min |
+| **[B. Docker Stack](#b-docker-stack)** | You want the full platform with UI, multi-agent debate, etc. | 5 min |
 
-## 0. Prerequisites
+---
+
+## A. Python SDK
+
+### 1. Install
+
+```bash
+pip install seocho
+```
+
+### 2. Define your schema
+
+```python
+from seocho import Ontology, NodeDef, RelDef, P
+
+ontology = Ontology(
+    name="my_domain",
+    nodes={
+        "Person":  NodeDef(properties={"name": P(str, unique=True)}),
+        "Company": NodeDef(properties={"name": P(str, unique=True)}),
+    },
+    relationships={
+        "WORKS_AT": RelDef(source="Person", target="Company"),
+    },
+)
+```
+
+### 3. Connect and index
+
+```python
+from seocho import Seocho
+from seocho.graph_store import Neo4jGraphStore
+from seocho.llm_backend import OpenAIBackend
+
+s = Seocho(
+    ontology=ontology,
+    graph_store=Neo4jGraphStore("bolt://localhost:7687", "neo4j", "password"),
+    llm=OpenAIBackend(model="gpt-4o"),
+)
+
+s.ensure_constraints()
+s.add("Marie Curie worked at the University of Paris.")
+```
+
+### 4. Query
+
+```python
+print(s.ask("Where did Marie Curie work?"))
+# → "Marie Curie worked at the University of Paris."
+```
+
+That's it. For more details see the [SDK documentation](/docs/sdk/).
+
+---
+
+## B. Docker Stack
+
+The full platform gives you multi-agent debate, a web UI, and all extraction services.
+
+### Prerequisites
 
 - Docker + Docker Compose
 - OpenAI API key (`OPENAI_API_KEY`)
-- `jq` (for API response checks)
-- Git
+- `jq` (optional, for pretty API responses)
 
-## 1. Clone and configure
+### 1. Clone and configure
 
 ```bash
 git clone https://github.com/tteon/seocho.git
 cd seocho
 
 cp .env.example .env
-# edit .env
-# required: OPENAI_API_KEY=sk-...
+# edit .env — required: OPENAI_API_KEY=sk-...
 ```
 
-Optional custom ports (if defaults collide):
-
-```bash
-NEO4J_HTTP_PORT=7475
-NEO4J_BOLT_PORT=7688
-EXTRACTION_API_PORT=8002
-EXTRACTION_NOTEBOOK_PORT=8890
-CHAT_INTERFACE_PORT=8502
-```
-
-## 2. Start services
+### 2. Start services
 
 ```bash
 make up
 docker compose ps
 ```
 
-Expected services:
+Expected services: `neo4j`, `extraction-service`, `semantic-service`, `evaluation-interface`
 
-- `neo4j`
-- `extraction-service`
-- `semantic-service`
-- `evaluation-interface`
-
-## 3. Verify base endpoints
-
-If you changed ports in `.env`, replace `8001`/`8501` below with your configured ports.
+### 3. Verify
 
 ```bash
 curl -sS http://localhost:8001/databases | jq .
-curl -sS http://localhost:8501/api/config | jq .
 ```
 
 Default URLs:
@@ -67,9 +108,7 @@ Default URLs:
 - API docs: `http://localhost:8001/docs`
 - DozerDB browser: `http://localhost:7474`
 
-## 4. Ingest your raw data
-
-Use runtime ingest API to load text directly into a target graph database.
+### 4. Ingest data
 
 ```bash
 curl -sS -X POST http://localhost:8001/platform/ingest/raw \
@@ -84,12 +123,7 @@ curl -sS -X POST http://localhost:8001/platform/ingest/raw \
   }' | jq .
 ```
 
-Success criteria:
-
-- `status` is one of `success`, `success_with_fallback`, `partial_success`
-- `records_processed >= 1`
-
-## 5. Ensure fulltext index for semantic mode
+### 5. Ensure fulltext index
 
 ```bash
 curl -sS -X POST http://localhost:8001/indexes/fulltext/ensure \
@@ -102,94 +136,58 @@ curl -sS -X POST http://localhost:8001/indexes/fulltext/ensure \
   }' | jq .
 ```
 
-## 6. Ask semantic and debate questions
+### 6. Ask questions
 
-### 6.1 Semantic mode (API)
+**Semantic mode:**
 
 ```bash
 curl -sS -X POST http://localhost:8501/api/chat/send \
   -H "Content-Type: application/json" \
   -d '{
-    "session_id":"qs_semantic_1",
+    "session_id":"qs_1",
     "message":"Show entities in kgruntime",
     "mode":"semantic",
     "workspace_id":"default",
     "databases":["kgruntime"]
-  }' | jq '{assistant_message, route: .runtime_payload.route}'
+  }' | jq '{assistant_message}'
 ```
 
-Success criteria:
-
-- `assistant_message` is non-empty
-- `runtime_payload.route` is `lpg`, `rdf`, or `hybrid`
-
-### 6.2 Debate mode (API)
+**Debate mode:**
 
 ```bash
 curl -sS -X POST http://localhost:8501/api/chat/send \
   -H "Content-Type: application/json" \
   -d '{
-    "session_id":"qs_debate_1",
+    "session_id":"qs_2",
     "message":"Compare known entities across databases",
     "mode":"debate",
     "workspace_id":"default"
-  }' | jq '{assistant_message, debate_results: .runtime_payload.debate_results}'
+  }' | jq '{assistant_message}'
 ```
 
-Success criteria:
-
-- `assistant_message` is non-empty
-- `runtime_payload.debate_results` exists
-
-## 7. Run strict integration smoke test
+### 7. Smoke test
 
 ```bash
 make e2e-smoke
 ```
 
-What it checks end-to-end:
+### 8. Or use the Python SDK against the running server
 
-- `/platform/ingest/raw`
-- `/indexes/fulltext/ensure`
-- semantic chat (`/api/chat/send`, mode `semantic`)
-- debate chat (`/api/chat/send`, mode `debate`)
+```python
+from seocho import Seocho
 
-If `OPENAI_API_KEY` is real, debate is checked in strict pass mode.
-
-If you are running custom ports, execute the script with explicit overrides:
-
-```bash
-EXTRACTION_API_PORT=8002 CHAT_INTERFACE_PORT=8502 bash scripts/integration/e2e_runtime_smoke.sh
+s = Seocho(base_url="http://localhost:8001")
+s.add("ACME acquired Beta in 2024.", database="kgruntime")
+print(s.ask("What happened with ACME?"))
 ```
 
-## 8. Validate through UI
+---
 
-1. Open `http://localhost:8501`
-2. Set `Ingest DB` to `kgruntime`
-3. Paste raw lines and click `Ingest Raw`
-4. Ask a question in `Semantic` mode
-5. Switch to `Debate` mode and ask the same question
-6. Compare `Trace` and result payloads
+## Next Steps
 
-## 9. Next practical steps
-
-- Run SHACL-like readiness: `POST /rules/assess`
-- Build ontology hints offline: `python scripts/ontology/build_ontology_hints.py ...`
-- Read extension guide: `docs/OPEN_SOURCE_PLAYBOOK.md`
-- Read first-run walkthrough: `docs/TUTORIAL_FIRST_RUN.md`
-
-## Troubleshooting
-
-Extraction service logs:
-
-```bash
-docker compose logs --tail=200 extraction-service
-```
-
-Chat interface logs:
-
-```bash
-docker compose logs --tail=200 evaluation-interface
-```
-
-If ports conflict, set the port env vars in `.env` and rerun `make up`.
+| Goal | Link |
+|------|------|
+| Design a richer ontology | [Ontology Guide](/docs/sdk/ontology-guide/) |
+| Full SDK method reference | [API Reference](/docs/sdk/api-reference/) |
+| Real-world examples | [Examples](/docs/sdk/examples/) |
+| Architecture deep-dive | [Architecture](/docs/architecture/) |
