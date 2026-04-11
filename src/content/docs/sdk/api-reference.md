@@ -151,7 +151,7 @@ Types: `str`, `int`, `float`, `bool` or `PropertyType` enum.
 ## GraphStore
 
 ```python
-from seocho.graph_store import Neo4jGraphStore
+from seocho.store import Neo4jGraphStore
 
 store = Neo4jGraphStore("bolt://localhost:7687", "neo4j", "password")
 store.write(nodes, rels, database="mydb")
@@ -164,8 +164,7 @@ store.close()
 ## LLMBackend
 
 ```python
-from seocho.llm_backend import OpenAIBackend
-
+from seocho.store import OpenAIBackend
 llm = OpenAIBackend(model="gpt-4o", timeout=120.0)
 response = llm.complete(system="...", user="...")
 print(response.text)
@@ -175,7 +174,7 @@ parsed = response.json()  # auto-strips markdown fences
 ## VectorStore
 
 ```python
-from seocho.vector_store import FAISSVectorStore
+from seocho.store import FAISSVectorStore
 
 vs = FAISSVectorStore(model="text-embedding-3-small")
 vs.add("doc-1", "Samsung is a Korean tech company.")

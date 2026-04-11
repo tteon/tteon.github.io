@@ -36,9 +36,7 @@ ontology = Ontology(
 
 ```python
 from seocho import Seocho
-from seocho.graph_store import Neo4jGraphStore
-from seocho.llm_backend import OpenAIBackend
-
+from seocho.store import Neo4jGraphStore, OpenAIBackend
 s = Seocho(
     ontology=ontology,
     graph_store=Neo4jGraphStore("bolt://localhost:7687", "neo4j", "password"),

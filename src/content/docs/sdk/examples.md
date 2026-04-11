@@ -11,9 +11,7 @@ The easiest way to bring your own data:
 
 ```python
 from seocho import Seocho, Ontology, NodeDef, RelDef, P
-from seocho.graph_store import Neo4jGraphStore
-from seocho.llm_backend import OpenAIBackend
-
+from seocho.store import Neo4jGraphStore, OpenAIBackend
 ontology = Ontology(
     name="my_domain",
     nodes={
