@@ -4,10 +4,10 @@ import path from 'path';
 import { execSync } from 'child_process';
 
 const WORK_DIR = process.cwd();
-const LOCAL_SEOCHO_REPO_DIR =
-    process.env.SEOCHO_SOURCE_REPO ||
-    path.resolve(WORK_DIR, '..');
+const EXPLICIT_SOURCE_REPO = process.env.SEOCHO_SOURCE_REPO;
+const LOCAL_SEOCHO_REPO_DIR = EXPLICIT_SOURCE_REPO || path.resolve(WORK_DIR, '..');
 const USE_LOCAL_SOURCE =
+    Boolean(EXPLICIT_SOURCE_REPO) &&
     fs.existsSync(path.join(LOCAL_SEOCHO_REPO_DIR, 'README.md')) &&
     fs.existsSync(path.join(LOCAL_SEOCHO_REPO_DIR, 'docs'));
 const TEMP_ROOT = fs.mkdtempSync(path.join(os.tmpdir(), 'seocho-site-sync-'));
@@ -31,7 +31,7 @@ if (!fs.existsSync(path.dirname(UPDATES_JSON_PATH))) {
 
 // 1. Fetching external repository (Shallow clone to save time)
 if (USE_LOCAL_SOURCE) {
-    console.log(`Using local seocho source at ${SEOCHO_REPO_DIR}`);
+    console.log(`Using explicit SEOCHO source at ${SEOCHO_REPO_DIR}`);
 } else {
     console.log('Cloning tteon/seocho to extract docs...');
     execSync(`git clone --depth 1 https://github.com/tteon/seocho.git ${SEOCHO_REPO_DIR}`);

@@ -4,10 +4,12 @@ import path from 'path';
 import { execSync } from 'child_process';
 
 const WORK_DIR = process.cwd();
+const EXPLICIT_SOURCE_REPO = process.env.SEOCHO_SOURCE_REPO;
 const LOCAL_SEOCHO_REPO_DIR =
-  process.env.SEOCHO_SOURCE_REPO ||
+  EXPLICIT_SOURCE_REPO ||
   path.resolve(WORK_DIR, '..');
 const USE_LOCAL_SOURCE =
+  Boolean(EXPLICIT_SOURCE_REPO) &&
   fs.existsSync(path.join(LOCAL_SEOCHO_REPO_DIR, 'README.md')) &&
   fs.existsSync(path.join(LOCAL_SEOCHO_REPO_DIR, 'docs'));
 const TMP_ROOT = fs.mkdtempSync(path.join(os.tmpdir(), 'seocho-doc-sync-'));
@@ -186,7 +188,7 @@ function renderMirroredContent(mapping) {
 
 try {
   if (USE_LOCAL_SOURCE) {
-    console.log(`Using local SEOCHO source at ${SEOCHO_REPO_DIR}`);
+    console.log(`Using explicit SEOCHO source at ${SEOCHO_REPO_DIR}`);
   } else {
     console.log('Cloning tteon/seocho for docs sync verification...');
     execSync(`git clone --depth 1 https://github.com/tteon/seocho.git ${SEOCHO_REPO_DIR}`, {
