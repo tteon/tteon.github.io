@@ -35,6 +35,7 @@ export default defineConfig({
                         { label: 'Quick Start', link: '/docs/quickstart/' },
                         { label: 'Bring Your Data', link: '/docs/apply_your_data/' },
                         { label: 'Python SDK', link: '/docs/python_sdk/' },
+                        { label: 'Files and Artifacts', link: '/docs/files_and_artifacts/' },
                         { label: 'Tutorial', link: '/docs/tutorial/' },
                         { label: 'Open Source Playbook', link: '/docs/open_source_playbook/' },
                         { label: 'Architecture', link: '/docs/architecture/' },

@@ -37,6 +37,18 @@ if (USE_LOCAL_SOURCE) {
     execSync(`git clone --depth 1 https://github.com/tteon/seocho.git ${SEOCHO_REPO_DIR}`);
 }
 
+function sourceDateFor(relPath) {
+    try {
+        const output = execSync(
+            `git -C "${SEOCHO_REPO_DIR}" log -1 --format=%cs -- "${relPath}"`,
+            { stdio: ['ignore', 'pipe', 'ignore'] }
+        ).toString().trim();
+        return output || new Date().toISOString().split('T')[0];
+    } catch {
+        return new Date().toISOString().split('T')[0];
+    }
+}
+
 // 2. Mapping Files to copy over to Starlight
 const fileMappings = [
     {
@@ -60,6 +72,11 @@ const fileMappings = [
         frontmatter: `---\ntitle: Python SDK\ndescription: Developer-first guide to ingest data and query SEOCHO through the Python SDK.\n---\n\n> *Source mirrored from \`seocho/docs/PYTHON_INTERFACE_QUICKSTART.md\`*\n\n`
     },
     {
+        src: 'docs/FILES_AND_ARTIFACTS.md',
+        dest: 'files_and_artifacts.md',
+        frontmatter: `---\ntitle: Files and Artifacts\ndescription: Where ontology files, graph state, rule profiles, semantic artifacts, and traces live.\n---\n\n> *Source mirrored from \`seocho/docs/FILES_AND_ARTIFACTS.md\`*\n\n`
+    },
+    {
         src: 'docs/ARCHITECTURE.md',
         dest: 'architecture.md',
         frontmatter: `---\ntitle: Architecture\ndescription: System Architecture and Module Map.\n---\n\n> *Source mirrored from \`seocho/docs/ARCHITECTURE.md\`*\n\n`
@@ -74,13 +91,13 @@ const fileMappings = [
         src: 'docs/PHILOSOPHY.md',
         dest: 'philosophy.md',
         isBlog: true,
-        frontmatter: `---\ntitle: "SEOCHO Design Philosophy & Operating Principles"\ndate: ${new Date().toISOString().split('T')[0]}\nauthors:\n  - seocho\nexcerpt: Extract domain rules and high-value semantics from heterogeneous data into a SHACL-like semantic layer.\n---\n\n> *Source mirrored from \`seocho/docs/PHILOSOPHY.md\`*\n\n`
+        frontmatter: `---\ntitle: "SEOCHO Design Philosophy & Operating Principles"\ndate: ${sourceDateFor('docs/PHILOSOPHY.md')}\nauthors:\n  - seocho\nexcerpt: Extract domain rules and high-value semantics from heterogeneous data into a SHACL-like semantic layer.\n---\n\n> *Source mirrored from \`seocho/docs/PHILOSOPHY.md\`*\n\n`
     },
     {
         src: 'docs/PHILOSOPHY_FEASIBILITY_REVIEW.md',
         dest: 'feasibility-review-framework.md',
         isBlog: true,
-        frontmatter: `---\ntitle: "Feasibility Review Framework & Rubrics"\ndate: ${new Date().toISOString().split('T')[0]}\nauthors:\n  - seocho\nexcerpt: Multi-role feasibility review framework and Go/No-Go rubric for graph data implementations.\n---\n\n> *Source mirrored from \`seocho/docs/PHILOSOPHY_FEASIBILITY_REVIEW.md\`*\n\n`
+        frontmatter: `---\ntitle: "Feasibility Review Framework & Rubrics"\ndate: ${sourceDateFor('docs/PHILOSOPHY_FEASIBILITY_REVIEW.md')}\nauthors:\n  - seocho\nexcerpt: Multi-role feasibility review framework and Go/No-Go rubric for graph data implementations.\n---\n\n> *Source mirrored from \`seocho/docs/PHILOSOPHY_FEASIBILITY_REVIEW.md\`*\n\n`
     }
 ];
 
@@ -89,6 +106,7 @@ const routeReplacements = new Map([
     ['`docs/QUICKSTART.md`', '[`/docs/quickstart/`](/docs/quickstart/)'],
     ['`docs/APPLY_YOUR_DATA.md`', '[`/docs/apply_your_data/`](/docs/apply_your_data/)'],
     ['`docs/PYTHON_INTERFACE_QUICKSTART.md`', '[`/docs/python_sdk/`](/docs/python_sdk/)'],
+    ['`docs/FILES_AND_ARTIFACTS.md`', '[`/docs/files_and_artifacts/`](/docs/files_and_artifacts/)'],
     ['`docs/ARCHITECTURE.md`', '[`/docs/architecture/`](/docs/architecture/)'],
     ['`docs/WORKFLOW.md`', '[`/docs/workflow/`](/docs/workflow/)'],
     ['`docs/PHILOSOPHY.md`', '[`/docs/philosophy/`](/docs/philosophy/)'],

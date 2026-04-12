@@ -11,7 +11,9 @@ This document is the canonical workflow reference for SEOCHO operations.
 ## Stack Baseline
 
 - Agent runtime: OpenAI Agents SDK
-- Tracing/evaluation: Opik
+- Tracing/evaluation contract: vendor-neutral (`none|console|jsonl|opik`)
+- Preferred team observability backend: Opik
+- Canonical neutral trace artifact: JSONL
 - Graph backend: DozerDB
 - MVP tenancy: single-tenant with `workspace_id` propagated end-to-end
 
@@ -85,7 +87,8 @@ Primary surfaces:
 - for custom interactive UX, run `/platform/chat/send`
 - monitor split health surfaces (`/health/runtime`, `/health/batch`)
 - enforce runtime policy checks
-- capture traces in Opik
+- capture traces through the configured observability backend
+- prefer `jsonl` as the portable artifact and Opik as the optional team exporter
 
 Semantic path summary:
 
@@ -112,6 +115,8 @@ Operational notes:
 - use `scripts/pm/lint-items.sh` with internal `bd --no-daemon` execution to avoid local daemon startup stalls.
 - current dev quality gates in `Makefile` run against `extraction-service`.
 - keep graph procedure privileges scoped (`apoc.*,n10s.*`) in `docker-compose.yml`.
+- default local compose stack is `neo4j + extraction-service + evaluation-interface`.
+- legacy `semantic-service` is opt-in only via `docker compose --profile legacy-semantic up -d semantic-service`.
 
 ## Docs Website Sync
 

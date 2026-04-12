@@ -17,7 +17,17 @@ const SEOCHO_REPO_DIR = USE_LOCAL_SOURCE
 const TARGET_DOCS_DIR = path.join(WORK_DIR, 'src', 'content', 'docs', 'docs');
 const TARGET_BLOG_DIR = path.join(WORK_DIR, 'src', 'content', 'docs', 'blog');
 
-const today = new Date().toISOString().split('T')[0];
+function sourceDateFor(relPath) {
+  try {
+    const output = execSync(
+      `git -C "${SEOCHO_REPO_DIR}" log -1 --format=%cs -- "${relPath}"`,
+      { stdio: ['ignore', 'pipe', 'ignore'] }
+    ).toString().trim();
+    return output || new Date().toISOString().split('T')[0];
+  } catch {
+    return new Date().toISOString().split('T')[0];
+  }
+}
 
 const fileMappings = [
   {
@@ -61,6 +71,16 @@ const fileMappings = [
       '> *Source mirrored from `seocho/docs/PYTHON_INTERFACE_QUICKSTART.md`*\n\n',
   },
   {
+    src: 'docs/FILES_AND_ARTIFACTS.md',
+    dest: 'files_and_artifacts.md',
+    frontmatter:
+      '---\n' +
+      'title: Files and Artifacts\n' +
+      'description: Where ontology files, graph state, rule profiles, semantic artifacts, and traces live.\n' +
+      '---\n\n' +
+      '> *Source mirrored from `seocho/docs/FILES_AND_ARTIFACTS.md`*\n\n',
+  },
+  {
     src: 'docs/ARCHITECTURE.md',
     dest: 'architecture.md',
     frontmatter:
@@ -88,7 +108,7 @@ const fileMappings = [
     frontmatter:
       '---\n' +
       'title: "SEOCHO Design Philosophy & Operating Principles"\n' +
-      `date: ${today}\n` +
+      `date: ${sourceDateFor('docs/PHILOSOPHY.md')}\n` +
       'authors:\n' +
       '  - seocho\n' +
       'excerpt: Extract domain rules and high-value semantics from heterogeneous data into a SHACL-like semantic layer.\n' +
@@ -102,7 +122,7 @@ const fileMappings = [
     frontmatter:
       '---\n' +
       'title: "Feasibility Review Framework & Rubrics"\n' +
-      `date: ${today}\n` +
+      `date: ${sourceDateFor('docs/PHILOSOPHY_FEASIBILITY_REVIEW.md')}\n` +
       'authors:\n' +
       '  - seocho\n' +
       'excerpt: Multi-role feasibility review framework and Go/No-Go rubric for graph data implementations.\n' +
@@ -116,6 +136,7 @@ const routeReplacements = new Map([
   ['`docs/QUICKSTART.md`', '[`/docs/quickstart/`](/docs/quickstart/)'],
   ['`docs/APPLY_YOUR_DATA.md`', '[`/docs/apply_your_data/`](/docs/apply_your_data/)'],
   ['`docs/PYTHON_INTERFACE_QUICKSTART.md`', '[`/docs/python_sdk/`](/docs/python_sdk/)'],
+  ['`docs/FILES_AND_ARTIFACTS.md`', '[`/docs/files_and_artifacts/`](/docs/files_and_artifacts/)'],
   ['`docs/ARCHITECTURE.md`', '[`/docs/architecture/`](/docs/architecture/)'],
   ['`docs/WORKFLOW.md`', '[`/docs/workflow/`](/docs/workflow/)'],
   ['`docs/PHILOSOPHY.md`', '[`/docs/philosophy/`](/docs/philosophy/)'],

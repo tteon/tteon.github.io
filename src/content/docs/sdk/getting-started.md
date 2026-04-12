@@ -11,6 +11,18 @@ description: From zero to a working knowledge graph in 5 minutes
 pip install seocho
 ```
 
+For local engine mode against your own Neo4j/DozerDB, use:
+
+```bash
+pip install "seocho[local]"
+```
+
+If you are editing the repository itself, prefer:
+
+```bash
+pip install -e ".[dev]"
+```
+
 ## 2. Define your schema
 
 ```python
@@ -89,6 +101,10 @@ print(f"Quality: {scores['overall']:.0%}")
 ontology.to_jsonld("schema.jsonld")   # commit this to version control
 ontology = Ontology.from_jsonld("schema.jsonld")  # load it back
 ```
+
+See [`/docs/files_and_artifacts/`](/docs/files_and_artifacts/) for where
+`schema.jsonld`, graph data, rule profiles, semantic artifacts, and traces
+actually live on disk.
 
 ## 8. Use domain-specific prompts
 

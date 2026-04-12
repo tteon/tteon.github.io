@@ -20,19 +20,60 @@ If your first question is how to load your own records safely, read
 
 ## 1. Install
 
-Published package:
+Pick the mode first:
+
+- HTTP client mode only:
 
 ```bash
 pip install seocho
 ```
 
-Repository development install:
+- local SDK engine from the published package:
+
+```bash
+pip install "seocho[local]"
+```
+
+- repository development or local CLI authoring from a clone:
 
 ```bash
 pip install -e ".[dev]"
 ```
 
+- offline ontology governance helpers:
+
+```bash
+pip install "seocho[ontology]"
+```
+
+Important:
+
+- `pip install seocho` is enough for remote HTTP client mode.
+- `pip install "seocho[local]"` is the simplest published-package path for direct `Neo4jGraphStore(...)` workflows.
+- local engine mode requires a real graph backend and local-mode dependencies.
+- `pip install -e ".[dev]"` remains the right path when you are editing the repo itself.
+
+If you are iterating on schema evolution, use the offline governance CLI:
+
+```bash
+seocho ontology check --schema schema.jsonld
+seocho ontology export --schema schema.jsonld --format shacl --output shacl.json
+seocho ontology diff --left schema_v1.jsonld --right schema_v2.jsonld
+```
+
+Recommendation:
+
+- keep a stable `package_id` on the ontology and bump `version` semantically
+- treat `seocho ontology diff` as the first migration warning gate before runtime rollout
+
 ## 2. Configure
+
+You have two primary SDK shapes:
+
+| Mode | Constructor | When to use it |
+|------|-------------|----------------|
+| HTTP client | `Seocho(base_url="http://localhost:8001", workspace_id="default")` | consume a running SEOCHO runtime |
+| Local engine | `Seocho(ontology=..., graph_store=..., llm=...)` | SDK authoring, experiments, direct graph access |
 
 Fastest script-style setup:
 
@@ -49,6 +90,32 @@ from seocho import Seocho
 
 client = Seocho(base_url="http://localhost:8001", workspace_id="default")
 ```
+
+Important parameters:
+
+- `base_url`: root URL of the running SEOCHO runtime
+- `workspace_id`: required logical scope for runtime-facing data and queries
+- `user_id`, `agent_id`, `session_id`: optional scope fields for memory/runtime tracing
+
+Local engine example:
+
+```python
+from seocho import Seocho, Ontology
+from seocho.store import Neo4jGraphStore, OpenAIBackend
+
+client = Seocho(
+    ontology=Ontology(name="demo"),
+    graph_store=Neo4jGraphStore("bolt://localhost:7687", "neo4j", "password"),
+    llm=OpenAIBackend(model="gpt-4o"),
+    workspace_id="default",
+)
+```
+
+Local-mode constructor parameters you should understand:
+
+- `graph_store`: Bolt-backed DozerDB/Neo4j connection used by the SDK
+- `llm`: OpenAI-compatible extraction/query backend
+- `ontology`: schema contract that drives extraction, validation, and query generation
 
 ## 3. Put Your Data In
 
@@ -145,6 +212,15 @@ What `reasoning_mode` does:
 - validates constrained Cypher before execution
 - retries with a small repair budget when slot fill is insufficient
 - avoids jumping straight to multi-agent debate
+
+Parameter guidance:
+
+- `reasoning_mode=False`: fastest default path
+- `reasoning_mode=True`: enable bounded semantic repair for harder questions
+- `repair_budget=0`: no retry
+- `repair_budget=1..2`: practical default for hard graph questions
+- `graph_ids=[...]`: preferred public routing key when you know the graph target
+- `databases=[...]`: physical database scope when you are working at DB level
 
 ## 7. Use the Builder Surface
 
@@ -427,7 +503,101 @@ Use this decision rule:
 3. Add `reasoning_mode=True` before reaching for debate.
 4. Use `advanced()` only when you explicitly want multi-agent comparison.
 
-## 16. Read Next
+## 16. Agent-Level Sessions
+
+Sessions maintain context across indexing and querying operations.
+Three execution modes are available via ``AgentConfig``:
+
+```python
+from seocho import Seocho, Ontology, AgentConfig, RoutingPolicy, AGENT_PRESETS
+
+# Pipeline mode (default) — deterministic, no LLM reasoning about flow
+s = Seocho(ontology=onto, graph_store=store, llm=llm)
+
+with s.session("analysis") as sess:
+    sess.add("Samsung CEO Jay Y. Lee reported $234B revenue.")
+    sess.add("Apple CEO Tim Cook reported $383B revenue.")
+    # QueryAgent sees structured context: entities + relationships
+    answer = sess.ask("Compare Samsung and Apple revenue")
+```
+
+### Agent mode (LLM decides tool execution order)
+
+```python
+s = Seocho(
+    ontology=onto, graph_store=store, llm=llm,
+    agent_config=AgentConfig(execution_mode="agent"),
+)
+```
+
+### Supervisor with hand-off (explicit opt-in)
+
+```python
+s = Seocho(
+    ontology=onto, graph_store=store, llm=llm,
+    agent_config=AgentConfig(
+        execution_mode="supervisor",
+        handoff=True,
+        routing_policy=RoutingPolicy.thorough(),
+    ),
+)
+
+with s.session("auto") as sess:
+    sess.run("Samsung CEO is Jay Y. Lee")    # → IndexingAgent
+    sess.run("Who is Samsung's CEO?")        # → QueryAgent
+```
+
+### Routing policy presets
+
+| Preset | Latency | Tokens | Quality | Use when |
+|--------|---------|--------|---------|----------|
+| `RoutingPolicy.fast()` | 70% | 20% | 10% | Speed matters most |
+| `RoutingPolicy.balanced()` | 33% | 33% | 34% | General use |
+| `RoutingPolicy.thorough()` | 10% | 10% | 80% | Accuracy matters most |
+
+## 17. Ontology Merge
+
+Combine two ontologies when integrating new domains:
+
+```python
+finance = Ontology.from_jsonld("finance.jsonld")
+legal = Ontology.from_jsonld("legal.jsonld")
+
+# Union: combine properties from both
+combined = finance.merge(legal)
+# → Company has revenue (finance) + jurisdiction (legal)
+
+# Strict: raise on type conflicts
+combined = finance.merge(legal, strategy="strict")
+
+combined.to_jsonld("combined.jsonld")
+```
+
+Strategies: ``union`` (default), ``left_wins``, ``right_wins``, ``strict``.
+
+## 18. Where Ontology And Runtime Files Live
+
+Common locations:
+
+- default ontology file in CLI examples: `schema.jsonld`
+- local graph state for docker stack: `data/neo4j/`
+- semantic artifact store: `outputs/semantic_artifacts/`
+- rule profile registry: `outputs/rule_profiles/rule_profiles.db`
+- semantic run metadata: `outputs/semantic_metadata/`
+- trace file path: `SEOCHO_TRACE_JSONL_PATH`
+
+Use these commands to inspect them directly:
+
+```bash
+seocho ontology check --schema schema.jsonld
+seocho ontology export --schema schema.jsonld --format shacl --output shacl.json
+seocho artifacts list --status approved
+curl -sS "http://localhost:8001/semantic/artifacts?workspace_id=default" | jq .
+```
+
+See `FILES_AND_ARTIFACTS.md` for the full map.
+
+## 19. Read Next
 
 - `APPLY_YOUR_DATA.md`
 - `QUICKSTART.md`

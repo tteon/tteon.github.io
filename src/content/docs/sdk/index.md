@@ -13,6 +13,20 @@ Define your schema once — it drives extraction, querying, validation, and grap
 pip install seocho
 ```
 
+That thin install is for HTTP client mode.
+
+For local engine mode with your own ontology and Bolt-backed graph store:
+
+```bash
+pip install "seocho[local]"
+```
+
+For repository development:
+
+```bash
+pip install -e ".[dev]"
+```
+
 ## Quick Example
 
 ```python
@@ -91,3 +105,4 @@ Three execution modes: `pipeline` (default, deterministic), `agent` (tool use), 
 - [Ontology Guide](/sdk/ontology-guide/) — schema design, JSON-LD, SHACL
 - [API Reference](/sdk/api-reference/) — full method reference
 - [Examples](/sdk/examples/) — real-world patterns
+- [/docs/files_and_artifacts/](/docs/files_and_artifacts/) — where ontology and runtime files live
