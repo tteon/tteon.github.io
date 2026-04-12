@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "check:docs": "bash scripts/check-doc-quality.sh",
-    "check:sync": "node scripts/check-doc-sync.mjs"
+    "check:sync": "node scripts/check-doc-sync.mjs",
+    "test": "node --test scripts/lib/*.test.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.37.6",
