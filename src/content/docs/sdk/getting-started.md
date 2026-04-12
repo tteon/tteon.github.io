@@ -103,6 +103,24 @@ s = Seocho(
 )
 ```
 
+## 9. Share the Result Over HTTP
+
+If you want teammates to use the same SDK-authored setup through HTTP client
+mode, export a portable runtime bundle and serve it separately:
+
+```python
+bundle = s.export_runtime_bundle(
+    "portable.bundle.json",
+    app_name="team-memory-runtime",
+    default_database="neo4j",
+)
+print(bundle.app_name)
+```
+
+```bash
+seocho serve-http --bundle portable.bundle.json --port 8010
+```
+
 ## What's Next
 
 | Goal | Link |

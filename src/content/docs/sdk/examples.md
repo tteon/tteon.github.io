@@ -180,3 +180,36 @@ s = Seocho(base_url="http://localhost:8001")
 s.add("Some content")
 print(s.ask("What do you know?"))
 ```
+
+## Portable Runtime Bundle
+
+Use this when one developer authors a local ontology-first SDK setup and wants
+other developers to consume it over HTTP without copying the whole Python app.
+
+```python
+from seocho import Seocho
+
+client = Seocho(
+    ontology=ontology,
+    graph_store=store,
+    llm=llm,
+    agent_config=agent_config,
+)
+
+client.export_runtime_bundle(
+    "portable.bundle.json",
+    app_name="team-memory-runtime",
+    default_database="neo4j",
+)
+```
+
+```bash
+seocho serve-http --bundle portable.bundle.json --host 0.0.0.0 --port 8010
+```
+
+```python
+from seocho import Seocho
+
+remote = Seocho(base_url="http://localhost:8010", workspace_id="default")
+print(remote.ask("What do you know about Alex?"))
+```

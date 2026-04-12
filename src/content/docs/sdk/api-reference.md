@@ -49,6 +49,21 @@ s = Seocho(
 | `s.ensure_constraints(*, database)` | Apply ontology-derived UNIQUE/INDEX constraints |
 | `s.register_ontology(database, ontology)` | Bind per-database ontology |
 
+### Portable Runtime Sharing
+
+| Method | Description |
+|--------|-------------|
+| `s.export_runtime_bundle(path?, *, app_name, default_database)` | Serialize a local SDK setup into a portable JSON bundle |
+| `Seocho.from_runtime_bundle(path_or_bundle, *, workspace_id)` | Rehydrate a local SDK client from a portable bundle |
+
+CLI equivalents:
+
+| Command | Description |
+|--------|-------------|
+| `seocho bundle export --output portable.bundle.json ...` | Export a portable runtime bundle from a local SDK-style config |
+| `seocho bundle show portable.bundle.json` | Inspect bundle metadata before serving or sharing |
+| `seocho serve-http --bundle portable.bundle.json --port 8010` | Expose the bundle through a small HTTP compatibility runtime |
+
 ---
 
 ## Ontology
