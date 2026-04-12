@@ -13,13 +13,13 @@ Define your schema once — it drives extraction, querying, validation, and grap
 pip install seocho
 ```
 
-## Two Ways to Use
-
-### Local mode — no server needed
+## Quick Example
 
 ```python
 from seocho import Seocho, Ontology, NodeDef, RelDef, P
 from seocho.store import Neo4jGraphStore, OpenAIBackend
+
+# 1. Define your schema
 ontology = Ontology(
     name="my_domain",
     nodes={
@@ -31,52 +31,48 @@ ontology = Ontology(
     },
 )
 
+# 2. Connect
 s = Seocho(
     ontology=ontology,
     graph_store=Neo4jGraphStore("bolt://localhost:7687", "neo4j", "pass"),
     llm=OpenAIBackend(model="gpt-4o"),
 )
 
+# 3. Index your data
 s.add("Marie Curie worked at the University of Paris.")
-print(s.ask("Where did Marie Curie work?"))
-```
+s.index_directory("./my_data/")
 
-### HTTP mode — against a running server
-
-```python
-s = Seocho(base_url="http://localhost:8001")
-s.add("Marie Curie worked at the University of Paris.")
+# 4. Query
 print(s.ask("Where did Marie Curie work?"))
 ```
 
 ## What the Ontology Controls
 
-Your ontology feeds into **every stage**:
-
-| Stage | What the ontology provides |
-|-------|---------------------------|
-| **Extraction** | Entity types, relationship types, property constraints → system prompt |
-| **Querying** | Full graph schema, cardinality, query hints → Cypher generation prompt |
-| **Validation** | SHACL shapes derived automatically → post-extraction check |
-| **Graph constraints** | Cypher UNIQUE/INDEX statements generated from property definitions |
-| **Denormalization** | Cardinality-based safety rules for flattening graph data |
-| **Linking** | Ontology context for entity deduplication |
+| Stage | What happens |
+|-------|-------------|
+| **Extraction** | Ontology tells the LLM what entity types and relationships to look for |
+| **Querying** | Ontology gives the LLM full schema context for Cypher generation |
+| **Validation** | SHACL shapes are derived → catches type errors and cardinality violations |
+| **Constraints** | `UNIQUE`/`INDEX` statements generated and applied to Neo4j |
+| **Denormalization** | Cardinality rules determine what's safe to flatten |
 
 ## Key Features
 
-- **File-based indexing**: `s.index_directory("./data/")` — drop files and index
-- **Automatic chunking**: long documents split with overlap
-- **Content deduplication**: same text won't be indexed twice
-- **SHACL validation gate**: reject invalid extractions before writing
-- **Reasoning mode**: `s.ask(question, reasoning_mode=True, repair_budget=2)` — auto-retry with relaxed queries
-- **Multi-ontology**: `s.register_ontology("finance_db", finance_onto)` — per-database schemas
-- **Confidence scoring**: `ontology.score_extraction(data)` — quality metrics
-- **JSON-LD storage**: `ontology.to_jsonld("schema.jsonld")` — version-controlled schemas
-- **Incremental indexing**: `s.reindex(source_id, new_content)` — update without duplicates
+| Feature | What it does |
+|---------|-------------|
+| `s.index_directory("./data/")` | Index .txt, .md, .csv, .json, .jsonl, .pdf files |
+| `s.ask("question", reasoning_mode=True)` | Auto-retry with relaxed queries if first attempt fails |
+| `s.register_ontology("db", onto)` | Different schema per database |
+| `ontology.score_extraction(data)` | Quality score (0.0–1.0) per node and relationship |
+| `ontology.to_jsonld("schema.jsonld")` | Version-controlled schema files |
+| `s.reindex(source_id, new_text)` | Update indexed content without duplicates |
+| `PRESET_PROMPTS["finance"]` | Domain-specific extraction prompts |
+| `Workbench` | Compare ontology/model/prompt combinations at scale |
+| `enable_tracing(backend="console")` | Pluggable observability (console, JSONL, Opik) |
 
 ## Next
 
 - [Getting Started](/sdk/getting-started/) — 5-minute walkthrough
-- [Ontology Guide](/sdk/ontology-guide/) — schema design, JSON-LD, SHACL, denormalization
+- [Ontology Guide](/sdk/ontology-guide/) — schema design, JSON-LD, SHACL
 - [API Reference](/sdk/api-reference/) — full method reference
 - [Examples](/sdk/examples/) — real-world patterns

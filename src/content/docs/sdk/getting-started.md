@@ -13,8 +13,6 @@ pip install seocho
 
 ## 2. Define your schema
 
-An ontology tells SEOCHO what entities and relationships exist in your domain.
-
 ```python
 from seocho import Ontology, NodeDef, RelDef, P
 
@@ -30,64 +28,79 @@ ontology = Ontology(
 )
 ```
 
-`P(str, unique=True)` means: string property, must be unique. This single declaration drives the extraction prompt, query prompt, a Neo4j UNIQUE constraint, and SHACL validation.
+`P(str, unique=True)` = string property, must be unique. This drives the extraction prompt, query prompt, a Neo4j UNIQUE constraint, and SHACL validation — all from one declaration.
 
-## 3. Connect and index
+## 3. Connect
 
 ```python
 from seocho import Seocho
 from seocho.store import Neo4jGraphStore, OpenAIBackend
+
 s = Seocho(
     ontology=ontology,
     graph_store=Neo4jGraphStore("bolt://localhost:7687", "neo4j", "password"),
     llm=OpenAIBackend(model="gpt-4o"),
 )
 
-s.ensure_constraints()  # apply UNIQUE/INDEX to the database
-s.add("Marie Curie worked at the University of Paris.")
+s.ensure_constraints()
 ```
 
-SEOCHO automatically: sends an ontology-aware extraction prompt to the LLM → gets back Person and Company nodes → validates against SHACL → deduplicates → writes to Neo4j.
+## 4. Index data
 
-## 4. Query
+```python
+# Single text
+s.add("Marie Curie worked at the University of Paris.")
+
+# From files
+s.index_directory("./my_data/")
+
+# Batch
+s.add_batch([
+    "Apple CEO Tim Cook announced new AI features.",
+    "Samsung's Jay Y. Lee met with NVIDIA's Jensen Huang.",
+])
+```
+
+## 5. Query
 
 ```python
 print(s.ask("Where did Marie Curie work?"))
-# → "Marie Curie worked at the University of Paris."
+
+# With auto-retry for hard questions
+print(s.ask("Which companies are involved in chip supply?",
+            reasoning_mode=True, repair_budget=2))
 ```
 
-The LLM generates Cypher using your ontology as context — it knows `Person` and `Company` exist, `WORKS_AT` connects them, and `name` is the unique lookup key.
-
-## 5. Index files from a directory
-
-The easiest way to bring your own data:
+## 6. Inspect extraction
 
 ```python
-results = s.index_directory("./my_data/", database="mydb")
-print(f"Indexed {results['files_indexed']} files")
-```
-
-Supports `.txt`, `.md`, `.csv`, `.json`, `.jsonl`. Changed files are auto-detected on re-run.
-
-## 6. Inspect what was extracted
-
-```python
+# Preview what gets extracted (without writing)
 result = s.extract("Elon Musk is the CEO of Tesla and SpaceX.")
 print(result)
-# {"nodes": [...], "relationships": [...]}
 
-# Check extraction quality
+# Check quality
 scores = ontology.score_extraction(result)
-print(f"Quality: {scores['overall']}")
+print(f"Quality: {scores['overall']:.0%}")
 ```
 
-## 7. Save your ontology
+## 7. Save your schema
 
 ```python
-ontology.to_jsonld("schema.jsonld")  # version control this
+ontology.to_jsonld("schema.jsonld")   # commit this to version control
+ontology = Ontology.from_jsonld("schema.jsonld")  # load it back
+```
 
-# Load it back
-ontology = Ontology.from_jsonld("schema.jsonld")
+## 8. Use domain-specific prompts
+
+```python
+from seocho.query import PRESET_PROMPTS
+
+s = Seocho(
+    ontology=ontology,
+    graph_store=store,
+    llm=llm,
+    extraction_prompt=PRESET_PROMPTS["finance"],  # or: legal, medical, research
+)
 ```
 
 ## What's Next
