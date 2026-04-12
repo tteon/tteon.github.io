@@ -58,7 +58,22 @@ When the source contract changes:
 - avoid duplicate or conflicting slugs; build warnings about duplicate IDs are
   real defects until explained
 
-## 5. Required Validation
+## 5. Automation Roles
+
+- Codex is the primary PR author for bounded docs work:
+  - mirrored-doc sync
+  - broken link fixes
+  - stale snippet cleanup
+  - one small developer-facing docs improvement
+- Jules is PR-fixer-first for this repo:
+  - repair failing docs/build/CI checks on an existing PR
+  - keep scope narrow to the exact broken route, stale snippet, mirrored-doc
+    drift, or failing validation
+  - do not originate broad IA, design, or source-contract changes unless
+    explicitly asked
+- Human maintainers remain the merge gate.
+
+## 6. Required Validation
 
 Run these before landing changes:
 
@@ -78,7 +93,7 @@ What these gates mean:
 - `check-built-links.sh` rejects internal links or assets that do not resolve in
   `dist/`
 
-## 6. Editing Rules
+## 7. Editing Rules
 
 - use ASCII unless the file already needs non-ASCII content
 - keep doc navigation intentional and shallow
@@ -87,7 +102,7 @@ What these gates mean:
 - if a mirrored page becomes materially better here, decide whether the main
   repo source should be updated too
 
-## 7. Landing Rules
+## 8. Landing Rules
 
 - default branch is `main`
 - validate before push
