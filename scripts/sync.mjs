@@ -1,7 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 
 const WORK_DIR = process.cwd();
 const LOCAL_SEOCHO_REPO_DIR =
@@ -34,7 +34,7 @@ if (USE_LOCAL_SOURCE) {
     console.log(`Using local seocho source at ${SEOCHO_REPO_DIR}`);
 } else {
     console.log('Cloning tteon/seocho to extract docs...');
-    execSync(`git clone --depth 1 https://github.com/tteon/seocho.git ${SEOCHO_REPO_DIR}`);
+    execFileSync('git', ['clone', '--depth', '1', 'https://github.com/tteon/seocho.git', SEOCHO_REPO_DIR]);
 }
 
 // 2. Mapping Files to copy over to Starlight
@@ -128,7 +128,7 @@ for (const map of fileMappings) {
 // 3. Fetching Changelog via GitHub API
 console.log('Fetching latest 5 releases from tteon/seocho for Changelog...');
 try {
-    const result = execSync(`curl -s https://api.github.com/repos/tteon/seocho/releases?per_page=5`);
+    const result = execFileSync('curl', ['-s', 'https://api.github.com/repos/tteon/seocho/releases?per_page=5']);
     const releases = JSON.parse(result.toString());
 
     const updates = releases.map((release) => {

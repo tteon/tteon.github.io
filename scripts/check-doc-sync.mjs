@@ -1,7 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 
 const WORK_DIR = process.cwd();
 const LOCAL_SEOCHO_REPO_DIR =
@@ -148,9 +148,13 @@ try {
     console.log(`Using local SEOCHO source at ${SEOCHO_REPO_DIR}`);
   } else {
     console.log('Cloning tteon/seocho for docs sync verification...');
-    execSync(`git clone --depth 1 https://github.com/tteon/seocho.git ${SEOCHO_REPO_DIR}`, {
-      stdio: 'inherit',
-    });
+    execFileSync(
+      'git',
+      ['clone', '--depth', '1', 'https://github.com/tteon/seocho.git', SEOCHO_REPO_DIR],
+      {
+        stdio: 'inherit',
+      }
+    );
   }
 
   const drifted = [];
