@@ -52,6 +52,11 @@ function sourceDateFor(relPath) {
 // 2. Mapping Files to copy over to Starlight
 const fileMappings = [
     {
+        src: 'docs/WHY_SEOCHO.md',
+        dest: 'why_seocho.md',
+        frontmatter: `---\ntitle: Why SEOCHO\ndescription: Why SEOCHO is ontology-first and graph-native instead of generic memory-first.\n---\n\n> *Source mirrored from \`seocho/docs/WHY_SEOCHO.md\`*\n\n`
+    },
+    {
         src: 'docs/README.md',
         dest: 'index.md',
         frontmatter: `---\ntitle: Docs Home\ndescription: Central Documentation Index for SEOCHO\n---\n\n> *Source mirrored from \`seocho/docs/README.md\`*\n\n`
@@ -102,6 +107,7 @@ const fileMappings = [
 ];
 
 const routeReplacements = new Map([
+    ['`docs/WHY_SEOCHO.md`', '[`/docs/why_seocho/`](/docs/why_seocho/)'],
     ['`docs/README.md`', '[`/docs/`](/docs/)'],
     ['`docs/QUICKSTART.md`', '[`/docs/quickstart/`](/docs/quickstart/)'],
     ['`docs/APPLY_YOUR_DATA.md`', '[`/docs/apply_your_data/`](/docs/apply_your_data/)'],
@@ -112,6 +118,15 @@ const routeReplacements = new Map([
     ['`docs/PHILOSOPHY.md`', '[`/docs/philosophy/`](/docs/philosophy/)'],
     ['`docs/TUTORIAL_FIRST_RUN.md`', '[`/docs/tutorial/`](/docs/tutorial/)'],
     ['`docs/OPEN_SOURCE_PLAYBOOK.md`', '[`/docs/open_source_playbook/`](/docs/open_source_playbook/)'],
+    ['(WHY_SEOCHO.md)', '(/docs/why_seocho/)'],
+    ['(QUICKSTART.md)', '(/docs/quickstart/)'],
+    ['(PYTHON_INTERFACE_QUICKSTART.md)', '(/docs/python_sdk/)'],
+    ['(APPLY_YOUR_DATA.md)', '(/docs/apply_your_data/)'],
+    ['(FILES_AND_ARTIFACTS.md)', '(/docs/files_and_artifacts/)'],
+    ['(ARCHITECTURE.md)', '(/docs/architecture/)'],
+    ['(WORKFLOW.md)', '(/docs/workflow/)'],
+    ['(TUTORIAL_FIRST_RUN.md)', '(/docs/tutorial/)'],
+    ['(OPEN_SOURCE_PLAYBOOK.md)', '(/docs/open_source_playbook/)'],
 ]);
 
 function rewriteWebsiteRoutes(content) {

@@ -5,7 +5,15 @@ description: Ontology-first Python SDK for knowledge graph construction and quer
 
 # Python SDK
 
-Define your schema once — it drives extraction, querying, validation, and graph constraints automatically.
+Define your ontology once, then use the same contract for indexing, query
+planning, validation, and runtime semantic artifacts.
+
+SEOCHO is strongest when you need more than generic memory:
+
+- ontology-first extraction and querying
+- Neo4j or DozerDB as the graph-native runtime
+- governed JSON-LD, SHACL, constraints, and runtime artifacts
+- local SDK authoring with HTTP runtime consumption
 
 ## Install
 
@@ -60,6 +68,8 @@ s.index_directory("./my_data/")
 print(s.ask("Where did Marie Curie work?"))
 ```
 
+If you want the product rationale first, read [/docs/why_seocho/](/docs/why_seocho/).
+
 ## What the Ontology Controls
 
 | Stage | What happens |
@@ -101,6 +111,7 @@ Three execution modes: `pipeline` (default, deterministic), `agent` (tool use), 
 
 ## Next
 
+- [/docs/why_seocho/](/docs/why_seocho/) — product positioning and ontology-first rationale
 - [Getting Started](/sdk/getting-started/) — 5-minute walkthrough
 - [Ontology Guide](/sdk/ontology-guide/) — schema design, JSON-LD, SHACL
 - [API Reference](/sdk/api-reference/) — full method reference

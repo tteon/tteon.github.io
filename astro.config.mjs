@@ -9,7 +9,7 @@ export default defineConfig({
         tailwind({ applyBaseStyles: false }),
         starlight({
             title: 'SEOCHO',
-            description: 'Open Source Agent-Driven Knowledge Graph Platform',
+            description: 'Ontology-first graph memory and runtime for agents',
             customCss: ['./src/styles/custom.css'],
             plugins: [
                 starlightBlog({
@@ -32,6 +32,7 @@ export default defineConfig({
                 {
                     label: 'Docs', items: [
                         { label: 'Introduction', link: '/docs/' },
+                        { label: 'Why SEOCHO', link: '/docs/why_seocho/' },
                         { label: 'Quick Start', link: '/docs/quickstart/' },
                         { label: 'Bring Your Data', link: '/docs/apply_your_data/' },
                         { label: 'Python SDK', link: '/docs/python_sdk/' },

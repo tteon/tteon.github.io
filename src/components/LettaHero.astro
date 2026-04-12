@@ -14,19 +14,22 @@
     </div>
 
     <h1 class="text-6xl md:text-8xl font-black tracking-tighter mb-6 text-white leading-tight">
-      The Operating System for <br />
-      <span class="site-title">Agentic Knowledge Graphs</span>
+      Ontology-First <br />
+      <span class="site-title">Graph Memory for Agents</span>
     </h1>
 
     <div class="text-lg md:text-xl text-zinc-400 max-w-3xl mx-auto mb-10 font-light tracking-wide leading-relaxed space-y-2">
-      <p class="border-l-2 border-zinc-700 pl-4 text-left">1. Bring your records, tickets, notes, or documents into isolated graph targets.</p>
-      <p class="border-l-2 border-zinc-700 pl-4 text-left">2. Query through the semantic layer first, then bounded repair when retrieval is insufficient.</p>
-      <p class="border-l-2 border-zinc-700 pl-4 text-left">3. Use advanced debate only when you explicitly need cross-graph comparison.</p>
+      <p class="border-l-2 border-zinc-700 pl-4 text-left">1. Define one ontology and use it across extraction, querying, validation, and runtime artifacts.</p>
+      <p class="border-l-2 border-zinc-700 pl-4 text-left">2. Keep graph behavior inspectable with schema-aware query planning and bounded repair.</p>
+      <p class="border-l-2 border-zinc-700 pl-4 text-left">3. Promote the same local contract into a runtime other agents can consume over HTTP.</p>
     </div>
 
     <div class="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4">
       <a href="/docs/quickstart/" class="px-6 py-3 bg-white text-black font-semibold rounded-lg hover:bg-zinc-200 transition-colors shadow-[0_0_30px_-10px_rgba(255,255,255,0.2)]">
         Get Started
+      </a>
+      <a href="/docs/why_seocho/" class="px-6 py-3 bg-white/5 border border-white/10 text-zinc-300 font-medium rounded-lg hover:bg-white/10 hover:text-white transition-colors backdrop-blur-sm">
+        Why SEOCHO
       </a>
       <a href="/docs/apply_your_data/" class="px-6 py-3 bg-white/5 border border-white/10 text-zinc-300 font-medium rounded-lg hover:bg-white/10 hover:text-white transition-colors backdrop-blur-sm">
         Bring Your Data
@@ -63,31 +66,25 @@
 
 client = Seocho(base_url="http://localhost:8001", workspace_id="default")
 
-client.raw_ingest(
-    [
-        {"id": "r1", "content": "ACME acquired Beta in 2024."},
-        {"id": "r2", "content": "Beta provides risk analytics to ACME."},
-    ],
-    target_database="kgruntime",
+artifacts = client.approved_artifacts_from_ontology()
+prompt_context = client.prompt_context_from_ontology(
+    instructions=["Prefer finance ontology labels."]
 )
 
-<span class="text-zinc-500"># Semantic layer first</span>
-semantic = client.semantic(
-    "What is ACME related to?",
-    databases=["kgruntime"],
+client.add_with_details(
+    "ACME acquired Beta in 2024.",
+    approved_artifacts=artifacts,
+    prompt_context=prompt_context,
+)
+
+<span class="text-zinc-500"># Ontology-aware query planning</span>
+answer = client.ask(
+    "Who did ACME acquire?",
     reasoning_mode=True,
     repair_budget=2,
 )
 
-<span class="text-zinc-500"># Advanced mode only when you need cross-graph comparison</span>
-advanced = client.advanced(
-    "Compare what each graph knows about ACME.",
-    graph_ids=["kgnormal", "kgfibo"],
-)
-
-print(semantic.response)
-print(semantic.semantic_context["reasoning"])
-print(advanced.debate_state)
+print(answer)
 </code></pre>`} />
       </div>
     </div>

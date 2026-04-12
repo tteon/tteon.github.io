@@ -179,7 +179,23 @@ curl -sS "http://localhost:8001/semantic/runs?workspace_id=default&limit=5&route
 make e2e-smoke
 ```
 
-## 10. Troubleshooting
+## 10. Keep One Ontology Contract
+
+If you author locally with `schema.jsonld` but ingest/query through the runtime,
+do not maintain a second hand-written runtime payload. Use the same ontology to
+build runtime-safe artifacts:
+
+```python
+from seocho import Ontology, Seocho
+
+ontology = Ontology.from_jsonld("schema.jsonld")
+client = Seocho(ontology=ontology)
+
+artifacts = client.approved_artifacts_from_ontology()
+prompt_context = client.prompt_context_from_ontology()
+```
+
+## 11. Troubleshooting
 
 Check service state:
 
@@ -195,7 +211,7 @@ Common issues:
 - port collision on `8001`, `8501`, `7474`, or `7687`
 - graph database not ready yet
 
-## 11. Know Where Your Files Go
+## 12. Know Where Your Files Go
 
 The main local locations are:
 
@@ -206,10 +222,10 @@ The main local locations are:
 - semantic run metadata: `outputs/semantic_metadata/`
 - JSONL tracing: path from `SEOCHO_TRACE_JSONL_PATH`
 
-See [FILES_AND_ARTIFACTS.md](FILES_AND_ARTIFACTS.md) for the full map and
+See [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/) for the full map and
 inspection commands.
 
-## 12. Read Next
+## 13. Read Next
 
 - [`/docs/python_sdk/`](/docs/python_sdk/)
 - [`/docs/apply_your_data/`](/docs/apply_your_data/)
