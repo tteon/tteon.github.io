@@ -42,6 +42,17 @@ s = Seocho(
 | `s.query(cypher, *, params, database)` | Execute raw Cypher |
 | `s.search_similar(query, *, limit)` | Vector similarity search |
 
+### Sessions
+
+| Method | Description |
+|--------|-------------|
+| `s.session(name, *, database)` | Create agent session with context persistence |
+| `sess.add(content)` | Index through session (context accumulated) |
+| `sess.ask(question)` | Query with accumulated entity context |
+| `sess.run(message)` | Supervisor hand-off (requires `handoff=True`) |
+| `sess.ask_stream(question)` | Stream response token by token |
+| `sess.close()` | Finalize session and return summary |
+
 ### Graph Management
 
 | Method | Description |
@@ -94,6 +105,13 @@ ontology = Ontology.from_yaml("schema.yaml")
 | `score_extraction(data)` | Quality scores (0.0–1.0) per node/rel |
 | `to_shacl()` | View derived SHACL shapes |
 | `to_cypher_constraints()` | View Cypher constraint statements |
+
+### Merge & Migration
+
+| Method | Description |
+|--------|-------------|
+| `onto.merge(other, *, strategy)` | Combine two ontologies (union/left_wins/right_wins/strict) |
+| `onto.migration_plan(new_onto)` | Compute Cypher migration statements |
 
 ### Denormalization
 
@@ -159,6 +177,40 @@ enable_tracing(backend="jsonl", output="trace.jsonl") # raw file
 enable_tracing(backend="opik", project_name="proj")   # Opik
 enable_tracing(backend=["console", "jsonl"])           # multiple
 ```
+
+---
+
+## AgentConfig
+
+```python
+from seocho import AgentConfig, RoutingPolicy, AGENT_PRESETS
+
+# Presets
+config = AGENT_PRESETS["default"]      # pipeline mode
+config = AGENT_PRESETS["strict"]       # high quality threshold
+config = AGENT_PRESETS["fast"]         # minimal validation
+config = AGENT_PRESETS["agent"]        # tool-use mode
+config = AGENT_PRESETS["supervisor"]   # hand-off mode
+
+# Custom
+config = AgentConfig(
+    execution_mode="supervisor",       # pipeline, agent, supervisor
+    handoff=True,
+    routing_policy=RoutingPolicy(
+        latency=0.1,
+        token_efficiency=0.3,
+        information_quality=0.6,
+    ),
+    reasoning_mode=True,
+    repair_budget=3,
+)
+```
+
+| Preset | Latency | Tokens | Quality |
+|--------|---------|--------|---------|
+| `RoutingPolicy.fast()` | 70% | 20% | 10% |
+| `RoutingPolicy.balanced()` | 33% | 33% | 34% |
+| `RoutingPolicy.thorough()` | 10% | 10% | 80% |
 
 ---
 

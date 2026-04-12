@@ -62,13 +62,28 @@ print(s.ask("Where did Marie Curie work?"))
 |---------|-------------|
 | `s.index_directory("./data/")` | Index .txt, .md, .csv, .json, .jsonl, .pdf files |
 | `s.ask("question", reasoning_mode=True)` | Auto-retry with relaxed queries if first attempt fails |
+| `s.session("name")` | Agent session with context persistence across operations |
+| `AgentConfig(execution_mode="agent")` | LLM agent with tool use (extract/validate/score/write) |
+| `AgentConfig(execution_mode="supervisor", handoff=True)` | Sub-agent hand-off between IndexingAgent and QueryAgent |
+| `RoutingPolicy(latency=0.1, information_quality=0.8)` | 3-axis trade-off for routing decisions |
+| `onto_a.merge(onto_b)` | Combine two ontologies with conflict resolution |
+| `onto.migration_plan(new_onto)` | Schema evolution with generated Cypher statements |
 | `s.register_ontology("db", onto)` | Different schema per database |
-| `ontology.score_extraction(data)` | Quality score (0.0–1.0) per node and relationship |
 | `ontology.to_jsonld("schema.jsonld")` | Version-controlled schema files |
-| `s.reindex(source_id, new_text)` | Update indexed content without duplicates |
-| `PRESET_PROMPTS["finance"]` | Domain-specific extraction prompts |
 | `Workbench` | Compare ontology/model/prompt combinations at scale |
 | `enable_tracing(backend="console")` | Pluggable observability (console, JSONL, Opik) |
+
+## Agent Sessions
+
+```python
+with s.session("analysis") as sess:
+    sess.add("Samsung CEO Jay Y. Lee reported $234B revenue.")
+    sess.add("Apple CEO Tim Cook reported $383B revenue.")
+    answer = sess.ask("Compare Samsung and Apple revenue")
+    # Structured entity context passed to QueryAgent
+```
+
+Three execution modes: `pipeline` (default, deterministic), `agent` (tool use), `supervisor` (hand-off).
 
 ## Next
 

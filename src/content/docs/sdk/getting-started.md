@@ -121,6 +121,53 @@ print(bundle.app_name)
 seocho serve-http --bundle portable.bundle.json --port 8010
 ```
 
+## 10. Agent Sessions
+
+Sessions maintain context across multiple indexing and querying operations:
+
+```python
+with s.session("research") as sess:
+    sess.add("Samsung CEO Jay Y. Lee reported $234B revenue.")
+    sess.add("Apple CEO Tim Cook reported $383B revenue.")
+    # QueryAgent sees structured context from both documents
+    answer = sess.ask("Compare Samsung and Apple revenue")
+```
+
+Three execution modes via `AgentConfig`:
+
+```python
+from seocho import AgentConfig, AGENT_PRESETS
+
+# Pipeline (default) — deterministic, no LLM reasoning about flow
+s = Seocho(ontology=onto, graph_store=store, llm=llm)
+
+# Agent — LLM decides tool execution order
+s = Seocho(..., agent_config=AgentConfig(execution_mode="agent"))
+
+# Supervisor + hand-off — auto-routes indexing vs query
+s = Seocho(..., agent_config=AGENT_PRESETS["supervisor"])
+with s.session("auto") as sess:
+    sess.run("Samsung CEO is Jay Y. Lee")    # → IndexingAgent
+    sess.run("Who is Samsung's CEO?")        # → QueryAgent
+```
+
+## 11. Ontology Merge and Migration
+
+```python
+finance = Ontology.from_jsonld("finance.jsonld")
+legal = Ontology.from_jsonld("legal.jsonld")
+
+# Merge: combine nodes/relationships
+combined = finance.merge(legal)
+combined.to_jsonld("combined.jsonld")
+
+# Migration: schema evolution
+plan = old_onto.migration_plan(new_onto)
+print(plan["summary"])
+for stmt in plan["cypher_statements"]:
+    print(stmt["cypher"])  # Ready-to-run Cypher
+```
+
 ## What's Next
 
 | Goal | Link |
