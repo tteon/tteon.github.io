@@ -5,6 +5,13 @@ description: From zero to a working knowledge graph in 5 minutes
 
 # Getting Started
 
+SEOCHO has two valid starting points:
+
+- use `pip install seocho` when you are consuming an existing runtime over HTTP
+- use `pip install "seocho[local]"` when you are authoring the ontology and graph locally
+
+If you want the product rationale first, read [/docs/why_seocho/](/docs/why_seocho/).
+
 ## 1. Install
 
 ```bash

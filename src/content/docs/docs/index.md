@@ -17,6 +17,18 @@ SEOCHO is easiest to understand if you separate three surfaces:
   contracts
 - website docs and SDK pages: public onboarding and mirrored developer guides
 
+## Choose Your Entry Path
+
+Start from the path that matches your actual job:
+
+| If you need... | Start here |
+|---|---|
+| the product framing and why SEOCHO is ontology-first | [WHY_SEOCHO.md](/docs/why_seocho/) |
+| the shortest local success path | [QUICKSTART.md](/docs/quickstart/) |
+| local SDK authoring with your own ontology and graph | [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/) |
+| file locations for ontology, artifacts, traces, and rule profiles | [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/) |
+| bring-your-own-data ingestion | [APPLY_YOUR_DATA.md](/docs/apply_your_data/) |
+
 ## Canonical Start Docs
 
 Read these first unless you already know exactly which area you need:

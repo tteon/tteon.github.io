@@ -4,6 +4,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,700&display=swap');
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard-dynamic-subset.css');
 
 :root {
@@ -20,12 +21,13 @@
     --sl-color-gray-6: #18181B;
     --sl-color-accent: #22d3ee;
     /* cyan-400 */
-    --sl-color-accent-high: #a855f7;
-    /* purple-500 */
+    --sl-color-accent-high: #f59e0b;
+    /* amber-500 */
 
-    /* Letta Aesthetic Typography (with Pretendard for perfect Korean rendering) */
+    /* SEOCHO typography */
     --sl-font: 'Geist', 'Pretendard', sans-serif;
     --sl-font-mono: 'Geist Mono', 'Pretendard', monospace;
+    --seocho-font-display: 'Newsreader', 'Pretendard', serif;
 }
 
 body {
@@ -39,6 +41,12 @@ body {
     background-attachment: fixed;
     word-break: keep-all;
     /* Prevent Korean words from breaking aggressively */
+}
+
+.seocho-display {
+    font-family: var(--seocho-font-display);
+    font-variation-settings: "opsz" 48;
+    letter-spacing: -0.04em;
 }
 
 code,
@@ -85,12 +93,27 @@ starlight-theme-select {
 
 /* Minimalist gradient styling for the restored "SEOCHO" title */
 .site-title {
-    background: linear-gradient(to right, #FFFFFF, #A1A1AA);
+    background: linear-gradient(110deg, #ffffff 0%, #b6f3ff 45%, #f5d38f 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    font-weight: 800 !important;
-    letter-spacing: -0.05em;
+    font-weight: 700 !important;
+    letter-spacing: -0.04em;
+}
+
+.sl-markdown-content h1,
+.sl-markdown-content h2 {
+    font-family: var(--seocho-font-display);
+    letter-spacing: -0.035em;
+}
+
+.sl-markdown-content h1 {
+    font-size: clamp(2.6rem, 5vw, 4.5rem);
+    line-height: 0.95;
+}
+
+.sl-markdown-content h2 {
+    line-height: 1.02;
 }
 
 /* Subtle styling for the restored Search Bar to match Glassmorphic theme */
