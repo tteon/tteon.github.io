@@ -109,13 +109,17 @@ Use these when changing a specific subsystem or workflow:
   - [`/docs/`](/docs/)
   - [`/docs/quickstart/`](/docs/quickstart/)
   - [`/docs/apply_your_data/`](/docs/apply_your_data/)
-  - [`/docs/python_sdk/`](/docs/python_sdk/)
-  - [`/docs/architecture/`](/docs/architecture/)
-  - [`/docs/workflow/`](/docs/workflow/)
+- [`/docs/python_sdk/`](/docs/python_sdk/)
+- [`/docs/architecture/`](/docs/architecture/)
+- [`/docs/workflow/`](/docs/workflow/)
 - Website updates are currently maintained directly in the local `tteon.github.io/`
-  workspace and validated there with `npm run build`.
-- `tteon.github.io/scripts/sync.mjs` may be used as a local helper, but no repo-side
-  automatic sync workflow is currently enforced.
+  workspace.
+- Repo-side docs consistency checks now run in `.github/workflows/docs-consistency.yml`
+  via `bash scripts/ci/check-doc-contracts.sh`.
+- Website-side mirrored-doc drift checks run in
+  `tteon.github.io/.github/workflows/docs-quality.yml` via `npm run check:sync`.
+- `tteon.github.io/scripts/sync.mjs` may be used as a local helper, but mirrored
+  pages are still reviewed website content, not a blind publish target.
 
 ## Archive
 
