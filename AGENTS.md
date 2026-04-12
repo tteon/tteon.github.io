@@ -9,8 +9,9 @@ Before editing:
 1. `README.md`
 2. `astro.config.mjs`
 3. `scripts/check-doc-quality.sh`
-4. `scripts/check-built-links.sh`
-5. `scripts/sync.mjs`
+4. `scripts/check-doc-sync.mjs`
+5. `scripts/check-built-links.sh`
+6. `scripts/sync.mjs`
 
 If the change touches mirrored documentation under `src/content/docs/docs/`,
 also inspect the matching source material in the main repo at
@@ -62,6 +63,7 @@ When the source contract changes:
 Run these before landing changes:
 
 ```bash
+npm run check:sync
 bash scripts/check-doc-quality.sh
 npm run build
 bash scripts/check-built-links.sh
@@ -69,6 +71,8 @@ bash scripts/check-built-links.sh
 
 What these gates mean:
 
+- `check-doc-sync.mjs` rejects drift between mirrored site docs and `seocho`
+  source docs
 - `check-doc-quality.sh` rejects stale sync wording and stale doc patterns
 - `npm run build` confirms Astro/Starlight output still compiles
 - `check-built-links.sh` rejects internal links or assets that do not resolve in

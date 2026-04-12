@@ -1,11 +1,22 @@
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import { execSync } from 'child_process';
 
-const SEOCHO_REPO_DIR = path.join(process.cwd(), 'temp_seocho');
-const TARGET_DOCS_DIR = path.join(process.cwd(), 'src', 'content', 'docs', 'docs');
-const TARGET_BLOG_DIR = path.join(process.cwd(), 'src', 'content', 'docs', 'blog');
-const UPDATES_JSON_PATH = path.join(process.cwd(), 'src', 'data', 'updates.json');
+const WORK_DIR = process.cwd();
+const LOCAL_SEOCHO_REPO_DIR =
+    process.env.SEOCHO_SOURCE_REPO ||
+    path.resolve(WORK_DIR, '..');
+const USE_LOCAL_SOURCE =
+    fs.existsSync(path.join(LOCAL_SEOCHO_REPO_DIR, 'README.md')) &&
+    fs.existsSync(path.join(LOCAL_SEOCHO_REPO_DIR, 'docs'));
+const TEMP_ROOT = fs.mkdtempSync(path.join(os.tmpdir(), 'seocho-site-sync-'));
+const SEOCHO_REPO_DIR = USE_LOCAL_SOURCE
+    ? LOCAL_SEOCHO_REPO_DIR
+    : path.join(TEMP_ROOT, 'seocho');
+const TARGET_DOCS_DIR = path.join(WORK_DIR, 'src', 'content', 'docs', 'docs');
+const TARGET_BLOG_DIR = path.join(WORK_DIR, 'src', 'content', 'docs', 'blog');
+const UPDATES_JSON_PATH = path.join(WORK_DIR, 'src', 'data', 'updates.json');
 
 // Ensure target directories exist
 if (!fs.existsSync(TARGET_DOCS_DIR)) {
@@ -19,11 +30,12 @@ if (!fs.existsSync(path.dirname(UPDATES_JSON_PATH))) {
 }
 
 // 1. Fetching external repository (Shallow clone to save time)
-console.log('Cloning tteon/seocho to extract docs...');
-if (fs.existsSync(SEOCHO_REPO_DIR)) {
-    fs.rmSync(SEOCHO_REPO_DIR, { recursive: true, force: true });
+if (USE_LOCAL_SOURCE) {
+    console.log(`Using local seocho source at ${SEOCHO_REPO_DIR}`);
+} else {
+    console.log('Cloning tteon/seocho to extract docs...');
+    execSync(`git clone --depth 1 https://github.com/tteon/seocho.git ${SEOCHO_REPO_DIR}`);
 }
-execSync(`git clone --depth 1 https://github.com/tteon/seocho.git ${SEOCHO_REPO_DIR}`);
 
 // 2. Mapping Files to copy over to Starlight
 const fileMappings = [
@@ -72,6 +84,26 @@ const fileMappings = [
     }
 ];
 
+const routeReplacements = new Map([
+    ['`docs/README.md`', '[`/docs/`](/docs/)'],
+    ['`docs/QUICKSTART.md`', '[`/docs/quickstart/`](/docs/quickstart/)'],
+    ['`docs/APPLY_YOUR_DATA.md`', '[`/docs/apply_your_data/`](/docs/apply_your_data/)'],
+    ['`docs/PYTHON_INTERFACE_QUICKSTART.md`', '[`/docs/python_sdk/`](/docs/python_sdk/)'],
+    ['`docs/ARCHITECTURE.md`', '[`/docs/architecture/`](/docs/architecture/)'],
+    ['`docs/WORKFLOW.md`', '[`/docs/workflow/`](/docs/workflow/)'],
+    ['`docs/PHILOSOPHY.md`', '[`/docs/philosophy/`](/docs/philosophy/)'],
+    ['`docs/TUTORIAL_FIRST_RUN.md`', '[`/docs/tutorial/`](/docs/tutorial/)'],
+    ['`docs/OPEN_SOURCE_PLAYBOOK.md`', '[`/docs/open_source_playbook/`](/docs/open_source_playbook/)'],
+]);
+
+function rewriteWebsiteRoutes(content) {
+    let rewritten = content;
+    for (const [sourceRef, routeLink] of routeReplacements.entries()) {
+        rewritten = rewritten.replaceAll(sourceRef, routeLink);
+    }
+    return rewritten;
+}
+
 // Copy and inject frontmatter
 console.log('Processing and wrapping markdown files...');
 for (const map of fileMappings) {
@@ -84,6 +116,7 @@ for (const map of fileMappings) {
 
         // Attempt to remove existing H1 titles so it doesn't clash with Astro Title
         content = content.replace(/^#\s(.*?)\n/m, '');
+        content = rewriteWebsiteRoutes(content);
 
         fs.writeFileSync(destPath, map.frontmatter + content);
         console.log(`✅ Synced: ${map.src} -> ${path.join(path.basename(destDir), map.dest)}`);
@@ -131,5 +164,7 @@ try {
 }
 
 // Cleanup Temporary clone
-fs.rmSync(SEOCHO_REPO_DIR, { recursive: true, force: true });
+if (!USE_LOCAL_SOURCE) {
+    fs.rmSync(TEMP_ROOT, { recursive: true, force: true });
+}
 console.log('🎉 Sync complete!');

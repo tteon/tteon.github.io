@@ -42,6 +42,7 @@ Read [AGENTS.md](AGENTS.md) before making doc or site changes.
    ```
 4. Run doc quality and built-link checks:
    ```bash
+   npm run check:sync
    bash scripts/check-doc-quality.sh
    bash scripts/check-built-links.sh
    ```

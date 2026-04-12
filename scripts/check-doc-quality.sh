@@ -6,10 +6,22 @@ cd "$ROOT_DIR"
 
 DOCS_ROOT="src/content/docs"
 
+search_fixed() {
+  local pattern="$1"
+  shift
+
+  if command -v rg >/dev/null 2>&1; then
+    rg -n --fixed-strings "$pattern" "$@"
+    return
+  fi
+
+  grep -RFn -- "$pattern" "$@"
+}
+
 check_absent() {
   local pattern="$1"
   shift
-  if rg -n --fixed-strings "$pattern" "$@"; then
+  if search_fixed "$pattern" "$@"; then
     echo
     echo "Forbidden website docs pattern found: $pattern" >&2
     exit 1
@@ -19,7 +31,7 @@ check_absent() {
 check_present() {
   local pattern="$1"
   shift
-  if ! rg -n --fixed-strings "$pattern" "$@" >/dev/null; then
+  if ! search_fixed "$pattern" "$@" >/dev/null; then
     echo "Required website docs pattern missing: $pattern" >&2
     exit 1
   fi

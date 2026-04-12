@@ -5,7 +5,6 @@ description: Developer-first guide to ingest data and query SEOCHO through the P
 
 > *Source mirrored from `seocho/docs/PYTHON_INTERFACE_QUICKSTART.md`*
 
-# Python Interface Quickstart
 
 SEOCHO's Python SDK is designed around a simple rule:
 
@@ -17,7 +16,7 @@ If you already have the runtime running at `http://localhost:8001`, you can
 start here immediately.
 
 If your first question is how to load your own records safely, read
-[`/docs/apply_your_data/`](/docs/apply_your_data/) alongside this guide.
+`APPLY_YOUR_DATA.md` alongside this guide.
 
 ## 1. Install
 
@@ -55,6 +54,8 @@ client = Seocho(base_url="http://localhost:8001", workspace_id="default")
 
 ### 3.1 Add one memory
 
+Use this when you want the shortest path from text to graph-backed memory.
+
 ```python
 memory = client.add(
     "Alex manages the Seoul retail account and prefers ontology-aware retrieval.",
@@ -65,6 +66,9 @@ print(memory.memory_id)
 ```
 
 ### 3.2 Ingest a batch of raw records
+
+Use this when you want SEOCHO to extract entities and relationships into a
+target graph.
 
 ```python
 result = client.raw_ingest(
@@ -79,14 +83,15 @@ print(result.status)
 print(result.records_processed)
 ```
 
-If you want a fuller ingestion guide with target-graph and record-shape advice,
-continue with [`/docs/apply_your_data/`](/docs/apply_your_data/).
-
 ## 4. Ask the Simple Way
+
+If you only want a string answer:
 
 ```python
 print(client.ask("What do you know about Alex?"))
 ```
+
+If you also want evidence:
 
 ```python
 response = client.chat("What do you know about Alex?")
@@ -97,6 +102,9 @@ print(response.evidence_bundle)
 
 ## 5. Use the Semantic Layer First
 
+This is the main graph-QA path. Prefer `graph_ids` instead of raw database names
+when you know the intended graph target.
+
 ```python
 semantic = client.semantic(
     "Who manages the Seoul retail account?",
@@ -105,10 +113,16 @@ semantic = client.semantic(
 
 print(semantic.route)
 print(semantic.response)
-print(semantic.semantic_context["evidence_bundle_preview"])
+print(semantic.support.status)
+print(semantic.evidence.grounded_slots)
+print(semantic.evidence.missing_slots)
+print(semantic.run_record.run_id)
 ```
 
 ## 6. Turn On Repair When the Query Is Hard
+
+If the question is harder, ambiguous, or likely to need relation-path repair,
+keep the semantic path but enable bounded reasoning mode.
 
 ```python
 semantic = client.semantic(
@@ -120,10 +134,21 @@ semantic = client.semantic(
 
 print(semantic.route)
 print(semantic.semantic_context["reasoning"])
-print(semantic.semantic_context["evidence_bundle_preview"])
+print(semantic.strategy.executed_mode)
+print(semantic.strategy.next_mode_hint)
+print(semantic.evidence.missing_slots)
 ```
 
+What `reasoning_mode` does:
+
+- keeps the semantic layer as the first execution path
+- validates constrained Cypher before execution
+- retries with a small repair budget when slot fill is insufficient
+- avoids jumping straight to multi-agent debate
+
 ## 7. Use the Builder Surface
+
+For application code, the builder can be easier to read.
 
 ```python
 result = (
@@ -134,9 +159,21 @@ result = (
 )
 
 print(result.route)
+print(result.support.status)
+print(result.strategy.executed_mode)
 ```
 
+Mode selection rules:
+
+- `plan(...).run()` defaults to semantic execution
+- `plan(...).react()` uses graph-scoped single-agent routing
+- `plan(...).advanced()` or `plan(...).debate()` uses explicit debate mode
+- `result.strategy.advanced_debate_recommended` tells you when debate is worth trying
+
 ## 8. Use Advanced Mode Only When You Really Need Debate
+
+Debate is not the default retrieval path. It is for cross-graph comparison or
+cases where you explicitly want multiple graph specialists to answer.
 
 ```python
 advanced = client.advanced(
@@ -146,6 +183,16 @@ advanced = client.advanced(
 
 print(advanced.debate_state)
 print(advanced.response)
+print(advanced.debate_results)
+```
+
+Equivalent explicit call:
+
+```python
+advanced = client.debate(
+    "Compare what the baseline and finance graphs know about Alex.",
+    graph_ids=["kgnormal", "kgfibo"],
+)
 ```
 
 ## 9. Inspect Graph Targets
@@ -155,7 +202,17 @@ for graph in client.graphs():
     print(graph.graph_id, graph.database, graph.ontology_id, graph.vocabulary_profile)
 ```
 
+Expected fields:
+
+- `graph_id`
+- `database`
+- `ontology_id`
+- `vocabulary_profile`
+- `description`
+
 ## 10. Module-Level Convenience API
+
+If you prefer `import seocho` style scripting:
 
 ```python
 import seocho
@@ -171,6 +228,15 @@ semantic = seocho.semantic(
     repair_budget=2,
 )
 print(semantic.response)
+
+advanced = seocho.advanced(
+    "Compare what the baseline and finance graphs know about Alex.",
+    graph_ids=["kgnormal", "kgfibo"],
+)
+print(advanced.debate_state)
+
+recent_runs = seocho.semantic_runs(limit=5, route="lpg")
+print(recent_runs[0].run_id)
 ```
 
 ## 11. Async API
@@ -190,15 +256,84 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-## 12. Mental Model
+## 12. Inspect Semantic Run History
+
+The runtime now keeps a SQLite-backed semantic run registry outside the graph
+store. You can inspect it from the SDK without touching internal files.
+
+```python
+recent_runs = client.semantic_runs(limit=10, route="lpg")
+print(recent_runs[0].run_id)
+print(recent_runs[0].support.status)
+
+run_record = client.semantic_run(recent_runs[0].run_id)
+print(run_record.strategy.executed_mode)
+print(run_record.evidence_summary)
+```
+
+## 13. Run Manual-Gold Evaluation
+
+Use the SDK evaluation harness when you want a small regression matrix over
+`question_only`, `reference_only`, `semantic_direct`, and `semantic_repair`.
+
+```python
+from seocho import ManualGoldCase, SemanticEvaluationHarness
+
+harness = SemanticEvaluationHarness(client)
+summary = harness.run_matrix(
+    [
+        ManualGoldCase(
+            case_id="neo4j-1",
+            question="What is Neo4j connected to?",
+            graph_ids=["kgnormal"],
+            expected_intent_id="relationship_lookup",
+            required_slots={
+                "source_entity": "Neo4j",
+                "target_entity": "Cypher",
+                "relation_paths": "USES",
+            },
+            preferred_relations=["USES"],
+            repair_budget=2,
+        )
+    ]
+)
+
+print(summary.aggregate_metrics["semantic_direct"])
+print(summary.aggregate_metrics["semantic_repair"])
+```
+
+These metrics are intentionally narrow:
+
+- `intent_match_rate`
+- `support_rate`
+- `required_answer_slot_coverage_manual`
+- `preferred_evidence_hit_rate`
+
+## 14. CLI Equivalents
+
+```bash
+seocho serve
+seocho add "Alex manages the Seoul retail account."
+seocho search "Who manages the Seoul retail account?"
+seocho chat "What do you know about Alex?"
+seocho graphs
+seocho stop
+```
+
+## 15. Mental Model
+
+Use this decision rule:
 
 1. Start with `ask` or `chat` for memory-first use.
 2. Use `semantic(...)` for graph-grounded retrieval.
 3. Add `reasoning_mode=True` before reaching for debate.
 4. Use `advanced()` only when you explicitly want multi-agent comparison.
 
-## 13. Read Next
+## 16. Read Next
 
-- [`/docs/apply_your_data/`](/docs/apply_your_data/)
-- [`/sdk/api-reference/`](/sdk/api-reference/)
-- [`/sdk/examples/`](/sdk/examples/)
+- `APPLY_YOUR_DATA.md`
+- `QUICKSTART.md`
+- `GRAPH_MEMORY_API.md`
+
+That keeps the default path deterministic and inspectable while still leaving a
+high-power advanced mode available.

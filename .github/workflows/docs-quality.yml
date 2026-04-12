@@ -23,8 +23,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check mirrored docs sync
+        run: npm run check:sync
+
       - name: Run website docs checks
-        run: bash scripts/check-doc-quality.sh
+        run: npm run check:docs
 
       - name: Build site
         run: npm run build

@@ -5,7 +5,6 @@ description: Get SEOCHO up and running in 5 minutes.
 
 > *Source mirrored from `seocho/docs/QUICKSTART.md`*
 
-# SEOCHO Quick Start
 
 Goal: one successful local run in under 5 minutes.
 
@@ -13,20 +12,8 @@ If you only read one runtime document first, read this one.
 
 If you want the Python SDK path immediately, continue with
 [`/docs/python_sdk/`](/docs/python_sdk/).
-If your first question is how to load your own records, continue with
+If you want the bring-your-own-data path immediately, continue with
 [`/docs/apply_your_data/`](/docs/apply_your_data/).
-
-## Execution Path At A Glance
-
-```
-setup-env ──▶ start services ──▶ ingest data ──▶ semantic retrieval
-                                                       │
-                                              enough evidence?
-                                              yes ──▶ grounded answer
-                                              no  ──▶ reasoning repair ──▶ grounded answer
-                                                                                │
-                                              (advanced debate only for explicit cross-graph comparison)
-```
 
 ## 1. Prerequisites
 
@@ -77,20 +64,6 @@ The default product path is:
 - run semantic retrieval
 - use bounded repair only when needed
 - reserve debate for explicit advanced use
-
-```
-Developer Question
-    │
-    ├── simple memory ──▶ ask() or chat()
-    │
-    ├── graph grounded ──▶ semantic()
-    │                        │
-    │                   retrieval weak?
-    │                   no  ──▶ grounded answer
-    │                   yes ──▶ reasoning_mode=True ──▶ grounded answer
-    │
-    └── explicit graph comparison ──▶ advanced debate
-```
 
 ## 5. First Success: Direct API Path
 
@@ -147,10 +120,12 @@ semantic = client.semantic(
 
 print(semantic.response)
 print(semantic.semantic_context["reasoning"])
-```
+print(semantic.support.status)
+print(semantic.strategy.next_mode_hint)
 
-If your next step is loading your own production-like records instead of sample
-data, read [`/docs/apply_your_data/`](/docs/apply_your_data/).
+recent = client.semantic_runs(limit=5, route="lpg")
+print(recent[0].run_id)
+```
 
 ## 7. Use Debate Only as an Advanced Mode
 
@@ -165,13 +140,22 @@ advanced = client.advanced(
 print(advanced.debate_state)
 ```
 
-## 8. Validate the Runtime
+Stay on the semantic path first. Inspect `semantic.support`, `semantic.strategy`,
+and `semantic.evidence` before reaching for debate.
+
+## 8. Inspect Runtime Semantic History
+
+```bash
+curl -sS "http://localhost:8001/semantic/runs?workspace_id=default&limit=5&route=lpg" | jq .
+```
+
+## 9. Validate the Runtime
 
 ```bash
 make e2e-smoke
 ```
 
-## 9. Troubleshooting
+## 10. Troubleshooting
 
 Check service state:
 
@@ -192,4 +176,5 @@ Common issues:
 - [`/docs/python_sdk/`](/docs/python_sdk/)
 - [`/docs/apply_your_data/`](/docs/apply_your_data/)
 - [`/docs/tutorial/`](/docs/tutorial/)
+- `docs/BEGINNER_PIPELINES_DEMO.md`
 - [`/docs/architecture/`](/docs/architecture/)

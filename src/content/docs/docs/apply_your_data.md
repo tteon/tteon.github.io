@@ -5,18 +5,22 @@ description: How to load your own records into SEOCHO and query them safely.
 
 > *Source mirrored from `seocho/docs/APPLY_YOUR_DATA.md`*
 
-# Apply Your Data to SEOCHO
 
-SEOCHO is easiest to adopt when you keep the execution order simple:
+SEOCHO is easiest to adopt when you treat it as a runtime with a clear order of
+operations:
 
-1. load your data into a graph target
+1. put your data into a graph target
 2. query through the semantic layer first
-3. enable bounded repair for harder questions
+3. enable bounded repair for hard questions
 4. use advanced debate only when you explicitly need cross-graph comparison
 
-## Choose an Ingestion Path
+This document is the shortest path from "I have data" to "I can query it
+through the SDK and API."
 
-Use `add(...)` for one-off text or memory-style inputs:
+## 1. Pick an Ingestion Path
+
+Use `add(...)` when you have one small piece of text and want the memory-style
+developer path.
 
 ```python
 from seocho import Seocho
@@ -31,7 +35,8 @@ memory = client.add(
 print(memory.memory_id)
 ```
 
-Use `raw_ingest(...)` for repeatable dataset loads:
+Use `raw_ingest(...)` when you already have records, batches, files, or ETL
+output and want a repeatable dataset load.
 
 ```python
 result = client.raw_ingest(
@@ -46,9 +51,9 @@ print(result.status)
 print(result.records_processed)
 ```
 
-## Recommended Record Shape
+## 2. Structure Records for Raw Ingest
 
-Minimum useful shape:
+The minimum useful record is:
 
 ```json
 {
@@ -59,43 +64,70 @@ Minimum useful shape:
 
 Recommended additions:
 
-- stable source IDs
 - `metadata.source`
 - `metadata.document_type`
 - `metadata.timestamp`
+- stable IDs from your existing system
 
-## Choose a Target Graph
+Example:
 
-Use one `target_database` per dataset or evaluation boundary.
+```python
+records = [
+    {
+        "id": "ticket-1024",
+        "content": "Customer reports recurring API timeout on Seoul retail sync.",
+        "metadata": {
+            "source": "support",
+            "priority": "high",
+            "customer": "ACME",
+        },
+    },
+]
+```
 
-Inspect current targets:
+## 3. Choose a Target Graph
+
+`target_database` is the physical ingest target.
+
+Use a separate target when:
+
+- the dataset has its own schema or ontology assumptions
+- you want clean evaluation boundaries
+- you expect to compare multiple graphs later
+
+Start simple:
+
+- one dataset -> one `target_database`
+- query that same target through `graph_ids` or `databases`
+
+Inspect available graph targets:
 
 ```python
 for graph in client.graphs():
     print(graph.graph_id, graph.database, graph.ontology_id, graph.vocabulary_profile)
 ```
 
-## Query in the Right Order
+## 4. Query in the Right Order
 
-Start simple:
+### 4.1 Start with `ask(...)` or `chat(...)`
 
 ```python
-print(client.ask("What do you know about ACME?"))
+print(client.ask("What do you know about Alex?"))
 ```
 
-Move to graph-grounded retrieval:
+### 4.2 Use `semantic(...)` for graph-grounded retrieval
 
 ```python
 semantic = client.semantic(
-    "What is ACME related to?",
-    databases=["accounts_graph"],
+    "Who manages the Seoul retail account?",
+    graph_ids=["kgnormal"],
 )
 
 print(semantic.route)
 print(semantic.response)
 ```
 
-Turn on bounded repair when the query is harder:
+### 4.3 Turn on bounded repair for harder questions
 
 ```python
 semantic = client.semantic(
@@ -108,7 +140,7 @@ semantic = client.semantic(
 print(semantic.semantic_context["reasoning"])
 ```
 
-Use debate only as an explicit advanced mode:
+### 4.4 Use `advanced(...)` only for explicit graph comparison
 
 ```python
 advanced = client.advanced(
@@ -120,7 +152,21 @@ print(advanced.debate_state)
 print(advanced.response)
 ```
 
-## API Example
+## 5. Use the Builder Surface When You Want One Explicit Plan
+
+```python
+result = (
+    client.plan("Who manages the Seoul retail account?")
+    .on_graph("kgnormal")
+    .with_repair_budget(2)
+    .run()
+)
+
+print(result.route)
+print(result.response)
+```
+
+## 6. API Example
 
 ```bash
 curl -sS -X POST http://localhost:8001/platform/ingest/raw \
@@ -147,7 +193,7 @@ curl -sS -X POST http://localhost:8001/run_agent_semantic \
   }' | jq '{route, response, reasoning: .semantic_context.reasoning}'
 ```
 
-## Where Ontology, JSON-LD, and SHACL Fit
+## 7. Where Ontology, JSON-LD, and SHACL Fit
 
 You do not need to start by hand-authoring every ontology artifact.
 
@@ -158,8 +204,25 @@ The practical order is:
 3. add approved semantic artifacts when you need stronger constraints,
    repeatability, or more deterministic retrieval
 
-## Read Next
+Those artifacts matter most when:
 
-- [`/docs/python_sdk/`](/docs/python_sdk/)
-- [`/docs/quickstart/`](/docs/quickstart/)
-- [`/sdk/ontology-guide/`](/sdk/ontology-guide/)
+- text-to-cypher needs tighter relation/property constraints
+- you want stable query behavior across runs
+- you need governance around approved ontology/shape changes
+
+## 8. Recommended Adoption Pattern
+
+For most teams, this is the right progression:
+
+1. `raw_ingest(...)` a small but representative dataset
+2. validate with `ask(...)` and `chat(...)`
+3. switch important questions to `semantic(...)`
+4. enable `reasoning_mode=True` for difficult graph questions
+5. reserve `advanced(...)` for explicit comparison or disagreement analysis
+
+## 9. Read Next
+
+- `PYTHON_INTERFACE_QUICKSTART.md`
+- `QUICKSTART.md`
+- `GRAPH_MEMORY_API.md`
+- `GRAPH_RAG_AGENT_HANDOFF_SPEC.md`
