@@ -1,0 +1,1 @@
+- Screen reader UX: Add aria-hidden="true" to decorative characters (e.g. arrows) and SVGs, and use aria-label for non-descriptive links (e.g. raw commit hashes).

@@ -166,7 +166,7 @@ graph TD
           <h2 class="seocho-display text-3xl md:text-5xl text-white mb-2">The SEOCHO Blog</h2>
           <p class="text-zinc-500 text-sm font-light">Concepts, reasoning, and major release announcements.</p>
         </div>
-        <a href="/blog/" class="text-sm font-medium text-zinc-300 hover:text-white transition-colors flex items-center">All Posts <span class="ml-1 text-lg leading-none">→</span></a>
+        <a href="/blog/" class="text-sm font-medium text-zinc-300 hover:text-white transition-colors flex items-center">All Posts <span class="ml-1 text-lg leading-none" aria-hidden="true">→</span></a>
       </div>
       <LatestBlog />
     </section>
@@ -179,7 +179,7 @@ graph TD
           <h2 class="seocho-display text-2xl md:text-4xl text-white mb-2">Latest Updates</h2>
           <p class="text-zinc-500 text-sm font-light">Continuously integrated signals from GitHub Releases.</p>
         </div>
-        <a href="https://github.com/TTEON/seocho/commits/main/" target="_blank" class="text-sm font-medium text-zinc-300 hover:text-white transition-colors flex items-center">View Commits <span class="ml-1 text-lg leading-none">→</span></a>
+        <a href="https://github.com/TTEON/seocho/commits/main/" target="_blank" class="text-sm font-medium text-zinc-300 hover:text-white transition-colors flex items-center">View Commits <span class="ml-1 text-lg leading-none" aria-hidden="true">→</span></a>
       </div>
 
       <ChangelogList />
@@ -195,7 +195,7 @@ graph TD
         <details class="group bg-[#040404] border border-white/10 p-6 md:p-8 rounded-2xl cursor-pointer hover:bg-white/[0.02] transition-colors">
           <summary class="flex justify-between items-center text-zinc-100 font-semibold list-none text-lg">
             How do I put my own data into SEOCHO?
-            <span class="transition-transform group-open:rotate-180 text-zinc-500">↓</span>
+            <span class="transition-transform group-open:rotate-180 text-zinc-500" aria-hidden="true">↓</span>
           </summary>
           <p class="text-zinc-400 text-sm mt-4 leading-relaxed font-light border-t border-white/5 pt-4">Start with `raw_ingest(...)` if you already have records or documents, or `add(...)` for one-off text. Use one `target_database` per dataset, then query it through `ask(...)`, `semantic(...)`, and only later `advanced(...)` if you need graph comparison.</p>
         </details>
@@ -203,7 +203,7 @@ graph TD
         <details class="group bg-[#040404] border border-white/10 p-6 md:p-8 rounded-2xl cursor-pointer hover:bg-white/[0.02] transition-colors">
           <summary class="flex justify-between items-center text-zinc-100 font-semibold list-none text-lg">
             When should I turn on reasoning mode?
-            <span class="transition-transform group-open:rotate-180 text-zinc-500">↓</span>
+            <span class="transition-transform group-open:rotate-180 text-zinc-500" aria-hidden="true">↓</span>
           </summary>
           <p class="text-zinc-400 text-sm mt-4 leading-relaxed font-light border-t border-white/5 pt-4">Turn on `reasoning_mode=True` when the first semantic retrieval pass is too weak, a relation path is missing, or slot fill is incomplete. It is the preferred escalation path before debate because it stays bounded and evidence-focused.</p>
         </details>
@@ -211,7 +211,7 @@ graph TD
         <details class="group bg-[#040404] border border-white/10 p-6 md:p-8 rounded-2xl cursor-pointer hover:bg-white/[0.02] transition-colors">
           <summary class="flex justify-between items-center text-zinc-100 font-semibold list-none text-lg">
             When should I use advanced debate?
-            <span class="transition-transform group-open:rotate-180 text-zinc-500">↓</span>
+            <span class="transition-transform group-open:rotate-180 text-zinc-500" aria-hidden="true">↓</span>
           </summary>
           <p class="text-zinc-400 text-sm mt-4 leading-relaxed font-light border-t border-white/5 pt-4">Use `advanced(...)` when the point of the request is explicit cross-graph comparison, disagreement analysis, or multi-agent synthesis. It is not the default retrieval mode and it should not replace the semantic-layer-first path for ordinary developer queries.</p>
         </details>
@@ -219,7 +219,7 @@ graph TD
         <details class="group bg-[#040404] border border-white/10 p-6 md:p-8 rounded-2xl cursor-pointer hover:bg-white/[0.02] transition-colors">
           <summary class="flex justify-between items-center text-zinc-100 font-semibold list-none text-lg">
             Do I need to author ontology, JSON-LD, or SHACL before first use?
-            <span class="transition-transform group-open:rotate-180 text-zinc-500">↓</span>
+            <span class="transition-transform group-open:rotate-180 text-zinc-500" aria-hidden="true">↓</span>
           </summary>
           <p class="text-zinc-400 text-sm mt-4 leading-relaxed font-light border-t border-white/5 pt-4">No. Start by ingesting representative data and validating the semantic path. Add approved ontology or shape artifacts when you need stronger constraints, more repeatable retrieval, or tighter governance around graph behavior.</p>
         </details>
