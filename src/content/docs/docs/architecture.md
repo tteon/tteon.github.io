@@ -111,11 +111,68 @@ This critical path is the default acceptance gate for user-facing releases.
 - runtime authorization policy enforcement
 - deployment quality gates and ADR governance
 
+Canonical SDK control-plane modules:
+
+- `seocho/agent/`
+- `seocho/query/`
+- `seocho/http_transport.py`
+- `seocho/ontology.py` as the stable public ontology facade
+- `seocho/ontology_serialization.py` for JSON-LD persistence
+- `seocho/ontology_artifacts.py` for runtime artifact and typed prompt generation
+- `seocho/ontology_governance.py` for offline diff/check/export flows
+- `seocho/runtime_contract.py`
+
 Primary modules:
 
 - `extraction/agent_server.py`
+- `extraction/server_runtime.py`
 - `extraction/policy.py`
 - `docs/decisions/`
+
+## Ontology Module Boundaries (Active Direction)
+
+Ontology remains a first-class SDK primitive, but it should no longer behave as
+one monolithic implementation file.
+
+- `seocho/ontology.py`
+  - stable public `Ontology`, `NodeDef`, `RelDef`, and `P` surface
+  - schema validation, SHACL derivation, and prompt-facing API entrypoints
+- `seocho/ontology_serialization.py`
+  - canonical JSON-LD load/save helpers
+  - no runtime governance side effects
+- `seocho/ontology_artifacts.py`
+  - runtime-facing typed artifact promotion
+  - approved artifacts, semantic prompt context, vocabulary shaping
+- `seocho/ontology_governance.py`
+  - offline check/diff/export/OWL inspection path
+
+Canonical direction:
+
+- local SDK and runtime promotion paths should consume explicit ontology-side
+  contracts instead of hand-built client glue
+- public API compatibility should stay centered on `Ontology`
+- heavy governance and OWL inspection stays out of the request hot path
+
+## Client Facade Boundaries (Active Direction)
+
+`Seocho` should stay a public facade, not a second home for canonical engine
+logic.
+
+- `seocho/client.py`
+  - public SDK facade and orchestration entrypoints
+- `seocho/http_transport.py`
+  - HTTP request/response wrapping and exception mapping
+- `seocho/client_artifacts.py`
+  - ontology-to-runtime-artifact bridge helpers
+- `seocho/query/*`, `seocho/agent/*`, `seocho/ontology_*`
+  - canonical engine subdomains used by the facade
+
+Canonical direction:
+
+- keep the constructor and top-level SDK calls stable
+- move HTTP transport, ontology bridge helpers, and local engine internals out
+  of `client.py` over incremental slices
+- avoid adding new canonical business logic directly to the facade
 
 ### Data Plane
 
@@ -125,8 +182,12 @@ Primary modules:
 
 Primary modules:
 
-- `extraction/pipeline.py`
-- `extraction/rule_constraints.py`
+- `seocho/rules.py` — canonical rule inference/validation (shared by SDK + server)
+- `seocho/index/pipeline.py` — canonical indexing pipeline with rule + embedding support
+- `seocho/index/linker.py` — canonical embedding-based entity linker
+- `extraction/pipeline.py` — legacy batch pipeline
+- `extraction/rule_constraints.py` — re-export shim to `seocho.rules`
+- `extraction/vector_store.py` — adapter shim to `seocho.store.vector`
 - `extraction/graph_loader.py`
 
 ## End-to-End Data Flow
@@ -189,6 +250,36 @@ Why this path exists:
 - query-time entity mapping is the hardest failure point in graph QA
 - fulltext-first lookup improves recall for imperfect user entity strings
 - semantic re-ranking + dedup reduces wrong-node selection before Cypher generation
+
+Canonical direction:
+
+- `seocho/query/` is the canonical query engine surface
+- local SDK and server runtime should share planner, executor, and answer
+  shaping contracts from `seocho/query/*`
+- `extraction/*` should keep transport and runtime orchestration concerns, not
+  grow a second query engine
+
+Server entrypoint direction:
+
+- `extraction/agent_server.py` should be the FastAPI transport shell
+- `extraction/server_runtime.py` should own shared runtime service composition
+- routers should prefer lazy service getters over eager singleton boot at import
+
+## Extraction Cleanup Classification (Current)
+
+The extraction layer is being reduced toward transport, provisioning, and
+compatibility roles.
+
+- shim now:
+  - `extraction/rule_constraints.py`
+  - `extraction/vector_store.py`
+- keep as transport/composition:
+  - `extraction/agent_server.py`
+  - `extraction/public_memory_api.py`
+  - `extraction/server_runtime.py`
+- migrate later:
+  - `extraction/runtime_ingest.py`
+  - `extraction/pipeline.py`
 
 ## Intent-First Graph-RAG Contract (Active Direction)
 

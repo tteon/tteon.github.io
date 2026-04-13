@@ -92,6 +92,9 @@ If you want the product rationale first, read [/docs/why_seocho/](/docs/why_seoc
 | `RoutingPolicy(latency=0.1, information_quality=0.8)` | 3-axis trade-off for routing decisions |
 | `onto_a.merge(onto_b)` | Combine two ontologies with conflict resolution |
 | `onto.migration_plan(new_onto)` | Schema evolution with generated Cypher statements |
+| `s.migrate("db", new_onto)` | Execute migration plan against live database |
+| `s.promote_artifact(artifact, "db")` | Promote approved artifact to production ontology |
+| `s.coverage_stats("db")` | Per-label node/rel population counts vs ontology |
 | `s.register_ontology("db", onto)` | Different schema per database |
 | `ontology.to_jsonld("schema.jsonld")` | Version-controlled schema files |
 | `Workbench` | Compare ontology/model/prompt combinations at scale |
