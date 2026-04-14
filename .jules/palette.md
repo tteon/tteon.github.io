@@ -1,0 +1,1 @@
+- For UX and accessibility tasks, ensure decorative visual elements (like CSS/HTML arrows or redundant SVGs) use `aria-hidden="true"` and links with non-descriptive text (e.g., raw commit hashes) utilize descriptive `aria-label`s.
