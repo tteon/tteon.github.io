@@ -129,6 +129,24 @@ Primary modules:
 - `extraction/policy.py`
 - `docs/decisions/`
 
+## Runtime Package Target (Active Direction)
+
+`extraction/` is a historical package name, not the desired long-term runtime
+name.
+
+Long-term package shape:
+
+- `seocho/`
+  - canonical engine modules
+- `runtime/`
+  - deployment shell, route wiring, policy, readiness, registry
+- `extraction/`
+  - extraction-only helpers or compatibility wrappers during migration
+
+We are intentionally choosing `runtime/` over `server/` because the shell owns
+more than HTTP route files. The staged migration contract lives in
+`docs/RUNTIME_PACKAGE_MIGRATION.md`.
+
 ## Ontology Module Boundaries (Active Direction)
 
 Ontology remains a first-class SDK primitive, but it should no longer behave as
@@ -189,6 +207,24 @@ Primary modules:
 - `extraction/rule_constraints.py` — re-export shim to `seocho.rules`
 - `extraction/vector_store.py` — adapter shim to `seocho.store.vector`
 - `extraction/graph_loader.py`
+
+## Benchmark Contract (Active Direction)
+
+Performance and quality must be measured in two tracks:
+
+- `FinDER`
+  - ingestion, graph construction, finance QA
+- `GraphRAG-Bench`
+  - retrieval, evidence quality, reasoning
+
+Measurement order:
+
+1. SEOCHO local SDK baseline
+2. SEOCHO runtime baseline
+3. peer baselines
+
+That rule prevents us from confusing deployment overhead with canonical engine
+quality. See `docs/BENCHMARKS.md`.
 
 ## End-to-End Data Flow
 
@@ -256,6 +292,17 @@ Canonical direction:
 - `seocho/query/` is the canonical query engine surface
 - local SDK and server runtime should share planner, executor, and answer
   shaping contracts from `seocho/query/*`
+- semantic query Phase A now also shares intent, support assessment, strategy
+  selection, Cypher validation, and insufficiency contracts from
+  `seocho/query/{intent,strategy_chooser,cypher_validator,insufficiency,contracts}.py`
+- semantic query Phase B now also shares constraint-slice building and run
+  metadata persistence from `seocho/query/{constraints,run_registry}.py`
+- semantic query Phase C now also shares entity resolution, route selection,
+  LPG/RDF specialists, and answer framing from
+  `seocho/query/semantic_agents.py`
+- semantic query Phase D now also shares `SemanticAgentFlow` orchestration from
+  `seocho/query/semantic_flow.py`; extraction keeps runtime injection and
+  compatibility aliases only
 - `extraction/*` should keep transport and runtime orchestration concerns, not
   grow a second query engine
 
@@ -277,9 +324,24 @@ compatibility roles.
   - `extraction/agent_server.py`
   - `extraction/public_memory_api.py`
   - `extraction/server_runtime.py`
-- migrate later:
-  - `extraction/runtime_ingest.py`
+- keep as compatibility caller over canonical seam:
   - `extraction/pipeline.py`
+- partial canonical seam reuse:
+  - `extraction/runtime_ingest.py`
+- canonical helper seams now shared with runtime ingest:
+  - `seocho/index/runtime_memory.py`
+  - `seocho/index/runtime_artifacts.py`
+- migrate later:
+  - remaining runtime ingest orchestration beyond extraction/linking setup
+
+Shared ingestion seam:
+
+- `seocho/index/extraction_engine.py`
+  - canonical extraction prompt rendering
+  - canonical linking prompt rendering
+  - canonical graph payload normalization
+  - reused by SDK indexing, extraction compatibility pipeline, and runtime
+    ingest prompt-driven extraction/linking setup
 
 ## Intent-First Graph-RAG Contract (Active Direction)
 
@@ -300,7 +362,11 @@ relevance.
 
 Primary implementation anchors:
 
-- `extraction/semantic_query_flow.py`
+- `seocho/query/intent.py`
+- `seocho/query/strategy_chooser.py`
+- `seocho/query/cypher_validator.py`
+- `seocho/query/insufficiency.py`
+- `extraction/semantic_query_flow.py` as the compatibility surface during migration
 - `extraction/memory_service.py`
 - `extraction/public_memory_api.py`
 - `seocho/types.py`
@@ -349,9 +415,12 @@ Offline ontology governance operators should prefer the SDK CLI surface:
 
 ### Extraction Layer
 
-| OntologyPromptBridge | `extraction/ontology_prompt_bridge.py` | Converts Ontology YAML definitions → LLM prompt variables |
-| EntityExtractor | `extraction/extractor.py` | OpenAI LLM-based entity and relationship extraction |
-| EntityLinker | `extraction/linker.py` | LLM-based entity resolution and canonicalization |
+| CanonicalExtractionEngine | `seocho/index/extraction_engine.py` | Shared extraction/linking prompt + normalization seam for SDK and extraction compatibility paths |
+| RuntimeMemoryHelpers | `seocho/index/runtime_memory.py` | Shared deterministic memory-graph shaping helpers for SDK/runtime ingestion paths |
+| RuntimeArtifactHelpers | `seocho/index/runtime_artifacts.py` | Shared deterministic runtime semantic-artifact merge, vocabulary, and summary helpers |
+| OntologyPromptBridge | `extraction/ontology_prompt_bridge.py` | Backward-compatible ontology → prompt bridge; new code should prefer ontology contracts directly |
+| EntityExtractor | `extraction/extractor.py` | Legacy OpenAI extractor wrapper retained for compatibility paths that have not yet moved to the canonical seam |
+| EntityLinker | `extraction/linker.py` | Legacy LLM linker wrapper retained for compatibility paths that have not yet moved to the canonical seam |
 | EntityDeduplicator | `extraction/deduplicator.py` | Embedding cosine similarity-based semantic deduplication |
 | RuleConstraints | `extraction/rule_constraints.py` | SHACL-like rule inference and node constraint validation annotations |
 | PromptManager | `extraction/prompt_manager.py` | Jinja2 prompt templating + history logging |
