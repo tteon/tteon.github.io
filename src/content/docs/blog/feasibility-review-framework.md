@@ -1,6 +1,6 @@
 ---
 title: "Feasibility Review Framework & Rubrics"
-date: 2026-02-21
+date: 2026-04-15
 authors:
   - seocho
 excerpt: Multi-role feasibility review framework and Go/No-Go rubric for graph data implementations.
