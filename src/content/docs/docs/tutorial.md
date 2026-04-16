@@ -26,10 +26,13 @@ cp .env.example .env
 Edit `.env` and set at least:
 
 ```bash
-OPENAI_API_KEY=sk-...
+OPENAI_API_KEY=<your-key>
 NEO4J_USER=neo4j
-NEO4J_PASSWORD=password
+NEO4J_PASSWORD=<set-a-strong-password>
 ```
+
+The `OPENAI_API_KEY` slot accepts any OpenAI-compatible provider's API key;
+the provider is pluggable, not a partnership.
 
 Notes:
 

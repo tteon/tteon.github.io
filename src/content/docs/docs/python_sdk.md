@@ -380,15 +380,16 @@ When one developer builds a local SDK configuration and wants other developers
 to consume it over HTTP client mode, export a portable runtime bundle and serve
 it behind the small bundle HTTP adapter.
 
-Author the bundle:
+Author the bundle. Any OpenAI-compatible backend can be substituted for
+the LLM shown — provider names are pluggable, not endorsements:
 
 ```python
-from seocho import DeepSeekBackend, LanceDBVectorStore, Seocho
+from seocho import OpenAIBackend, LanceDBVectorStore, Seocho
 
 client = Seocho(
     ontology=ontology,
     graph_store=graph_store,
-    llm=DeepSeekBackend(model="deepseek-chat"),
+    llm=OpenAIBackend(model="<model-id>"),       # any OpenAI-compatible backend
     vector_store=LanceDBVectorStore(uri="./.lancedb", table_name="team_memory"),
     agent_config=agent_config,
 )
@@ -409,9 +410,9 @@ seocho bundle export \
   --schema schema.jsonld \
   --neo4j-uri bolt://localhost:7687 \
   --neo4j-user neo4j \
-  --neo4j-password password \
-  --provider deepseek \
-  --model deepseek-chat \
+  --neo4j-password <your-password> \
+  --provider <openai-compatible-provider> \
+  --model <model-id> \
   --database neo4j \
   --output portable.bundle.json
 ```
@@ -449,15 +450,20 @@ Portable bundle limits in the current implementation:
 
 ## 13. Choose A Provider And Vector Backend
 
-OpenAI-compatible providers are available through the same local SDK surface:
+SEOCHO supports any OpenAI-compatible chat-completion provider through a
+single plug-in surface. The provider class names and models shown below
+are illustrative examples of that plug-in surface, not endorsements,
+partnerships, or recommendations — substitute the provider and model that
+match your own policy and cost profile.
 
 ```python
 from seocho import DeepSeekBackend, GrokBackend, KimiBackend, OpenAIBackend
 
-openai_llm = OpenAIBackend(model="gpt-4o-mini")
-deepseek_llm = DeepSeekBackend(model="deepseek-chat")
-kimi_llm = KimiBackend(model="kimi-k2.5")
-grok_llm = GrokBackend(model="grok-4.20-reasoning")
+# Example instantiations — replace with the provider and model you use.
+openai_llm = OpenAIBackend(model="<model-id>")
+deepseek_llm = DeepSeekBackend(model="<model-id>")
+kimi_llm = KimiBackend(model="<model-id>")
+grok_llm = GrokBackend(model="<model-id>")
 ```
 
 For semantic search, choose an in-memory or persistent vector backend:
