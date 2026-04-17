@@ -30,10 +30,21 @@ Responsibilities:
 
 Primary surfaces:
 
-- `extraction/agent_server.py`
-- `extraction/policy.py`
+- `runtime/agent_server.py`
+- `runtime/memory_service.py`
+- `runtime/middleware.py`
+- `runtime/policy.py`
 - `docs/decisions/`
 - `docs/BEADS_OPERATING_MODEL.md`
+
+Long-term target:
+
+- `runtime/` becomes the canonical deployment-shell package
+- `extraction/` shrinks to extraction-only concerns or compatibility wrappers
+- runtime-package slices are landing incrementally: `agent_server`,
+  `agent_readiness`, `middleware`, `memory_service`, `server_runtime`,
+  `public_memory_api`, `runtime_ingest`, and `policy` now live under
+  `runtime/` with flat `extraction/*` compatibility aliases
 
 ## Data Plane
 
@@ -64,6 +75,12 @@ Primary surfaces:
 - capture work item using standardized scripts:
   - `scripts/pm/new-issue.sh`
   - `scripts/pm/new-task.sh`
+- keep `.beads` as the canonical planning/status tracker
+- if the change touches a shared seam, create a Gastown reservation after the
+  `bd` item exists:
+  - include seam id, owner, `bd` id, branch/worktree, write scope, and TTL
+  - use `.agents/gastown/shared-seams.yaml` as the repo seam registry
+  - treat Gastown as coordination only, not a second planning system
 - for semantic retrieval or graph-grounded answer work, align the change with
   `docs/GRAPH_RAG_AGENT_HANDOFF_SPEC.md`
 - confirm philosophy alignment against [`/docs/philosophy/`](/docs/philosophy/) (ontology evidence, router/graph mapping, traceability)
@@ -107,19 +124,35 @@ Semantic path summary:
 - run code and ops gates
 - run runtime flow smoke gate (`make e2e-smoke`) when API/UI/data-plane contracts change
 - run quickstart reproducibility check (raw ingest -> semantic/debate chat) before release notes
+- when performance work is in scope, run the relevant benchmark track before and
+  after the change:
+  - `private finance corpus` for ingestion / finance-domain QA
+  - `GraphRAG-Bench` for retrieval / reasoning
+  - the bundled tutorial sample is onboarding-only and must not be reported as
+    benchmark evidence
 - optional one-command landing wrapper: `scripts/land.sh --task-id <id> --fix --pull --push`
 - run sprint label lint (`scripts/pm/lint-items.sh --sprint <id>`)
 - run agent docs lint (`scripts/pm/lint-agent-docs.sh`)
+- release or hand off any Gastown reservation before merge
 - close issue, rebase, sync, push
 - verify branch is up to date with origin
 
 Operational notes:
 
 - use `scripts/pm/lint-items.sh` with internal `bd --no-daemon` execution to avoid local daemon startup stalls.
+- when using git worktrees, prefer `BEADS_NO_DAEMON=1` to prevent daemon writes
+  landing in the wrong worktree
 - current dev quality gates in `Makefile` run against `extraction-service`.
+- while the service name remains `extraction-service`, compose mounts
+  `runtime/` and `seocho/` into `/app` so legacy flat entrypoints can import
+  canonical runtime and SDK modules during the staged rename.
 - keep graph procedure privileges scoped (`apoc.*,n10s.*`) in `docker-compose.yml`.
 - default local compose stack is `neo4j + extraction-service + evaluation-interface`.
 - legacy `semantic-service` is opt-in only via `docker compose --profile legacy-semantic up -d semantic-service`.
+- when decomposing large files, prefer the internal seam classes documented in
+  `docs/INTERNAL_CLASS_DESIGN.md` before introducing new top-level services
+- local SDK orchestration extracted from `seocho/client.py` should land in
+  `seocho/local_engine.py` before any broader facade redesign
 
 ## Docs Website Sync
 
@@ -151,7 +184,19 @@ Operational notes:
   - semantic/runtime/SDK `py_compile`
   - focused semantic/runtime/SDK pytest
   - `git diff --check`
+  - `bash scripts/ci/check-runtime-shell-contract.sh`
+  - `bash scripts/ci/check-module-ownership-contract.sh`
   - `scripts/pm/lint-agent-docs.sh`
+
+Runtime migration slices should use the repo-local skill:
+
+- `.agents/skills/runtime-migration-slice/SKILL.md`
+
+Install repo-managed hooks once per clone:
+
+```bash
+scripts/pm/install-git-hooks.sh
+```
 
 6. Daily Codex Maintenance Automation
 
@@ -161,6 +206,8 @@ Operational notes:
   - `OPENAI_API_KEY`
   - `SEOCHO_GITHUB_APP_ID`
   - `SEOCHO_GITHUB_APP_PRIVATE_KEY`
+- if any required secret is missing, the workflow exits successfully after an
+  explicit skip notice and creates no PR
 - prompt contract: `.github/codex/prompts/daily-maintenance-pr.md`
 - skill contract: `.agents/skills/daily-maintenance-pr/SKILL.md`
 - PR contract:
@@ -180,6 +227,8 @@ Operational notes:
   - `OPENAI_API_KEY`
   - `SEOCHO_GITHUB_APP_ID`
   - `SEOCHO_GITHUB_APP_PRIVATE_KEY`
+- if any required secret is missing, the workflow exits successfully after an
+  explicit skip notice and creates no PR
 - prompt contract: `.github/codex/prompts/periodic-review-pr.md`
 - skill contract: `.agents/skills/periodic-review-pr/SKILL.md`
 - PR contract:
