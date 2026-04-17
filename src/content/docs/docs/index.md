@@ -27,6 +27,8 @@ Start from the path that matches your actual job:
 | the shortest local success path | [QUICKSTART.md](/docs/quickstart/) |
 | local SDK authoring with your own ontology and graph | [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/) |
 | file locations for ontology, artifacts, traces, and rule profiles | [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/) |
+| benchmark tracks and measurement rules | [BENCHMARKS.md](BENCHMARKS.md) |
+| long-term runtime package migration plan | [RUNTIME_PACKAGE_MIGRATION.md](RUNTIME_PACKAGE_MIGRATION.md) |
 | bring-your-own-data ingestion | [APPLY_YOUR_DATA.md](/docs/apply_your_data/) |
 
 ## Canonical Start Docs
@@ -38,6 +40,11 @@ Read these first unless you already know exactly which area you need:
 - [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/): public Python SDK and pip-install path
 - [APPLY_YOUR_DATA.md](/docs/apply_your_data/): how to ingest your own records and query them safely
 - [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/): where ontology, rule, trace, and runtime files live
+- [BENCHMARKS.md](BENCHMARKS.md): benchmark tracks, peer baselines, and measurement order
+- [GASTOWN_COORDINATION.md](GASTOWN_COORDINATION.md): shared-seam reservation and handoff contract
+- [MODULE_OWNERSHIP_MAP.md](MODULE_OWNERSHIP_MAP.md): where new code should land
+- [INTERNAL_CLASS_DESIGN.md](INTERNAL_CLASS_DESIGN.md): internal seam classes for the modular monolith
+- [RUNTIME_PACKAGE_MIGRATION.md](RUNTIME_PACKAGE_MIGRATION.md): staged `extraction/` to `runtime/` migration plan
 - [WORKFLOW.md](/docs/workflow/): canonical operational workflow
 - `PRD_MVP.md`: current product scope and MVP contract
 - `GRAPH_MEMORY_API.md`: target public memory-first API
@@ -84,6 +91,11 @@ Current developer-facing execution order:
 Use these when changing a specific subsystem or workflow:
 
 - `ARCHITECTURE.md`: system architecture and module map
+- `BENCHMARKS.md`: benchmark tracks and baseline measurement contract
+- `GASTOWN_COORDINATION.md`: coordination contract for shared write scopes
+- `MODULE_OWNERSHIP_MAP.md`: contributor-facing canonical ownership map
+- `INTERNAL_CLASS_DESIGN.md`: repo-aligned internal class seams and import graph
+- `RUNTIME_PACKAGE_MIGRATION.md`: staged package-boundary migration plan
 - `../seocho/ontology_governance.py`: offline ontology governance helpers used by `seocho ontology *`
 - `GRAPH_RAG_AGENT_HANDOFF_SPEC.md`: intent-first Graph-RAG design brief
 - `AGENT_SERVER_REFACTOR_PLAN.md`: staged decomposition plan for `extraction/agent_server.py`
@@ -110,6 +122,8 @@ Use these when changing a specific subsystem or workflow:
 
 - `../scripts/ci/run_basic_ci.sh`: canonical local command behind the repo
   basic CI workflow
+- `../scripts/ci/check-module-ownership-contract.sh`: enforces canonical
+  `seocho/*` and `runtime/*` ownership for active extraction/runtime shims
 - `../scripts/ci/create_or_update_bot_pr.sh`: canonical PR publication helper
   for scheduled Codex automation
 - `../scripts/ci/validate_pr_body.sh`: enforces the required automation PR body
@@ -118,6 +132,8 @@ Use these when changing a specific subsystem or workflow:
   bounded maintenance work
 - `../.agents/skills/periodic-review-pr/SKILL.md`: repo-local skill for
   bounded review/refactor work
+- `../.agents/gastown/shared-seams.yaml`: repo-local shared seam registry for
+  Gastown reservations
 - `../.github/codex/prompts/daily-maintenance-pr.md`: prompt for daily Codex
   maintenance
 - `../.github/codex/prompts/periodic-review-pr.md`: prompt for periodic Codex
@@ -129,6 +145,10 @@ Use these when changing a specific subsystem or workflow:
   review workflow
 - `../.github/workflows/pr-comment-merge.yml`: maintainer-triggered `/go`
   squash merge workflow
+
+Scheduled Codex automation is optional. When `OPENAI_API_KEY`,
+`SEOCHO_GITHUB_APP_ID`, or `SEOCHO_GITHUB_APP_PRIVATE_KEY` are missing, the
+daily and periodic workflows exit successfully after an explicit skip notice.
 
 ## Docs Sync Integration
 

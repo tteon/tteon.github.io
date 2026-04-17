@@ -1,6 +1,6 @@
 ---
 title: "SEOCHO Design Philosophy & Operating Principles"
-date: 2026-04-12
+date: 2026-04-17
 authors:
   - seocho
 excerpt: Extract domain rules and high-value semantics from heterogeneous data into a SHACL-like semantic layer.
