@@ -30,10 +30,21 @@ Responsibilities:
 
 Primary surfaces:
 
-- `extraction/agent_server.py`
-- `extraction/policy.py`
+- `runtime/agent_server.py`
+- `runtime/memory_service.py`
+- `runtime/middleware.py`
+- `runtime/policy.py`
 - `docs/decisions/`
 - `docs/BEADS_OPERATING_MODEL.md`
+
+Long-term target:
+
+- `runtime/` becomes the canonical deployment-shell package
+- `extraction/` shrinks to extraction-only concerns or compatibility wrappers
+- runtime-package slices are landing incrementally: `agent_server`,
+  `agent_readiness`, `middleware`, `memory_service`, `server_runtime`,
+  `public_memory_api`, `runtime_ingest`, and `policy` now live under
+  `runtime/` with flat `extraction/*` compatibility aliases
 
 ## Data Plane
 
@@ -107,6 +118,10 @@ Semantic path summary:
 - run code and ops gates
 - run runtime flow smoke gate (`make e2e-smoke`) when API/UI/data-plane contracts change
 - run quickstart reproducibility check (raw ingest -> semantic/debate chat) before release notes
+- when performance work is in scope, run the relevant benchmark track before and
+  after the change:
+  - `private finance corpus` for ingestion / finance-domain QA
+  - `GraphRAG-Bench` for retrieval / reasoning
 - optional one-command landing wrapper: `scripts/land.sh --task-id <id> --fix --pull --push`
 - run sprint label lint (`scripts/pm/lint-items.sh --sprint <id>`)
 - run agent docs lint (`scripts/pm/lint-agent-docs.sh`)
@@ -117,6 +132,9 @@ Operational notes:
 
 - use `scripts/pm/lint-items.sh` with internal `bd --no-daemon` execution to avoid local daemon startup stalls.
 - current dev quality gates in `Makefile` run against `extraction-service`.
+- while the service name remains `extraction-service`, compose mounts
+  `runtime/` and `seocho/` into `/app` so legacy flat entrypoints can import
+  canonical runtime and SDK modules during the staged rename.
 - keep graph procedure privileges scoped (`apoc.*,n10s.*`) in `docker-compose.yml`.
 - default local compose stack is `neo4j + extraction-service + evaluation-interface`.
 - legacy `semantic-service` is opt-in only via `docker compose --profile legacy-semantic up -d semantic-service`.
@@ -151,7 +169,18 @@ Operational notes:
   - semantic/runtime/SDK `py_compile`
   - focused semantic/runtime/SDK pytest
   - `git diff --check`
+  - `bash scripts/ci/check-runtime-shell-contract.sh`
   - `scripts/pm/lint-agent-docs.sh`
+
+Runtime migration slices should use the repo-local skill:
+
+- `.agents/skills/runtime-migration-slice/SKILL.md`
+
+Install repo-managed hooks once per clone:
+
+```bash
+scripts/pm/install-git-hooks.sh
+```
 
 6. Daily Codex Maintenance Automation
 
