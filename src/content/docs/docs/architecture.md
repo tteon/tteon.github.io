@@ -38,6 +38,13 @@ That distinction matters because most current onboarding, API verification, and
 platform UX flow through `extraction-service`, not the standalone legacy
 semantic container.
 
+During the staged runtime rename, `extraction-service` still starts the legacy
+flat `agent_server` module. Compose therefore bind-mounts `runtime/` and
+`seocho/` into `/app`, and the flat `extraction/*` compatibility aliases
+bootstrap repo-root imports before delegating to canonical `runtime/*` modules.
+This keeps the local activation path stable while ownership moves out of the
+historically overloaded package.
+
 ## Storage And Artifact Layout
 
 The main local artifacts are deliberately file-system visible:
@@ -117,6 +124,7 @@ Canonical SDK control-plane modules:
 - `seocho/query/`
 - `seocho/http_transport.py`
 - `seocho/ontology.py` as the stable public ontology facade
+- `seocho/ontology_context.py` for compact shared ontology context descriptors and cache
 - `seocho/ontology_serialization.py` for JSON-LD persistence
 - `seocho/ontology_artifacts.py` for runtime artifact and typed prompt generation
 - `seocho/ontology_governance.py` for offline diff/check/export flows
@@ -124,10 +132,28 @@ Canonical SDK control-plane modules:
 
 Primary modules:
 
-- `extraction/agent_server.py`
-- `extraction/server_runtime.py`
-- `extraction/policy.py`
+- `runtime/agent_server.py`
+- `runtime/server_runtime.py`
+- `runtime/policy.py`
 - `docs/decisions/`
+
+## Runtime Package Target (Active Direction)
+
+`extraction/` is a historical package name, not the desired long-term runtime
+name.
+
+Long-term package shape:
+
+- `seocho/`
+  - canonical engine modules
+- `runtime/`
+  - deployment shell, route wiring, policy, readiness, registry
+- `extraction/`
+  - extraction-only helpers or compatibility wrappers during migration
+
+We are intentionally choosing `runtime/` over `server/` because the shell owns
+more than HTTP route files. The staged migration contract lives in
+`docs/RUNTIME_PACKAGE_MIGRATION.md`.
 
 ## Ontology Module Boundaries (Active Direction)
 
@@ -137,6 +163,17 @@ one monolithic implementation file.
 - `seocho/ontology.py`
   - stable public `Ontology`, `NodeDef`, `RelDef`, and `P` surface
   - schema validation, SHACL derivation, and prompt-facing API entrypoints
+- `seocho/ontology_context.py`
+  - stable `ontology_context_hash` descriptor shared by indexing, query, traces, and agent sessions
+  - small in-process cache for compiled extraction/query/agent context artifacts
+  - SKOS-style glossary/vocabulary hash derived from ontology labels, aliases, properties, and relationship terms
+  - graph-write metadata helpers that attach compact `_ontology_*` properties to persisted nodes and relationships
+  - query guardrail helpers that compare active ontology context with indexed graph context hashes
+  - typed HTTP response metadata for memory search/chat, semantic query, router, debate, execution-plan, and platform chat clients
+- Target middleware contract: `docs/ONTOLOGY_RUN_CONTEXT_STRATEGY.md`
+  - aligns workspace, graph/database scope, ontology profile, glossary identity, policy, tool use, debate, session carryover, and evidence status
+- Target property-graph lens contract: `docs/PROPERTY_GRAPH_LENS_STRATEGY.md`
+  - preserves schemaless graph flexibility while marking only agent-visible anchors, evidence sources, evidence paths, provenance, importance, confidence, and context metadata
 - `seocho/ontology_serialization.py`
   - canonical JSON-LD load/save helpers
   - no runtime governance side effects
@@ -189,6 +226,24 @@ Primary modules:
 - `extraction/rule_constraints.py` — re-export shim to `seocho.rules`
 - `extraction/vector_store.py` — adapter shim to `seocho.store.vector`
 - `extraction/graph_loader.py`
+
+## Benchmark Contract (Active Direction)
+
+Performance and quality must be measured in two tracks:
+
+- `private finance corpus`
+  - ingestion, graph construction, finance-domain QA
+- `GraphRAG-Bench`
+  - retrieval, evidence quality, reasoning
+
+Measurement order:
+
+1. SEOCHO local SDK baseline
+2. SEOCHO runtime baseline
+3. peer baselines
+
+That rule prevents us from confusing deployment overhead with canonical engine
+quality. See `docs/BENCHMARKS.md`.
 
 ## End-to-End Data Flow
 
@@ -256,13 +311,24 @@ Canonical direction:
 - `seocho/query/` is the canonical query engine surface
 - local SDK and server runtime should share planner, executor, and answer
   shaping contracts from `seocho/query/*`
+- semantic query Phase A now also shares intent, support assessment, strategy
+  selection, Cypher validation, and insufficiency contracts from
+  `seocho/query/{intent,strategy_chooser,cypher_validator,insufficiency,contracts}.py`
+- semantic query Phase B now also shares constraint-slice building and run
+  metadata persistence from `seocho/query/{constraints,run_registry}.py`
+- semantic query Phase C now also shares entity resolution, route selection,
+  LPG/RDF specialists, and answer framing from
+  `seocho/query/semantic_agents.py`
+- semantic query Phase D now also shares `SemanticAgentFlow` orchestration from
+  `seocho/query/semantic_flow.py`; extraction keeps runtime injection and
+  compatibility aliases only
 - `extraction/*` should keep transport and runtime orchestration concerns, not
   grow a second query engine
 
 Server entrypoint direction:
 
-- `extraction/agent_server.py` should be the FastAPI transport shell
-- `extraction/server_runtime.py` should own shared runtime service composition
+- `runtime/agent_server.py` is the FastAPI transport shell
+- `runtime/server_runtime.py` owns shared runtime service composition
 - routers should prefer lazy service getters over eager singleton boot at import
 
 ## Extraction Cleanup Classification (Current)
@@ -273,13 +339,40 @@ compatibility roles.
 - shim now:
   - `extraction/rule_constraints.py`
   - `extraction/vector_store.py`
-- keep as transport/composition:
+- compatibility alias now:
   - `extraction/agent_server.py`
+  - `extraction/agent_readiness.py`
+  - `extraction/middleware.py`
+  - `extraction/memory_service.py`
   - `extraction/public_memory_api.py`
   - `extraction/server_runtime.py`
-- migrate later:
-  - `extraction/runtime_ingest.py`
+  - `extraction/policy.py`
+- keep as transport/composition:
+  - `runtime/agent_server.py`
+  - `runtime/agent_readiness.py`
+  - `runtime/middleware.py`
+  - `runtime/memory_service.py`
+  - `runtime/public_memory_api.py`
+  - `runtime/server_runtime.py`
+  - `runtime/runtime_ingest.py`
+- keep as compatibility caller over canonical seam:
   - `extraction/pipeline.py`
+- compatibility alias now:
+  - `extraction/runtime_ingest.py`
+- canonical helper seams now shared with runtime ingest:
+  - `seocho/index/runtime_memory.py`
+  - `seocho/index/runtime_artifacts.py`
+- migrate later:
+  - remaining runtime ingest orchestration beyond extraction/linking setup
+
+Shared ingestion seam:
+
+- `seocho/index/extraction_engine.py`
+  - canonical extraction prompt rendering
+  - canonical linking prompt rendering
+  - canonical graph payload normalization
+  - reused by SDK indexing, extraction compatibility pipeline, and runtime
+    ingest prompt-driven extraction/linking setup
 
 ## Intent-First Graph-RAG Contract (Active Direction)
 
@@ -300,9 +393,13 @@ relevance.
 
 Primary implementation anchors:
 
-- `extraction/semantic_query_flow.py`
-- `extraction/memory_service.py`
-- `extraction/public_memory_api.py`
+- `seocho/query/intent.py`
+- `seocho/query/strategy_chooser.py`
+- `seocho/query/cypher_validator.py`
+- `seocho/query/insufficiency.py`
+- `extraction/semantic_query_flow.py` as the compatibility surface during migration
+- `runtime/memory_service.py`
+- `runtime/public_memory_api.py`
 - `seocho/types.py`
 
 Reference design brief: `docs/GRAPH_RAG_AGENT_HANDOFF_SPEC.md`
@@ -349,9 +446,12 @@ Offline ontology governance operators should prefer the SDK CLI surface:
 
 ### Extraction Layer
 
-| OntologyPromptBridge | `extraction/ontology_prompt_bridge.py` | Converts Ontology YAML definitions → LLM prompt variables |
-| EntityExtractor | `extraction/extractor.py` | OpenAI LLM-based entity and relationship extraction |
-| EntityLinker | `extraction/linker.py` | LLM-based entity resolution and canonicalization |
+| CanonicalExtractionEngine | `seocho/index/extraction_engine.py` | Shared extraction/linking prompt + normalization seam for SDK and extraction compatibility paths |
+| RuntimeMemoryHelpers | `seocho/index/runtime_memory.py` | Shared deterministic memory-graph shaping helpers for SDK/runtime ingestion paths |
+| RuntimeArtifactHelpers | `seocho/index/runtime_artifacts.py` | Shared deterministic runtime semantic-artifact merge, vocabulary, and summary helpers |
+| OntologyPromptBridge | `extraction/ontology_prompt_bridge.py` | Backward-compatible ontology → prompt bridge; new code should prefer ontology contracts directly |
+| EntityExtractor | `extraction/extractor.py` | Legacy OpenAI extractor wrapper retained for compatibility paths that have not yet moved to the canonical seam |
+| EntityLinker | `extraction/linker.py` | Legacy LLM linker wrapper retained for compatibility paths that have not yet moved to the canonical seam |
 | EntityDeduplicator | `extraction/deduplicator.py` | Embedding cosine similarity-based semantic deduplication |
 | RuleConstraints | `extraction/rule_constraints.py` | SHACL-like rule inference and node constraint validation annotations |
 | PromptManager | `extraction/prompt_manager.py` | Jinja2 prompt templating + history logging |
@@ -374,9 +474,12 @@ Offline ontology governance operators should prefer the SDK CLI surface:
 | AgentFactory | `extraction/agent_factory.py` | Dynamically provisions dedicated Agents per graph target |
 | SharedMemory | `extraction/shared_memory.py` | Request-scoped shared memory between agents + query cache |
 | DebateOrchestrator | `extraction/debate.py` | Executes Parallel Debate pattern (fan-out → collect → synthesize) |
-| Agent Server | `extraction/agent_server.py` | FastAPI endpoints (`/run_agent`, `/run_debate`, `/run_agent_semantic`, `/platform/chat/send`, `/platform/ingest/raw`) |
+| Agent Server | `runtime/agent_server.py` | FastAPI endpoints (`/run_agent`, `/run_debate`, `/run_agent_semantic`, `/platform/chat/send`, `/platform/ingest/raw`) |
+| Agent Readiness | `runtime/agent_readiness.py` | Runtime readiness summary helpers for graph-agent orchestration |
+| Request Middleware | `runtime/middleware.py` | Request ID correlation middleware for runtime HTTP endpoints |
+| Memory Service | `runtime/memory_service.py` | Memory-first runtime facade over ingest and semantic graph search |
 | Platform Agents | `extraction/platform_agents.py` | Backend/Frontend specialist orchestration + session state management |
-| Runtime Raw Ingestor | `extraction/runtime_ingest.py` | Runtime raw-text extraction/linking/rule-annotation and DB loading |
+| Runtime Raw Ingestor | `runtime/runtime_ingest.py` | Runtime raw-text extraction/linking/rule-annotation and DB loading |
 
 ### Observability Layer
 

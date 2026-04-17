@@ -96,13 +96,13 @@ const fileMappings = [
         src: 'docs/PHILOSOPHY.md',
         dest: 'philosophy.md',
         isBlog: true,
-        frontmatter: `---\ntitle: "SEOCHO Design Philosophy & Operating Principles"\ndate: ${sourceDateFor('docs/PHILOSOPHY.md')}\nauthors:\n  - seocho\nexcerpt: Extract domain rules and high-value semantics from heterogeneous data into a SHACL-like semantic layer.\n---\n\n> *Source mirrored from \`seocho/docs/PHILOSOPHY.md\`*\n\n`
+        frontmatter: `---\ntitle: "SEOCHO Design Philosophy & Operating Principles"\ndate: 2026-04-13\nauthors:\n  - seocho\nexcerpt: Extract domain rules and high-value semantics from heterogeneous data into a SHACL-like semantic layer.\n---\n\n> *Source mirrored from \`seocho/docs/PHILOSOPHY.md\`*\n\n`
     },
     {
         src: 'docs/PHILOSOPHY_FEASIBILITY_REVIEW.md',
         dest: 'feasibility-review-framework.md',
         isBlog: true,
-        frontmatter: `---\ntitle: "Feasibility Review Framework & Rubrics"\ndate: ${sourceDateFor('docs/PHILOSOPHY_FEASIBILITY_REVIEW.md')}\nauthors:\n  - seocho\nexcerpt: Multi-role feasibility review framework and Go/No-Go rubric for graph data implementations.\n---\n\n> *Source mirrored from \`seocho/docs/PHILOSOPHY_FEASIBILITY_REVIEW.md\`*\n\n`
+        frontmatter: `---\ntitle: "Feasibility Review Framework & Rubrics"\ndate: 2026-04-13\nauthors:\n  - seocho\nexcerpt: Multi-role feasibility review framework and Go/No-Go rubric for graph data implementations.\n---\n\n> *Source mirrored from \`seocho/docs/PHILOSOPHY_FEASIBILITY_REVIEW.md\`*\n\n`
     }
 ];
 

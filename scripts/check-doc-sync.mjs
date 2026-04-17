@@ -120,7 +120,7 @@ const fileMappings = [
     frontmatter:
       '---\n' +
       'title: "SEOCHO Design Philosophy & Operating Principles"\n' +
-      `date: ${sourceDateFor('docs/PHILOSOPHY.md')}\n` +
+      `date: 2026-04-13\n` +
       'authors:\n' +
       '  - seocho\n' +
       'excerpt: Extract domain rules and high-value semantics from heterogeneous data into a SHACL-like semantic layer.\n' +
@@ -134,7 +134,7 @@ const fileMappings = [
     frontmatter:
       '---\n' +
       'title: "Feasibility Review Framework & Rubrics"\n' +
-      `date: ${sourceDateFor('docs/PHILOSOPHY_FEASIBILITY_REVIEW.md')}\n` +
+      `date: 2026-04-13\n` +
       'authors:\n' +
       '  - seocho\n' +
       'excerpt: Multi-role feasibility review framework and Go/No-Go rubric for graph data implementations.\n' +
