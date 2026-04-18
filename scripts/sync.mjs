@@ -16,6 +16,7 @@ const SEOCHO_REPO_DIR = USE_LOCAL_SOURCE
     : path.join(TEMP_ROOT, 'seocho');
 const TARGET_DOCS_DIR = path.join(WORK_DIR, 'src', 'content', 'docs', 'docs');
 const TARGET_BLOG_DIR = path.join(WORK_DIR, 'src', 'content', 'docs', 'blog');
+const SOURCE_BLOB_BASE = 'https://github.com/tteon/seocho/blob/main/';
 const UPDATES_JSON_PATH = path.join(WORK_DIR, 'src', 'data', 'updates.json');
 
 // Ensure target directories exist
@@ -123,10 +124,19 @@ const routeReplacements = new Map([
     ['(PYTHON_INTERFACE_QUICKSTART.md)', '(/docs/python_sdk/)'],
     ['(APPLY_YOUR_DATA.md)', '(/docs/apply_your_data/)'],
     ['(FILES_AND_ARTIFACTS.md)', '(/docs/files_and_artifacts/)'],
-    ['(ARCHITECTURE.md)', '(/docs/architecture/)'],
-    ['(WORKFLOW.md)', '(/docs/workflow/)'],
-    ['(TUTORIAL_FIRST_RUN.md)', '(/docs/tutorial/)'],
-    ['(OPEN_SOURCE_PLAYBOOK.md)', '(/docs/open_source_playbook/)'],
+  ['(ARCHITECTURE.md)', '(/docs/architecture/)'],
+  ['(WORKFLOW.md)', '(/docs/workflow/)'],
+  ['(TUTORIAL_FIRST_RUN.md)', '(/docs/tutorial/)'],
+  ['(OPEN_SOURCE_PLAYBOOK.md)', '(/docs/open_source_playbook/)'],
+  ['(BENCHMARKS.md)', `(${SOURCE_BLOB_BASE}docs/BENCHMARKS.md)`],
+  ['(RUNTIME_PACKAGE_MIGRATION.md)', `(${SOURCE_BLOB_BASE}docs/RUNTIME_PACKAGE_MIGRATION.md)`],
+  ['(GRAPH_RAG_AGENT_HANDOFF_SPEC.md)', `(${SOURCE_BLOB_BASE}docs/GRAPH_RAG_AGENT_HANDOFF_SPEC.md)`],
+  ['(ONTOLOGY_RUN_CONTEXT_STRATEGY.md)', `(${SOURCE_BLOB_BASE}docs/ONTOLOGY_RUN_CONTEXT_STRATEGY.md)`],
+  ['(PROPERTY_GRAPH_LENS_STRATEGY.md)', `(${SOURCE_BLOB_BASE}docs/PROPERTY_GRAPH_LENS_STRATEGY.md)`],
+  ['(ISSUE_TASK_SYSTEM.md)', `(${SOURCE_BLOB_BASE}docs/ISSUE_TASK_SYSTEM.md)`],
+  ['(BEADS_OPERATING_MODEL.md)', `(${SOURCE_BLOB_BASE}docs/BEADS_OPERATING_MODEL.md)`],
+  ['(decisions/DECISION_LOG.md)', `(${SOURCE_BLOB_BASE}docs/decisions/DECISION_LOG.md)`],
+  ['(../CONTRIBUTING.md)', `(${SOURCE_BLOB_BASE}CONTRIBUTING.md)`],
 ]);
 
 function rewriteWebsiteRoutes(content) {

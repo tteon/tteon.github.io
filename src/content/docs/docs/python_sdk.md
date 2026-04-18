@@ -8,6 +8,7 @@ description: Developer-first guide to ingest data and query SEOCHO through the P
 
 SEOCHO's Python SDK is designed around a simple rule:
 
+- keep agents and graph databases aligned to one ontology contract
 - default to the semantic layer
 - turn on bounded repair when retrieval is insufficient
 - use debate only as an explicit advanced mode
@@ -17,6 +18,8 @@ start here immediately.
 
 If your first question is how to load your own records safely, read
 `APPLY_YOUR_DATA.md` alongside this guide.
+If your first question is how to measure quality or latency, read
+`BENCHMARKS.md` instead of treating this guide as the benchmark contract.
 
 ## 1. Install
 
@@ -49,8 +52,9 @@ pip install "seocho[ontology]"
 Important:
 
 - `pip install seocho` is enough for remote HTTP client mode.
-- `pip install "seocho[local]"` is the simplest published-package path for direct `Neo4jGraphStore(...)` workflows.
-- local engine mode requires a real graph backend and local-mode dependencies.
+- `pip install "seocho[local]"` is the simplest published-package path for `Seocho.local(...)`.
+- `Seocho.local(ontology)` defaults to embedded LadybugDB, so a Neo4j/DozerDB server is optional for hello world.
+- pass `graph="bolt://..."` or `Neo4jGraphStore(...)` when you want the production DozerDB/Neo4j path.
 - `pip install -e ".[dev]"` remains the right path when you are editing the repo itself.
 
 If you are iterating on schema evolution, use the offline governance CLI:
@@ -73,7 +77,8 @@ You have two primary SDK shapes:
 | Mode | Constructor | When to use it |
 |------|-------------|----------------|
 | HTTP client | `Seocho(base_url="http://localhost:8001", workspace_id="default")` | consume a running SEOCHO runtime |
-| Local engine | `Seocho(ontology=..., graph_store=..., llm=...)` | SDK authoring, experiments, direct graph access |
+| Embedded local engine | `Seocho.local(ontology)` | serverless SDK authoring, experiments, hello world |
+| Explicit local engine | `Seocho(ontology=..., graph_store=..., llm=...)` | direct backend control |
 
 Fastest script-style setup:
 
@@ -97,7 +102,17 @@ Important parameters:
 - `workspace_id`: required logical scope for runtime-facing data and queries
 - `user_id`, `agent_id`, `session_id`: optional scope fields for memory/runtime tracing
 
-Local engine example:
+Embedded local engine example:
+
+```python
+from seocho import Ontology, Seocho
+
+client = Seocho.local(Ontology(name="demo"))
+client.add("Marie Curie worked at the University of Paris.")
+print(client.ask("Where did Marie Curie work?"))
+```
+
+Production graph-server example:
 
 ```python
 from seocho import Seocho, Ontology
@@ -113,7 +128,7 @@ client = Seocho(
 
 Local-mode constructor parameters you should understand:
 
-- `graph_store`: Bolt-backed DozerDB/Neo4j connection used by the SDK
+- `graph_store`: explicit backend used by the SDK; `Seocho.local(...)` creates an embedded LadybugDB store by default
 - `llm`: OpenAI-compatible extraction/query backend
 - `ontology`: schema contract that drives extraction, validation, and query generation
 
@@ -380,16 +395,15 @@ When one developer builds a local SDK configuration and wants other developers
 to consume it over HTTP client mode, export a portable runtime bundle and serve
 it behind the small bundle HTTP adapter.
 
-Author the bundle. Any OpenAI-compatible backend can be substituted for
-the LLM shown — provider names are pluggable, not endorsements:
+Author the bundle:
 
 ```python
-from seocho import OpenAIBackend, LanceDBVectorStore, Seocho
+from seocho import DeepSeekBackend, LanceDBVectorStore, Seocho
 
 client = Seocho(
     ontology=ontology,
     graph_store=graph_store,
-    llm=OpenAIBackend(model="<model-id>"),       # any OpenAI-compatible backend
+    llm=DeepSeekBackend(model="deepseek-chat"),
     vector_store=LanceDBVectorStore(uri="./.lancedb", table_name="team_memory"),
     agent_config=agent_config,
 )
@@ -410,9 +424,9 @@ seocho bundle export \
   --schema schema.jsonld \
   --neo4j-uri bolt://localhost:7687 \
   --neo4j-user neo4j \
-  --neo4j-password <your-password> \
-  --provider <openai-compatible-provider> \
-  --model <model-id> \
+  --neo4j-password password \
+  --provider deepseek \
+  --model deepseek-chat \
   --database neo4j \
   --output portable.bundle.json
 ```
@@ -451,20 +465,24 @@ Portable bundle limits in the current implementation:
 ## 13. Choose A Provider And Vector Backend
 
 SEOCHO supports any OpenAI-compatible chat-completion provider through a
-single plug-in surface. The provider class names and models shown below
-are illustrative examples of that plug-in surface, not endorsements,
+single plug-in surface. The provider names and models shown below are
+illustrative examples of that plug-in surface, not endorsements,
 partnerships, or recommendations — substitute the provider and model that
 match your own policy and cost profile.
 
 ```python
-from seocho import DeepSeekBackend, GrokBackend, KimiBackend, OpenAIBackend
+from seocho import DeepSeekBackend, GrokBackend, KimiBackend, OpenAIBackend, QwenBackend
 
 # Example instantiations — replace with the provider and model you use.
 openai_llm = OpenAIBackend(model="<model-id>")
 deepseek_llm = DeepSeekBackend(model="<model-id>")
 kimi_llm = KimiBackend(model="<model-id>")
 grok_llm = GrokBackend(model="<model-id>")
+qwen_llm = QwenBackend(model="<model-id>")
 ```
+
+Provider env vars follow the preset names: `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`,
+`MOONSHOT_API_KEY`, `XAI_API_KEY`, and `DASHSCOPE_API_KEY`.
 
 For semantic search, choose an in-memory or persistent vector backend:
 
@@ -565,7 +583,12 @@ store = Neo4jGraphStore("bolt://localhost:7687", "neo4j", "password")
 llm = OpenAIBackend(model="gpt-4o-mini")
 
 # Pipeline mode (default) — deterministic, no LLM reasoning about flow
-s = Seocho(ontology=onto, graph_store=store, llm=llm)
+s = Seocho(
+    ontology=onto,
+    graph_store=store,
+    llm=llm,
+    ontology_profile="finance-core",
+)
 
 with s.session("analysis") as sess:
     sess.add("ACME acquired Beta in 2024.")
@@ -573,6 +596,39 @@ with s.session("analysis") as sess:
     # QueryAgent sees structured context derived from the same ontology
     answer = sess.ask("What does ACME know about Beta?")
 ```
+
+`ontology_profile` is optional. When set, SEOCHO attaches a compact
+`ontology_context` descriptor to indexing metadata, query traces, and session
+agent context. The descriptor also includes the SKOS-style glossary hash derived
+from vocabulary terms and aliases, so glossary changes invalidate the context
+identity. This is the lightweight middleware seam that proves indexing and
+querying used the same shared ontology contract without adding a new storage
+format or hot-path reasoning dependency.
+
+In local SDK mode, the same context is also persisted as compact `_ontology_*`
+properties on graph nodes and relationships. Query paths inspect those hashes
+and surface `ontology_context_mismatch` metadata when the active ontology
+profile differs from data already indexed in the target graph. SEOCHO does not
+block the answer automatically; the metadata is a re-indexing and audit
+guardrail for teams that change ontology profiles over time.
+
+HTTP runtime mode exposes the same guardrail through typed SDK responses:
+
+```python
+semantic = client.semantic("Who manages Seoul retail?", databases=["kgnormal"])
+print(semantic.ontology_context_mismatch["mismatch"])
+
+chat = client.chat("What do we know about Seoul retail?", databases=["kgnormal"])
+print(chat.ontology_context_mismatch.get("warning", ""))
+
+result = client.plan("Compare Seoul retail sources").on_graph("retail_kg").advanced().run()
+print(result.ontology_context_mismatch["databases"])
+```
+
+The same top-level field is available on router, debate, execution-plan, and
+platform chat responses. This keeps the library interface consistent: agent
+code asks a graph question, while SEOCHO carries ontology/database parity
+metadata beside the answer.
 
 If the same ontology must also govern runtime ingest, reuse it instead of
 authoring a second payload:
