@@ -19,6 +19,8 @@ now?
 |---|---|
 | get a first local success path | [QUICKSTART.md](/docs/quickstart/) |
 | use the Python SDK directly | [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/) |
+| declare reusable agent patterns in YAML | [AGENT_DESIGN_SPECS.md](AGENT_DESIGN_SPECS.md) |
+| declare graph-model-aware indexing in YAML | [INDEXING_DESIGN_SPECS.md](INDEXING_DESIGN_SPECS.md) |
 | bring your own ontology and data | [APPLY_YOUR_DATA.md](/docs/apply_your_data/) |
 | inspect files, artifacts, and traces | [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/) |
 | understand the system design | [ARCHITECTURE.md](/docs/architecture/) |
@@ -40,6 +42,10 @@ Recommended onboarding order:
 - [QUICKSTART.md](/docs/quickstart/): shortest local success path
 - [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/): public
   Python SDK path and API examples
+- [AGENT_DESIGN_SPECS.md](AGENT_DESIGN_SPECS.md): YAML-backed agent patterns
+  with required ontology bindings
+- [INDEXING_DESIGN_SPECS.md](INDEXING_DESIGN_SPECS.md): YAML-backed indexing
+  variants for LPG, RDF, hybrid, and inquiry-cycle defaults
 - [APPLY_YOUR_DATA.md](/docs/apply_your_data/): ingest your own records and query
   them safely
 - [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/): where ontology files,

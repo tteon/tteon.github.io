@@ -672,6 +672,70 @@ with s.session("auto") as sess:
 | `RoutingPolicy.balanced()` | 33% | 33% | 34% | General use |
 | `RoutingPolicy.thorough()` | 10% | 10% | 80% | Accuracy matters most |
 
+### YAML agent design specs
+
+If you want a reviewable agent setup checked into git, declare it in YAML and
+let SEOCHO compile it into `AgentConfig` plus `ontology_profile`.
+
+```python
+from seocho import Ontology, Seocho
+
+onto = Ontology.from_jsonld("schema.jsonld")
+
+client = Seocho.from_agent_design(
+    "examples/agent_designs/planning_multi_agent_finance.yaml",
+    ontology=onto,
+    llm="openai/gpt-4o-mini",
+    workspace_id="finance-prod",
+)
+```
+
+The YAML must include an `ontology:` section. If the section is missing, or it
+does not declare a binding like `profile`, `ontology_id`, `package_id`, or
+`path`, SEOCHO raises a `ValueError`.
+
+See [AGENT_DESIGN_SPECS.md](AGENT_DESIGN_SPECS.md) and the
+[`examples/agent_designs/`](/tmp/seocho-land-finder-e2e/examples/agent_designs)
+directory for three starter patterns:
+
+- planning + multi-agent collaboration
+- reflection + chain-of-thought
+- memory + tool use
+
+### YAML indexing design specs
+
+If you want graph-model-aware indexing checked into git, declare it in YAML and
+let SEOCHO materialize the ontology graph model plus local indexing defaults.
+
+```python
+from seocho import Ontology, Seocho
+
+onto = Ontology.from_jsonld("schema.jsonld")
+
+client = Seocho.from_indexing_design(
+    "examples/indexing_designs/lpg_finance_provenance.yaml",
+    ontology=onto,
+    llm="openai/gpt-4o-mini",
+    workspace_id="finance-prod",
+)
+```
+
+The YAML must include an `ontology:` section and must declare
+`graph_model` + `storage_target`. RDF-targeted designs must also declare a
+`materialization.rdf_mode`.
+
+For `graph_model: lpg`, SEOCHO installs a property-graph-oriented extraction
+prompt by default so the model can preserve source-grounded scalar properties
+without collapsing period-specific metrics.
+
+See [INDEXING_DESIGN_SPECS.md](INDEXING_DESIGN_SPECS.md) and the
+[`examples/indexing_designs/`](/tmp/seocho-land-finder-e2e/examples/indexing_designs)
+directory for starter designs covering:
+
+- LPG + provenance-first indexing
+- RDF + deductive expansion
+- hybrid + inquiry-cycle repair
+
 ## 17. Ontology Merge
 
 Combine two ontologies when integrating new domains:

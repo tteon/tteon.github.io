@@ -20,6 +20,26 @@ const TARGET_DOCS_DIR = path.join(WORK_DIR, 'src', 'content', 'docs', 'docs');
 const TARGET_BLOG_DIR = path.join(WORK_DIR, 'src', 'content', 'docs', 'blog');
 const SOURCE_BLOB_BASE = 'https://github.com/tteon/seocho/blob/main/';
 
+// Materialize the source repo BEFORE the fileMappings array is evaluated.
+// sourceDateFor() runs git log inside the clone to embed the source commit
+// date into blog frontmatter, and fileMappings below invokes sourceDateFor()
+// at module-load time. If the clone happens inside the later try {} block,
+// the lookup fails and the frontmatter silently falls back to today's date,
+// which causes the expected-vs-stored comparison to drift day-over-day.
+//
+// Using --filter=blob:none (full commit history, lazy blob fetch) so
+// sourceDateFor() returns the real last-modified commit date for every file
+// without paying the cost of a full file-content clone.
+if (!USE_LOCAL_SOURCE) {
+  console.log('Cloning tteon/seocho for docs sync verification...');
+  execSync(
+    `git clone --filter=blob:none https://github.com/tteon/seocho.git ${SEOCHO_REPO_DIR}`,
+    { stdio: 'inherit' }
+  );
+} else {
+  console.log(`Using explicit SEOCHO source at ${SEOCHO_REPO_DIR}`);
+}
+
 function sourceDateFor(relPath) {
   try {
     const output = execSync(
@@ -197,14 +217,8 @@ function renderMirroredContent(mapping) {
 }
 
 try {
-  if (USE_LOCAL_SOURCE) {
-    console.log(`Using explicit SEOCHO source at ${SEOCHO_REPO_DIR}`);
-  } else {
-    console.log('Cloning tteon/seocho for docs sync verification...');
-    execSync(`git clone --depth 1 https://github.com/tteon/seocho.git ${SEOCHO_REPO_DIR}`, {
-      stdio: 'inherit',
-    });
-  }
+  // Clone already materialized at module top-level so sourceDateFor() could
+  // be evaluated inside the fileMappings array literal. Nothing to do here.
 
   const drifted = [];
 

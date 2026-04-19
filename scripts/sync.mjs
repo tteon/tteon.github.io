@@ -30,12 +30,18 @@ if (!fs.existsSync(path.dirname(UPDATES_JSON_PATH))) {
     fs.mkdirSync(path.dirname(UPDATES_JSON_PATH), { recursive: true });
 }
 
-// 1. Fetching external repository (Shallow clone to save time)
+// 1. Fetching external repository.
+// Full commit history is required: sourceDateFor() uses `git log -1 -- <file>`
+// to resolve each source file's last-modified date for blog frontmatter.
+// A `--depth 1` clone collapses that to a single synthesized commit (today's
+// date), which makes mirrored blog dates drift day-over-day and causes the
+// check-doc-sync gate to fail on every CI run after the first.
+// --filter=blob:none keeps the clone cheap by lazy-fetching file contents.
 if (USE_LOCAL_SOURCE) {
     console.log(`Using explicit SEOCHO source at ${SEOCHO_REPO_DIR}`);
 } else {
     console.log('Cloning tteon/seocho to extract docs...');
-    execSync(`git clone --depth 1 https://github.com/tteon/seocho.git ${SEOCHO_REPO_DIR}`);
+    execSync(`git clone --filter=blob:none https://github.com/tteon/seocho.git ${SEOCHO_REPO_DIR}`);
 }
 
 function sourceDateFor(relPath) {
