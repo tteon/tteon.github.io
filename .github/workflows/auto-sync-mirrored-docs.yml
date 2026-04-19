@@ -1,0 +1,80 @@
+name: Auto-sync mirrored docs
+
+# Mirrored pages under src/content/docs/ are rendered from seocho/docs/*.md via
+# scripts/sync.mjs. Whenever seocho main changes, the mirrors drift and the
+# docs-quality gate (npm run check:sync) fails. This workflow runs the sync
+# on a schedule, and if drift is present opens (or force-updates) a PR so a
+# maintainer can merge the refresh.
+
+on:
+  schedule:
+    # Daily at 13:00 UTC / 22:00 Asia/Seoul — captures one day's upstream
+    # doc edits in a single PR.
+    - cron: "0 13 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: auto-sync-mirrored-docs
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run sync against seocho main
+        run: node scripts/sync.mjs
+
+      - name: Verify check:sync now passes
+        run: npm run check:sync
+
+      - name: Open or update auto-sync PR if drift
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo "No drift detected; mirrored docs already current."
+            exit 0
+          fi
+
+          echo "Drift detected in these files:"
+          git status --short
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          BRANCH="auto-sync/mirrored-docs"
+          git checkout -B "$BRANCH"
+          git add -A
+          git commit -m "docs: auto-sync mirrored docs from seocho main"
+          git push --force origin "$BRANCH"
+
+          # Reuse the existing auto-sync PR if it is still open.
+          EXISTING=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // ""')
+          if [[ -z "$EXISTING" ]]; then
+            gh pr create \
+              --head "$BRANCH" \
+              --base main \
+              --title "docs: auto-sync mirrored docs from seocho main" \
+              --body "Automated refresh of mirrored docs from \`tteon/seocho\` main via \`scripts/sync.mjs\`. Run \`npm run check:sync\` locally to verify.
+
+          Known limitation: PRs opened by \`GITHUB_TOKEN\` do not trigger repository workflows. To run the \`docs-quality\` and \`deploy\` checks on this PR, close and reopen it, or push an empty commit on top. Replace \`GITHUB_TOKEN\` with a PAT secret to remove this caveat."
+          else
+            echo "PR #$EXISTING already open; branch force-updated in place."
+          fi
