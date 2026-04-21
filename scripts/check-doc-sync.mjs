@@ -194,6 +194,8 @@ const routeReplacements = new Map([
   ['(BEADS_OPERATING_MODEL.md)', `(${SOURCE_BLOB_BASE}docs/BEADS_OPERATING_MODEL.md)`],
   ['(decisions/DECISION_LOG.md)', `(${SOURCE_BLOB_BASE}docs/decisions/DECISION_LOG.md)`],
   ['(../CONTRIBUTING.md)', `(${SOURCE_BLOB_BASE}CONTRIBUTING.md)`],
+  ['(/tmp/seocho-land-finder-e2e/examples/agent_designs)', `(${SOURCE_BLOB_BASE}examples/agent_designs)`],
+  ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs)', `(${SOURCE_BLOB_BASE}examples/indexing_designs)`],
 ]);
 
 function rewriteWebsiteRoutes(content) {
