@@ -18,28 +18,34 @@ now?
 | If you need to... | Start here |
 |---|---|
 | get a first local success path | [QUICKSTART.md](/docs/quickstart/) |
+| understand SEOCHO with architecture snippets | [BEGINNER_GUIDE.md](BEGINNER_GUIDE.md) |
 | use the Python SDK directly | [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/) |
 | declare reusable agent patterns in YAML | [AGENT_DESIGN_SPECS.md](AGENT_DESIGN_SPECS.md) |
 | declare graph-model-aware indexing in YAML | [INDEXING_DESIGN_SPECS.md](INDEXING_DESIGN_SPECS.md) |
 | bring your own ontology and data | [APPLY_YOUR_DATA.md](/docs/apply_your_data/) |
 | inspect files, artifacts, and traces | [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/) |
 | understand the system design | [ARCHITECTURE.md](/docs/architecture/) |
+| present SEOCHO to a technical audience | [presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md](presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md) |
 | measure behavior with FinDER and benchmark tracks | [BENCHMARKS.md](https://github.com/tteon/seocho/blob/main/docs/BENCHMARKS.md) |
 
 Recommended onboarding order:
 
 1. [WHY_SEOCHO.md](/docs/why_seocho/)
 2. [QUICKSTART.md](/docs/quickstart/)
-3. [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/)
-4. [APPLY_YOUR_DATA.md](/docs/apply_your_data/)
-5. [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/)
-6. [ARCHITECTURE.md](/docs/architecture/)
+3. [BEGINNER_GUIDE.md](BEGINNER_GUIDE.md)
+4. [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/)
+5. [APPLY_YOUR_DATA.md](/docs/apply_your_data/)
+6. [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/)
+7. [ARCHITECTURE.md](/docs/architecture/)
+8. [presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md](presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md)
 
 ## Product Entry Points
 
 - [WHY_SEOCHO.md](/docs/why_seocho/): product framing and ontology-aligned value
   proposition
 - [QUICKSTART.md](/docs/quickstart/): shortest local success path
+- [BEGINNER_GUIDE.md](BEGINNER_GUIDE.md): first-run guide that connects SDK
+  snippets to architecture seams
 - [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/): public
   Python SDK path and API examples
 - [AGENT_DESIGN_SPECS.md](AGENT_DESIGN_SPECS.md): YAML-backed agent patterns
@@ -56,6 +62,8 @@ Recommended onboarding order:
 ## Architecture And Operations
 
 - [ARCHITECTURE.md](/docs/architecture/): system architecture and runtime/module map
+- [presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md](presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md):
+  20-30 minute beginner-friendly product and architecture deck
 - [RUNTIME_PACKAGE_MIGRATION.md](https://github.com/tteon/seocho/blob/main/docs/RUNTIME_PACKAGE_MIGRATION.md): staged
   `extraction/` to `runtime/` migration plan
 - [GRAPH_RAG_AGENT_HANDOFF_SPEC.md](https://github.com/tteon/seocho/blob/main/docs/GRAPH_RAG_AGENT_HANDOFF_SPEC.md):
@@ -64,6 +72,10 @@ Recommended onboarding order:
   ontology context contract across indexing, query, and agents
 - [PROPERTY_GRAPH_LENS_STRATEGY.md](https://github.com/tteon/seocho/blob/main/docs/PROPERTY_GRAPH_LENS_STRATEGY.md):
   semantic overlay strategy for property graphs
+- [INTERNAL_CLASS_DESIGN.md](INTERNAL_CLASS_DESIGN.md): internal orchestration
+  seams for the modular monolith
+- [MODULE_OWNERSHIP_MAP.md](MODULE_OWNERSHIP_MAP.md): canonical module
+  ownership and compatibility boundaries
 - [WORKFLOW.md](/docs/workflow/): operational workflow
 
 ## Contributor References

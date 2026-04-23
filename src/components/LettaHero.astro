@@ -62,7 +62,7 @@
         <div class="mx-auto text-xs text-zinc-500 font-mono">seocho-ontology-first</div>
       </div>
       <div class="p-6 text-sm font-mono text-zinc-300 overflow-x-auto">
-        <Fragment set:html={`<pre class="!bg-transparent !m-0 !p-0"><code class="language-python">from seocho import Seocho, Ontology, NodeDef, RelDef, P
+        <pre class="!bg-transparent !m-0 !p-0"><code class="language-python">{`from seocho import Seocho, Ontology, NodeDef, RelDef, P
 from seocho.store import Neo4jGraphStore, OpenAIBackend
 
 ontology = Ontology(
@@ -82,8 +82,7 @@ client = Seocho(
 )
 
 client.add("ACME acquired Beta in 2024.")
-print(client.ask("Who did ACME acquire?", reasoning_mode=True))
-</code></pre>`} />
+print(client.ask("Who did ACME acquire?", reasoning_mode=True))`}</code></pre>
       </div>
     </div>
   </div>
