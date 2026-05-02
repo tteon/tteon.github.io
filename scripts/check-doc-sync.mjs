@@ -19,6 +19,7 @@ const SEOCHO_REPO_DIR = USE_LOCAL_SOURCE
 const TARGET_DOCS_DIR = path.join(WORK_DIR, 'src', 'content', 'docs', 'docs');
 const TARGET_BLOG_DIR = path.join(WORK_DIR, 'src', 'content', 'docs', 'blog');
 const SOURCE_BLOB_BASE = 'https://github.com/tteon/seocho/blob/main/';
+const SOURCE_TREE_BASE = 'https://github.com/tteon/seocho/tree/main/';
 
 // Materialize the source repo BEFORE the fileMappings array is evaluated.
 // sourceDateFor() runs git log inside the clone to embed the source commit
@@ -194,6 +195,22 @@ const routeReplacements = new Map([
   ['(BEADS_OPERATING_MODEL.md)', `(${SOURCE_BLOB_BASE}docs/BEADS_OPERATING_MODEL.md)`],
   ['(decisions/DECISION_LOG.md)', `(${SOURCE_BLOB_BASE}docs/decisions/DECISION_LOG.md)`],
   ['(../CONTRIBUTING.md)', `(${SOURCE_BLOB_BASE}CONTRIBUTING.md)`],
+  ['(../examples/agent_designs/)', `(${SOURCE_TREE_BASE}examples/agent_designs)`],
+  ['(../examples/indexing_designs/)', `(${SOURCE_TREE_BASE}examples/indexing_designs)`],
+  ['(../examples/agent_designs/planning_multi_agent_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/agent_designs/planning_multi_agent_finance.yaml)`],
+  ['(../examples/agent_designs/reflection_chain_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/agent_designs/reflection_chain_finance.yaml)`],
+  ['(../examples/agent_designs/memory_tool_use_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/agent_designs/memory_tool_use_finance.yaml)`],
+  ['(../examples/indexing_designs/lpg_finance_provenance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/lpg_finance_provenance.yaml)`],
+  ['(../examples/indexing_designs/rdf_deductive_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/rdf_deductive_finance.yaml)`],
+  ['(../examples/indexing_designs/hybrid_inquiry_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/hybrid_inquiry_finance.yaml)`],
+  ['(/tmp/seocho-land-finder-e2e/examples/agent_designs)', `(${SOURCE_TREE_BASE}examples/agent_designs)`],
+  ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs)', `(${SOURCE_TREE_BASE}examples/indexing_designs)`],
+  ['(/tmp/seocho-land-finder-e2e/examples/agent_designs/planning_multi_agent_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/agent_designs/planning_multi_agent_finance.yaml)`],
+  ['(/tmp/seocho-land-finder-e2e/examples/agent_designs/reflection_chain_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/agent_designs/reflection_chain_finance.yaml)`],
+  ['(/tmp/seocho-land-finder-e2e/examples/agent_designs/memory_tool_use_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/agent_designs/memory_tool_use_finance.yaml)`],
+  ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/lpg_finance_provenance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/lpg_finance_provenance.yaml)`],
+  ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/rdf_deductive_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/rdf_deductive_finance.yaml)`],
+  ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/hybrid_inquiry_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/hybrid_inquiry_finance.yaml)`],
 ]);
 
 function rewriteWebsiteRoutes(content) {
