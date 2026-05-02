@@ -69,23 +69,34 @@ jobs:
           # Reuse the existing auto-sync PR if it is still open.
           EXISTING=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // ""')
           if [[ -z "$EXISTING" ]]; then
+            PR_CREATE_LOG=$(mktemp)
             if ! gh pr create \
               --head "$BRANCH" \
               --base main \
               --title "docs: auto-sync mirrored docs from seocho main" \
               --body "Automated refresh of mirrored docs from \`tteon/seocho\` main via \`scripts/sync.mjs\`. Run \`npm run check:sync\` locally to verify.
 
-          Known limitation: PRs opened by \`GITHUB_TOKEN\` do not trigger repository workflows. To run the \`docs-quality\` and \`deploy\` checks on this PR, close and reopen it, or push an empty commit on top. Replace \`GITHUB_TOKEN\` with a PAT secret to remove this caveat."; then
-              echo "::warning::Auto-sync branch was updated, but this repository does not allow GitHub Actions to create pull requests with GITHUB_TOKEN. Open a PR manually from ${COMPARE_URL}, enable 'Allow GitHub Actions to create and approve pull requests', or switch the workflow to a PAT/App token."
-              {
-                echo "## Auto-sync follow-up needed"
-                echo
-                echo "Drift was synced and pushed to \`${BRANCH}\`, but PR creation is blocked by repository policy for \`GITHUB_TOKEN\`."
-                echo
-                echo "- Open PR manually: ${COMPARE_URL}"
-                echo "- Or enable repository setting: Allow GitHub Actions to create and approve pull requests"
-                echo "- Or replace \`GITHUB_TOKEN\` with a PAT/App token for this step"
-              } >> "$GITHUB_STEP_SUMMARY"
+          Known limitation: PRs opened by \`GITHUB_TOKEN\` do not trigger repository workflows. To run the \`docs-quality\` and \`deploy\` checks on this PR, close and reopen it, or push an empty commit on top. Replace \`GITHUB_TOKEN\` with a PAT secret to remove this caveat." >"$PR_CREATE_LOG" 2>&1; then
+              PR_CREATE_OUTPUT=$(cat "$PR_CREATE_LOG")
+              rm -f "$PR_CREATE_LOG"
+              if [[ "$PR_CREATE_OUTPUT" == *"GitHub Actions is not permitted to create or approve pull requests"* ]]; then
+                echo "::warning::Auto-sync branch was updated, but this repository does not allow GitHub Actions to create pull requests with GITHUB_TOKEN. Open a PR manually from ${COMPARE_URL}, enable 'Allow GitHub Actions to create and approve pull requests', or switch the workflow to a PAT/App token."
+                {
+                  echo "## Auto-sync follow-up needed"
+                  echo
+                  echo "Drift was synced and pushed to \`${BRANCH}\`, but PR creation is blocked by repository policy for \`GITHUB_TOKEN\`."
+                  echo
+                  echo "- Open PR manually: ${COMPARE_URL}"
+                  echo "- Or enable repository setting: Allow GitHub Actions to create and approve pull requests"
+                  echo "- Or replace \`GITHUB_TOKEN\` with a PAT/App token for this step"
+                } >> "$GITHUB_STEP_SUMMARY"
+              else
+                echo "$PR_CREATE_OUTPUT" >&2
+                exit 1
+              fi
+            else
+              cat "$PR_CREATE_LOG"
+              rm -f "$PR_CREATE_LOG"
             fi
           else
             echo "PR #$EXISTING already open; branch force-updated in place."
