@@ -2,3 +2,4 @@
 
 - Ensure decorative visual elements (like CSS/HTML arrows, e.g., `→`, or purely decorative SVGs inside links/buttons) use `aria-hidden="true"`.
 - Ensure links with dynamic, short, or non-descriptive text (like raw commit hashes, e.g., `#{update.hash}`) utilize descriptive `aria-label`s (e.g., `aria-label="View commit ${update.hash} on GitHub"`).
+- Decorative arrow icons inside interactive summary elements (like FAQ accordions) should use `aria-hidden="true"` to prevent screen readers from verbosely announcing them when their state is inherently handled by the parent tag.
