@@ -27,6 +27,7 @@ now?
 | bring your own ontology and data | [APPLY_YOUR_DATA.md](/docs/apply_your_data/) |
 | inspect files, artifacts, and traces | [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/) |
 | understand the system design | [ARCHITECTURE.md](/docs/architecture/) |
+| understand the top-level repository layout | [REPOSITORY_LAYOUT.md](REPOSITORY_LAYOUT.md) |
 | present SEOCHO to a technical audience | [presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md](presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md) |
 | measure behavior with FinDER and benchmark tracks | [BENCHMARKS.md](https://github.com/tteon/seocho/blob/main/docs/BENCHMARKS.md) |
 
@@ -94,6 +95,8 @@ Recommended onboarding order:
 - [ISSUE_TASK_SYSTEM.md](https://github.com/tteon/seocho/blob/main/docs/ISSUE_TASK_SYSTEM.md): sprint and task governance
 - [BEADS_OPERATING_MODEL.md](https://github.com/tteon/seocho/blob/main/docs/BEADS_OPERATING_MODEL.md): `.beads` execution
   contract
+- [REPOSITORY_LAYOUT.md](REPOSITORY_LAYOUT.md): root directory intent,
+  canonical edit surfaces, and legacy/local-only paths
 - [OPEN_SOURCE_PLAYBOOK.md](/docs/open_source_playbook/): contributor onboarding
 - [decisions/DECISION_LOG.md](https://github.com/tteon/seocho/blob/main/docs/decisions/DECISION_LOG.md): architecture decision
   history
@@ -104,6 +107,9 @@ Recommended onboarding order:
 - GitHub `README.md` is the fastest product landing page.
 - `docs/*` is the source of truth for long-form product, operator, and system
   contracts.
-- `tteon.github.io/` mirrors selected pages for `https://seocho.blog`.
-- If a source doc changes materially, update the mirrored website page and
-  validate drift with the website repo checks.
+- `website/` is the tracked Astro/Starlight source for `https://seocho.blog`.
+- `website/scripts/generate-docs.mjs` materializes selected `/docs/*` and
+  `/blog/*` pages from the repo-root source docs at build time.
+- Generated mirror files under `website/src/content/docs/docs/` are derived
+  artifacts; edit the repo-root source docs instead.
+- Validate the site with `cd website && npm ci && npm run check:docs && npm run build && bash scripts/check-built-links.sh`.
