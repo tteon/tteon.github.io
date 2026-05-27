@@ -70,9 +70,9 @@ const fileMappings = [
         frontmatter: `---\ntitle: Docs Home\ndescription: Central Documentation Index for SEOCHO\n---\n\n> *Source mirrored from \`seocho/docs/README.md\`*\n\n`
     },
     {
-        src: 'docs/QUICKSTART.md',
+        src: 'QUICKSTART.md',
         dest: 'quickstart.md',
-        frontmatter: `---\ntitle: Quickstart\ndescription: Get SEOCHO up and running in 5 minutes.\n---\n\n> *Source mirrored from \`seocho/docs/QUICKSTART.md\`*\n\n`
+        frontmatter: `---\ntitle: Quickstart\ndescription: Get SEOCHO up and running in 5 minutes.\n---\n\n> *Source mirrored from \`seocho/QUICKSTART.md\`*\n\n`
     },
     {
         src: 'docs/APPLY_YOUR_DATA.md',
@@ -117,6 +117,7 @@ const fileMappings = [
 const routeReplacements = new Map([
     ['`docs/WHY_SEOCHO.md`', '[`/docs/why_seocho/`](/docs/why_seocho/)'],
     ['`docs/README.md`', '[`/docs/`](/docs/)'],
+    ['`QUICKSTART.md`', '[`/docs/quickstart/`](/docs/quickstart/)'],
     ['`docs/QUICKSTART.md`', '[`/docs/quickstart/`](/docs/quickstart/)'],
     ['`docs/APPLY_YOUR_DATA.md`', '[`/docs/apply_your_data/`](/docs/apply_your_data/)'],
     ['`docs/PYTHON_INTERFACE_QUICKSTART.md`', '[`/docs/python_sdk/`](/docs/python_sdk/)'],
@@ -127,6 +128,7 @@ const routeReplacements = new Map([
     ['`docs/TUTORIAL_FIRST_RUN.md`', '[`/docs/tutorial/`](/docs/tutorial/)'],
     ['`docs/OPEN_SOURCE_PLAYBOOK.md`', '[`/docs/open_source_playbook/`](/docs/open_source_playbook/)'],
     ['(WHY_SEOCHO.md)', '(/docs/why_seocho/)'],
+    ['(../QUICKSTART.md)', '(/docs/quickstart/)'],
     ['(QUICKSTART.md)', '(/docs/quickstart/)'],
     ['(PYTHON_INTERFACE_QUICKSTART.md)', '(/docs/python_sdk/)'],
     ['(APPLY_YOUR_DATA.md)', '(/docs/apply_your_data/)'],
