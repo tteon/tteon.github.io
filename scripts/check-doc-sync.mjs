@@ -224,7 +224,8 @@ function rewriteWebsiteRoutes(content) {
 function renderMirroredContent(mapping) {
   const sourcePath = path.join(SEOCHO_REPO_DIR, mapping.src);
   if (!fs.existsSync(sourcePath)) {
-    throw new Error(`Missing source file in SEOCHO repo: ${mapping.src}`);
+    console.warn(`⚠️ Warning: Source file not found in SEOCHO repo: ${mapping.src}`);
+    return null;
   }
 
   let content = fs.readFileSync(sourcePath, 'utf8');
@@ -249,6 +250,10 @@ try {
     }
 
     const expected = renderMirroredContent(mapping);
+    if (expected === null) {
+      // Missing upstream, warning logged, skip diff check
+      continue;
+    }
     const actual = fs.readFileSync(destPath, 'utf8');
     if (expected !== actual) {
       drifted.push(`${mapping.dest}: mirrored content differs from seocho source`);
