@@ -3,7 +3,7 @@ title: Quickstart
 description: Get SEOCHO up and running in 5 minutes.
 ---
 
-> *Source mirrored from `seocho/docs/QUICKSTART.md`*
+> *Source mirrored from `seocho/docs/RUNTIME_DEPLOYMENT.md`*
 
 
 Goal: one successful local run in under 5 minutes.
@@ -43,8 +43,8 @@ SEOCHO exposes multiple query surfaces and they do not all use the same engine.
 | Surface | Execution path | Use this when |
 |---|---|---|
 | `Seocho.local(...).ask(...)` | local SDK query path | you want a serverless ontology-first local run |
-| `Seocho(base_url=...).ask(...)` | runtime `/api/chat` convenience path | you want app-style chat quickly |
-| `client.semantic(...)` | runtime semantic graph QA | you want deterministic graph-grounded QA first |
+| `Seocho(base_url=...).ask(...)` | runtime primary query facade | you want one public surface that auto-routes to chat or semantic graph QA |
+| `client.semantic(...)` | runtime advanced semantic graph QA | you want direct control of the semantic lane for debugging or expert use |
 | `client.react(...)` | runtime router agent | you want provider-native reasoning plus tool use |
 | `client.advanced(...)` / `client.debate(...)` | runtime debate orchestrator | you want explicit multi-agent comparison/synthesis |
 
@@ -148,6 +148,7 @@ curl -sS -X POST http://localhost:8001/run_agent_semantic \
     "workspace_id": "default",
     "query": "What is ACME related to?",
     "databases": ["kgruntime"],
+    "query_mode": "graph_cot",
     "reasoning_mode": true,
     "repair_budget": 2
   }' | jq '{route, response, reasoning: .semantic_context.reasoning}'
@@ -168,17 +169,20 @@ client.raw_ingest(
     target_database="kgruntime",
 )
 
-semantic = client.semantic(
+receipt = client.ask_response(
     "What is ACME related to?",
     databases=["kgruntime"],
+    cot_mode=True,
     reasoning_mode=True,
     repair_budget=2,
 )
 
-print(semantic.response)
-print(semantic.semantic_context["reasoning"])
-print(semantic.support.status)
-print(semantic.strategy.next_mode_hint)
+print(receipt.response)
+print(receipt.runtime_mode)
+print(receipt.semantic_context["reasoning"])
+print(receipt.support.status)
+print(receipt.strategy.next_mode_hint)
+print(receipt.graph_cot["guardrail_verdict"]["decision"])
 
 recent = client.semantic_runs(limit=5, route="lpg")
 print(recent[0].run_id)
@@ -240,11 +244,26 @@ build runtime-safe artifacts:
 ```python
 from seocho import Ontology, Seocho
 
-ontology = Ontology.from_jsonld("schema.jsonld")
+ontology = Ontology.load("schema.jsonld")
 client = Seocho(ontology=ontology)
 
 artifacts = client.approved_artifacts_from_ontology()
 prompt_context = client.prompt_context_from_ontology()
+```
+
+`Ontology.load(...)` also accepts `.ttl`, so local authoring and governance can
+start from Turtle directly.
+
+If you want the explicit local engine instead of `Seocho.local(...)`, construct
+`Seocho(ontology=..., graph_store=..., llm=...)`. All three are required to
+activate in-process extraction and query execution.
+
+For ontology version review before rollout:
+
+```bash
+seocho ontology check --schema schema.ttl
+seocho ontology diff --left schema_v1.ttl --right schema_v2.ttl
+seocho ontology report --schema schema_v2.ttl --output outputs/ontology_report.json
 ```
 
 ## 12. Troubleshooting
@@ -276,6 +295,60 @@ The main local locations are:
 
 See [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/) for the full map and
 inspection commands.
+
+## 14. GOPTS Layer-1 PROFILE Oracle (ADR-0097, optional)
+
+The GOPTS cost-ranked Cypher emitter (ADR-0097) ships with a Layer-1
+ranking-quality evaluation harness. The PROFILE oracle is opt-in — it
+needs a live DozerDB to collect real `db_hits` per candidate plan.
+
+**Start DozerDB**
+
+```bash
+docker compose up -d neo4j
+# wait a few seconds for the bolt port to come up
+```
+
+**Load the FIBO-lite test corpus** (idempotent, workspace-scoped):
+
+```bash
+NEO4J_PASSWORD=... python -m scripts.eval.load_gopts_fibo_corpus
+# tear down: python -m scripts.eval.load_gopts_fibo_corpus --teardown
+```
+
+**Run the live Layer-1 integration test**:
+
+```bash
+NEO4J_PASSWORD=... pytest -m integration_gopts seocho/tests/integration/
+```
+
+The test session auto-loads the corpus on entry and tears it down on
+exit. It skips cleanly when `NEO4J_PASSWORD` is unset or the bolt
+endpoint is unreachable — CI without Docker stays green.
+
+**What the harness reports**
+
+For each fixture, the harness compares the GOPTS cost model's ranking
+to Neo4j PROFILE's `db_hits`-driven ranking:
+
+- `avg_top1_accuracy` — fraction of fixtures where cost model picks
+  PROFILE's top plan.
+- `avg_ndcg_at_k` — graded relevance fallback for near-ties.
+- `avg_kendall_tau` — full-ranking agreement diagnostic.
+
+On today's catalog the harness reports 1.0 across all three — cost
+model and PROFILE agree everywhere. That is a positive result: it
+proves the cost-model defaults are well-calibrated against actual
+`db_hits`. The harness exists to *catch* future calibration drift
+when F8 (multi-plan execution) or richer alternatives change the
+picks.
+
+**Skipped fixtures**: the compose stack ships uniqueness constraints
+on `FinancialMetric.name` (and similar metric subclasses). The Layer-1
+live runner filters out fixtures 05/06 (`finance_metric_lookup`,
+`finance_metric_delta`) because they need multi-year metric rows that
+the constraint forbids loading. Mock-oracle Layer-1
+(`pytest seocho/tests/test_gopts_ranking.py`) still covers them.
 
 ## 13. Read Next
 
