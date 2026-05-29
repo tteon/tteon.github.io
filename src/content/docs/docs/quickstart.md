@@ -3,284 +3,252 @@ title: Quickstart
 description: Get SEOCHO up and running in 5 minutes.
 ---
 
-> *Source mirrored from `seocho/docs/QUICKSTART.md`*
+> *Source mirrored from `seocho/docs/TUTORIAL_FIRST_RUN.md`*
 
 
-Goal: one successful local run in under 5 minutes.
+Use this document after [../QUICKSTART.md](../QUICKSTART.md) succeeds.
 
-If you only read one runtime document first, read this one.
+This tutorial is not the minimal onboarding path.
+It is the manual verification path for developers who want to understand the runtime surfaces.
 
-This page is the onboarding path. Use it for first success and local product
-verification, not for benchmark claims.
-
-If you want the Python SDK path immediately, continue with
-[`/docs/python_sdk/`](/docs/python_sdk/).
-If you want the bring-your-own-data path immediately, continue with
-[`/docs/apply_your_data/`](/docs/apply_your_data/).
-If you are measuring quality or latency, continue with `docs/BENCHMARKS.md`.
-
-## 1. Prerequisites
-
-- Docker and Docker Compose
-- `OPENAI_API_KEY` recommended
-- `curl` and `jq` for optional API checks
-
-Without `OPENAI_API_KEY`, SEOCHO can still boot in local fallback mode for
-basic verification.
-
-Important:
-
-- `pip install seocho` alone does not provision DozerDB/Neo4j for you.
-- local runtime success still depends on the graph backend being reachable.
-- `make up` starts the core local stack, not every legacy service in the repo.
-- `make up` rebuilds an image-backed `extraction-service`, so `localhost:8001`
-  reflects a known source snapshot instead of a dirty bind-mounted checkout.
-
-## 1.1 Execution Modes Matter
-
-SEOCHO exposes multiple query surfaces and they do not all use the same engine.
-
-| Surface | Execution path | Use this when |
-|---|---|---|
-| `Seocho.local(...).ask(...)` | local SDK query path | you want a serverless ontology-first local run |
-| `Seocho(base_url=...).ask(...)` | runtime `/api/chat` convenience path | you want app-style chat quickly |
-| `client.semantic(...)` | runtime semantic graph QA | you want deterministic graph-grounded QA first |
-| `client.react(...)` | runtime router agent | you want provider-native reasoning plus tool use |
-| `client.advanced(...)` / `client.debate(...)` | runtime debate orchestrator | you want explicit multi-agent comparison/synthesis |
-
-Important implications:
-
-- local `ask()` is not the same benchmark target as runtime `react()` or
-  `advanced()`
-- `reasoning_mode` + `repair_budget` belong to the semantic path
-- `max_steps` + `tool_budget` belong to the runtime agentic paths
-- if you are comparing providers fairly on tool use, do it on runtime
-  `react/debate`, not local `ask()`
-
-## 2. Setup
+## 1. Confirm Baseline Services
 
 ```bash
-git clone https://github.com/tteon/seocho.git
-cd seocho
-make setup-env
-```
-
-## 3. Start the Runtime
-
-```bash
-make up
 docker compose ps
+curl -sS http://localhost:8001/health/runtime | jq .
+curl -sS http://localhost:8001/health/batch | jq .
+curl -sS http://localhost:8501/health | jq .
 ```
 
-If you explicitly want a live bind-mounted edit loop instead:
+Expected:
 
-```bash
-make up-live
-```
+- backend API reachable on `8001`
+- platform UI proxy reachable on `8501`
+- DozerDB reachable on `7474`
 
-Or through the local CLI:
-
-```bash
-pip install -e ".[dev]"
-seocho serve
-```
-
-Published-package local engine path:
-
-```bash
-pip install "seocho[local]"
-```
-
-The default core stack is:
+Current default compose stack:
 
 - `neo4j`
 - `extraction-service`
 - `evaluation-interface`
 
-Expected local surfaces:
-
-- Platform UI: `http://localhost:8501`
-- Backend API docs: `http://localhost:8001/docs`
-- DozerDB browser: `http://localhost:7474`
-
-If you need the old standalone `semantic-service`, start it explicitly:
+The legacy standalone `semantic-service` is not required for this tutorial. If
+you explicitly need it for compatibility checks:
 
 ```bash
 docker compose --profile legacy-semantic up -d semantic-service
 ```
 
-## 4. First Success: UI Path
+## 1.1 Know where your local state lives
 
-1. Open `http://localhost:8501`
-2. Use the ingest panel or click the sample flow
-3. Ask a semantic question
+Before debugging the APIs, know the main paths:
 
-The default product path is:
+- ontology file: usually `schema.jsonld`
+- graph data: `data/neo4j/`
+- semantic artifacts: `outputs/semantic_artifacts/`
+- rule profile registry: `outputs/rule_profiles/rule_profiles.db`
+- semantic metadata: `outputs/semantic_metadata/`
+- traces: path from `SEOCHO_TRACE_JSONL_PATH`
 
-- ingest data
-- run semantic retrieval
-- use bounded repair only when needed
-- reserve debate for explicit advanced use
+If you need direct inspection commands, use [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/).
 
-## 5. First Success: Direct API Path
+## 2. Verify The Public Graph-Memory API
 
-Ingest two records:
+### 2.1 Store one memory
+
+```bash
+curl -sS -X POST http://localhost:8001/api/memories \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workspace_id": "default",
+    "user_id": "tutorial_user",
+    "session_id": "tutorial_session",
+    "content": "ACME acquired Beta in 2024.",
+    "metadata": {
+      "source": "tutorial_note",
+      "tags": ["mna"]
+    }
+  }' | jq .
+```
+
+### 2.2 Read the memory back
+
+Replace `<MEMORY_ID>` with the returned value.
+
+```bash
+curl -sS "http://localhost:8001/api/memories/<MEMORY_ID>?workspace_id=default" | jq .
+```
+
+### 2.3 Search memories
+
+```bash
+curl -sS -X POST http://localhost:8001/api/memories/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workspace_id": "default",
+    "query": "Who was acquired by ACME?",
+    "limit": 5
+  }' | jq .
+```
+
+### 2.4 Ask from memories
+
+```bash
+curl -sS -X POST http://localhost:8001/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workspace_id": "default",
+    "message": "What do we know about ACME and Beta?"
+  }' | jq .
+```
+
+## 3. Inspect The Internal Runtime Path
+
+The public memory facade wraps a deeper runtime path.
+Use the internal endpoints below when you need ingestion or semantic behavior diagnostics.
+
+### 3.1 Ingest raw records directly
 
 ```bash
 curl -sS -X POST http://localhost:8001/platform/ingest/raw \
   -H "Content-Type: application/json" \
   -d '{
-    "workspace_id": "default",
-    "target_database": "kgruntime",
-    "records": [
-      {"id": "r1", "content": "ACME acquired Beta in 2024."},
-      {"id": "r2", "content": "Beta provides risk analytics to ACME."}
+    "workspace_id":"default",
+    "target_database":"kgnormal",
+    "records":[
+      {"id":"raw_1","content":"ACME acquired Beta in 2024."},
+      {"id":"raw_2","content":"Beta provides analytics to ACME."}
     ]
   }' | jq .
 ```
 
-Ask through the semantic endpoint:
+### 3.2 Ensure fulltext index
+
+```bash
+curl -sS -X POST http://localhost:8001/indexes/fulltext/ensure \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workspace_id":"default",
+    "databases":["kgnormal"],
+    "index_name":"entity_fulltext",
+    "create_if_missing":true
+  }' | jq .
+```
+
+### 3.3 Run semantic graph QA
 
 ```bash
 curl -sS -X POST http://localhost:8001/run_agent_semantic \
   -H "Content-Type: application/json" \
   -d '{
-    "workspace_id": "default",
-    "query": "What is ACME related to?",
-    "databases": ["kgruntime"],
-    "reasoning_mode": true,
-    "repair_budget": 2
-  }' | jq '{route, response, reasoning: .semantic_context.reasoning}'
+    "query":"Show links between ACME and Beta.",
+    "user_id":"tutorial_user",
+    "workspace_id":"default",
+    "databases":["kgnormal"]
+  }' | jq .
 ```
 
-## 6. First Success: Python SDK Path
-
-```python
-from seocho import Seocho
-
-client = Seocho(base_url="http://localhost:8001", workspace_id="default")
-
-client.raw_ingest(
-    [
-        {"id": "r1", "content": "ACME acquired Beta in 2024."},
-        {"id": "r2", "content": "Beta provides risk analytics to ACME."},
-    ],
-    target_database="kgruntime",
-)
-
-semantic = client.semantic(
-    "What is ACME related to?",
-    databases=["kgruntime"],
-    reasoning_mode=True,
-    repair_budget=2,
-)
-
-print(semantic.response)
-print(semantic.semantic_context["reasoning"])
-print(semantic.support.status)
-print(semantic.strategy.next_mode_hint)
-
-recent = client.semantic_runs(limit=5, route="lpg")
-print(recent[0].run_id)
-```
-
-## 7. Use React Or Debate Only As Explicit Agentic Modes
-
-If you want the runtime agent loop with bounded turns and tool usage:
-
-```python
-react = client.react(
-    "What changed in ACME's graph?",
-    graph_ids=["kgruntime"],
-    max_steps=6,
-    tool_budget=2,
-)
-
-print(react.response)
-```
-
-This is the correct surface for provider-native reasoning/tool-use experiments.
-
-## 8. Use Debate Only as an Advanced Mode
-
-If you explicitly want cross-graph comparison:
-
-```python
-advanced = client.advanced(
-    "Compare what each graph knows about ACME.",
-    graph_ids=["kgnormal", "kgfibo"],
-    max_steps=8,
-    tool_budget=3,
-)
-
-print(advanced.debate_state)
-```
-
-Stay on the semantic path first. Inspect `semantic.support`, `semantic.strategy`,
-and `semantic.evidence` before reaching for debate.
-
-## 9. Inspect Runtime Semantic History
+### 3.4 Run platform chat through the backend endpoint
 
 ```bash
-curl -sS "http://localhost:8001/semantic/runs?workspace_id=default&limit=5&route=lpg" | jq .
+curl -sS -X POST http://localhost:8001/platform/chat/send \
+  -H "Content-Type: application/json" \
+  -d '{
+    "session_id":"tutorial_chat_1",
+    "message":"What does ACME relate to?",
+    "mode":"semantic",
+    "workspace_id":"default",
+    "databases":["kgnormal"]
+  }' | jq .
 ```
 
-## 10. Validate the Runtime
+## 4. Verify Rule And Governance APIs
+
+### 4.1 Infer rules
 
 ```bash
-make e2e-smoke
+curl -sS -X POST http://localhost:8001/rules/infer \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workspace_id":"default",
+    "graph":{
+      "nodes":[
+        {"id":"1","label":"Company","properties":{"name":"Acme","employees":100}},
+        {"id":"2","label":"Company","properties":{"name":"Beta","employees":80}}
+      ],
+      "relationships":[]
+    }
+  }' | jq .
 ```
 
-## 11. Keep One Ontology Contract
-
-If you author locally with `schema.jsonld` but ingest/query through the runtime,
-do not maintain a second hand-written runtime payload. Use the same ontology to
-build runtime-safe artifacts:
-
-```python
-from seocho import Ontology, Seocho
-
-ontology = Ontology.from_jsonld("schema.jsonld")
-client = Seocho(ontology=ontology)
-
-artifacts = client.approved_artifacts_from_ontology()
-prompt_context = client.prompt_context_from_ontology()
-```
-
-## 12. Troubleshooting
-
-Check service state:
+### 4.2 Assess practical readiness
 
 ```bash
-docker compose ps
+curl -sS -X POST http://localhost:8001/rules/assess \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workspace_id":"default",
+    "graph":{
+      "nodes":[
+        {"id":"1","label":"Company","properties":{"name":"Acme","employees":100}},
+        {"id":"2","label":"Company","properties":{"name":"","employees":"many"}}
+      ],
+      "relationships":[]
+    }
+  }' | jq '.practical_readiness'
+```
+
+### 4.3 Semantic artifact lifecycle
+
+Create a draft:
+
+```bash
+curl -sS -X POST http://localhost:8001/semantic/artifacts/drafts \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workspace_id":"default",
+    "name":"tutorial_draft",
+    "ontology_candidate":{"ontology_name":"tutorial","classes":[],"relationships":[]},
+    "shacl_candidate":{"shapes":[]}
+  }' | jq .
+```
+
+Approve it:
+
+```bash
+curl -sS -X POST http://localhost:8001/semantic/artifacts/<ARTIFACT_ID>/approve \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workspace_id":"default",
+    "approved_by":"tutorial_user"
+  }' | jq .
+```
+
+## 5. Optional: Scripted Demos
+
+If you want repeatable staged demos instead of manual calls, continue with
+[BEGINNER_PIPELINES_DEMO.md](BEGINNER_PIPELINES_DEMO.md).
+
+## 6. Optional: Opik
+
+```bash
+make opik-up
+```
+
+Open `http://localhost:5173`.
+
+## 7. Troubleshooting
+
+If a request fails:
+
+```bash
 docker compose logs --tail=200 extraction-service
 docker compose logs --tail=200 evaluation-interface
+docker compose logs --tail=200 graphrag-neo4j
 ```
 
-Common issues:
+Useful checks:
 
-- `OPENAI_API_KEY` missing or placeholder only
-- port collision on `8001`, `8501`, `7474`, or `7687`
-- graph database not ready yet
-
-## 13. Know Where Your Files Go
-
-The main local locations are:
-
-- ontology file: usually `schema.jsonld`
-- local graph data: `data/neo4j/`
-- semantic artifacts: `outputs/semantic_artifacts/`
-- rule profile registry: `outputs/rule_profiles/rule_profiles.db`
-- semantic run metadata: `outputs/semantic_metadata/`
-- JSONL tracing: path from `SEOCHO_TRACE_JSONL_PATH`
-
-See [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/) for the full map and
-inspection commands.
-
-## 13. Read Next
-
-- [`/docs/python_sdk/`](/docs/python_sdk/)
-- [`/docs/apply_your_data/`](/docs/apply_your_data/)
-- [`/docs/tutorial/`](/docs/tutorial/)
-- `docs/BEGINNER_PIPELINES_DEMO.md`
-- [`/docs/architecture/`](/docs/architecture/)
+- `OPENAI_API_KEY` missing: runtime may fall back to deterministic extraction
+- fulltext missing: run `/indexes/fulltext/ensure`
+- wrong ports: confirm `.env` and `docker compose ps`
