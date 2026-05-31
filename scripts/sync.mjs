@@ -70,9 +70,9 @@ const fileMappings = [
         frontmatter: `---\ntitle: Docs Home\ndescription: Central Documentation Index for SEOCHO\n---\n\n> *Source mirrored from \`seocho/docs/README.md\`*\n\n`
     },
     {
-        src: 'docs/QUICKSTART.md',
+        src: 'QUICKSTART.md',
         dest: 'quickstart.md',
-        frontmatter: `---\ntitle: Quickstart\ndescription: Get SEOCHO up and running in 5 minutes.\n---\n\n> *Source mirrored from \`seocho/docs/QUICKSTART.md\`*\n\n`
+        frontmatter: `---\ntitle: Quickstart\ndescription: Get SEOCHO up and running in 5 minutes.\n---\n\n> *Source mirrored from \`seocho/QUICKSTART.md\`*\n\n`
     },
     {
         src: 'docs/APPLY_YOUR_DATA.md',
@@ -117,7 +117,7 @@ const fileMappings = [
 const routeReplacements = new Map([
     ['`docs/WHY_SEOCHO.md`', '[`/docs/why_seocho/`](/docs/why_seocho/)'],
     ['`docs/README.md`', '[`/docs/`](/docs/)'],
-    ['`docs/QUICKSTART.md`', '[`/docs/quickstart/`](/docs/quickstart/)'],
+    ['`QUICKSTART.md`', '[`/docs/quickstart/`](/docs/quickstart/)'],
     ['`docs/APPLY_YOUR_DATA.md`', '[`/docs/apply_your_data/`](/docs/apply_your_data/)'],
     ['`docs/PYTHON_INTERFACE_QUICKSTART.md`', '[`/docs/python_sdk/`](/docs/python_sdk/)'],
     ['`docs/FILES_AND_ARTIFACTS.md`', '[`/docs/files_and_artifacts/`](/docs/files_and_artifacts/)'],
@@ -160,6 +160,16 @@ const routeReplacements = new Map([
   ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/lpg_finance_provenance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/lpg_finance_provenance.yaml)`],
   ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/rdf_deductive_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/rdf_deductive_finance.yaml)`],
   ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/hybrid_inquiry_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/hybrid_inquiry_finance.yaml)`],
+  ['(../QUICKSTART.md)', '(/docs/quickstart/)'],
+  ['(../README.md#execution-surfaces)', '(/docs/#execution-surfaces)'],
+  ['(RUNTIME_DEPLOYMENT.md)', `(${SOURCE_BLOB_BASE}docs/RUNTIME_DEPLOYMENT.md)`],
+  ['(REPOSITORY_LAYOUT.md)', `(${SOURCE_BLOB_BASE}docs/REPOSITORY_LAYOUT.md)`],
+  ['(BEGINNER_GUIDE.md)', `(${SOURCE_BLOB_BASE}docs/BEGINNER_GUIDE.md)`],
+  ['(AGENT_DESIGN_SPECS.md)', `(${SOURCE_BLOB_BASE}docs/AGENT_DESIGN_SPECS.md)`],
+  ['(INDEXING_DESIGN_SPECS.md)', `(${SOURCE_BLOB_BASE}docs/INDEXING_DESIGN_SPECS.md)`],
+  ['(INTERNAL_CLASS_DESIGN.md)', `(${SOURCE_BLOB_BASE}docs/INTERNAL_CLASS_DESIGN.md)`],
+  ['(MODULE_OWNERSHIP_MAP.md)', `(${SOURCE_BLOB_BASE}docs/MODULE_OWNERSHIP_MAP.md)`],
+  ['(presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md)', `(${SOURCE_BLOB_BASE}docs/presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md)`],
 ]);
 
 function rewriteWebsiteRoutes(content) {
