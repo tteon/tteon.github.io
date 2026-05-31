@@ -211,6 +211,16 @@ const routeReplacements = new Map([
   ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/lpg_finance_provenance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/lpg_finance_provenance.yaml)`],
   ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/rdf_deductive_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/rdf_deductive_finance.yaml)`],
   ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/hybrid_inquiry_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/hybrid_inquiry_finance.yaml)`],
+  ['(../QUICKSTART.md)', '(/docs/quickstart/)'],
+  ['(../README.md#execution-surfaces)', '(/docs/#execution-surfaces)'],
+  ['(RUNTIME_DEPLOYMENT.md)', `(${SOURCE_BLOB_BASE}docs/RUNTIME_DEPLOYMENT.md)`],
+  ['(REPOSITORY_LAYOUT.md)', `(${SOURCE_BLOB_BASE}docs/REPOSITORY_LAYOUT.md)`],
+  ['(BEGINNER_GUIDE.md)', `(${SOURCE_BLOB_BASE}docs/BEGINNER_GUIDE.md)`],
+  ['(AGENT_DESIGN_SPECS.md)', `(${SOURCE_BLOB_BASE}docs/AGENT_DESIGN_SPECS.md)`],
+  ['(INDEXING_DESIGN_SPECS.md)', `(${SOURCE_BLOB_BASE}docs/INDEXING_DESIGN_SPECS.md)`],
+  ['(INTERNAL_CLASS_DESIGN.md)', `(${SOURCE_BLOB_BASE}docs/INTERNAL_CLASS_DESIGN.md)`],
+  ['(MODULE_OWNERSHIP_MAP.md)', `(${SOURCE_BLOB_BASE}docs/MODULE_OWNERSHIP_MAP.md)`],
+  ['(presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md)', `(${SOURCE_BLOB_BASE}docs/presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md)`],
 ]);
 
 function rewriteWebsiteRoutes(content) {

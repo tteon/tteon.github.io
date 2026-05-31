@@ -63,12 +63,14 @@ If you are iterating on schema evolution, use the offline governance CLI:
 seocho ontology check --schema schema.jsonld
 seocho ontology export --schema schema.jsonld --format shacl --output shacl.json
 seocho ontology diff --left schema_v1.jsonld --right schema_v2.jsonld
+seocho ontology report --schema schema_v2.ttl --output outputs/ontology_report.json
 ```
 
 Recommendation:
 
 - keep a stable `package_id` on the ontology and bump `version` semantically
 - treat `seocho ontology diff` as the first migration warning gate before runtime rollout
+- use `seocho ontology report` before rollout when you want one bundle with `context_hash`, semantic artifact draft, SHACL export, and synthetic sample-data validation
 
 ## 2. Configure
 
@@ -143,7 +145,7 @@ This is the intended product shape:
 ```python
 from seocho import Ontology, Seocho
 
-ontology = Ontology.from_jsonld("schema.jsonld")
+ontology = Ontology.load("schema.jsonld")
 client = Seocho(ontology=ontology)
 
 artifacts = client.approved_artifacts_from_ontology()
@@ -160,6 +162,12 @@ Use the helpers like this:
 - `artifact_draft_from_ontology()`: build a draft payload for the semantic artifact lifecycle APIs
 
 That keeps `schema.jsonld`, local SDK prompts, SHACL validation, and runtime semantic artifacts on one contract.
+
+Important:
+
+- `Seocho.local(ontology)` is the shortest serverless path.
+- Explicit local engine mode is `Seocho(ontology=..., graph_store=..., llm=...)`.
+- Passing only `ontology`, only `graph_store`, or only `llm` does not enable the in-process local engine.
 
 ## 3. Put Your Data In
 
@@ -189,6 +197,10 @@ result = client.add_with_details(
 print(result.ingest_summary)
 ```
 
+`add()` is intentionally the opinionated default path. Use
+`add_with_details()` when you explicitly want the expert surface for
+`prompt_context`, approved artifacts, or governance-controlled overrides.
+
 ### 3.2 Ingest a batch of raw records
 
 Use this when you want SEOCHO to extract entities and relationships into a
@@ -213,59 +225,81 @@ If you only want a string answer:
 
 ```python
 print(client.ask("What do you know about Alex?"))
+print(client.ask("Who manages the Seoul retail account?", graph_ids=["kgnormal"]))
 ```
 
-If you also want evidence:
+If you also want runtime metadata without dropping to the advanced semantic API:
 
 ```python
-response = client.chat("What do you know about Alex?")
-
-print(response.assistant_message)
-print(response.evidence_bundle)
-```
-
-## 5. Use the Semantic Layer First
-
-This is the main graph-QA path. Prefer `graph_ids` instead of raw database names
-when you know the intended graph target.
-
-```python
-semantic = client.semantic(
+response = client.ask_response(
     "Who manages the Seoul retail account?",
     graph_ids=["kgnormal"],
 )
 
-print(semantic.route)
-print(semantic.response)
-print(semantic.support.status)
-print(semantic.evidence.grounded_slots)
-print(semantic.evidence.missing_slots)
-print(semantic.run_record.run_id)
+print(response.response)
+print(response.runtime_mode)
+print(response.answer_envelope["query_mode"])
+print(response.routing_decision)
+```
+
+Use `chat()` only when you explicitly want the lightweight memory/chat surface.
+Use `ask_response()` when you want the public query surface plus metadata.
+
+## 5. Use `ask()` As The Primary Query Surface
+
+Prefer `graph_ids` instead of raw database names when you know the intended
+graph target. `ask()` routes into semantic graph QA automatically when graph
+scope or semantic controls are present.
+
+```python
+answer = client.ask(
+    "Who manages the Seoul retail account?",
+    graph_ids=["kgnormal"],
+)
+
+print(answer)
+
+receipt = client.ask_response(
+    "Who manages the Seoul retail account?",
+    graph_ids=["kgnormal"],
+)
+print(receipt.runtime_mode)
+print(receipt.support.status)
+print(receipt.evidence.grounded_slots)
+print(receipt.evidence.missing_slots)
+print(receipt.run_record.run_id)
 ```
 
 ## 6. Turn On Repair When the Query Is Hard
 
 If the question is harder, ambiguous, or likely to need relation-path repair,
-keep the semantic path but enable bounded reasoning mode.
+stay on `ask()` but enable bounded semantic repair.
 
 ```python
-semantic = client.semantic(
+answer = client.ask(
     "What is Neo4j related to GraphRAG?",
     graph_ids=["kgnormal"],
     reasoning_mode=True,
     repair_budget=2,
 )
+print(answer)
 
-print(semantic.route)
-print(semantic.semantic_context["reasoning"])
-print(semantic.strategy.executed_mode)
-print(semantic.strategy.next_mode_hint)
-print(semantic.evidence.missing_slots)
+receipt = client.ask_response(
+    "What is Neo4j related to GraphRAG?",
+    graph_ids=["kgnormal"],
+    reasoning_mode=True,
+    repair_budget=2,
+)
+print(receipt.runtime_mode)
+print(receipt.semantic_context["reasoning"])
+print(receipt.strategy.executed_mode)
+print(receipt.strategy.next_mode_hint)
+print(receipt.evidence.missing_slots)
 ```
 
 What `reasoning_mode` does:
 
-- keeps the semantic layer as the first execution path
+- keeps semantic graph QA as the first execution path
 - validates constrained Cypher before execution
 - retries with a small repair budget when slot fill is insufficient
 - avoids jumping straight to multi-agent debate
@@ -276,8 +310,29 @@ Parameter guidance:
 - `reasoning_mode=True`: enable bounded semantic repair for harder questions
 - `repair_budget=0`: no retry
 - `repair_budget=1..2`: practical default for hard graph questions
+- `query_mode="graph_cot"`: explicit advanced override for the Graph-CoT execution lane
+- `cot_mode=True`: SDK shorthand for `query_mode="graph_cot"` on `client.ask(...)`, `client.ask_response(...)`, and `client.semantic(...)`
 - `graph_ids=[...]`: preferred public routing key when you know the graph target
 - `databases=[...]`: physical database scope when you are working at DB level
+
+Graph-CoT mode still rides on the same public `ask()` contract:
+
+```python
+receipt = client.ask_response(
+    "What is Neo4j related to GraphRAG?",
+    graph_ids=["kgnormal"],
+    cot_mode=True,
+)
+
+print(receipt.answer_envelope["query_mode"])
+print(receipt.strategy.executed_mode)
+print(receipt.agent_pattern["pattern"])
+print(receipt.graph_cot["guardrail_verdict"]["decision"])
+print(receipt.graph_cot["final_answer"]["status"])
+```
+
+Use `semantic()` only when you explicitly want the advanced/debug graph-QA
+surface and need to control or inspect the semantic lane directly.
 
 ## 7. Use the Builder Surface
 
@@ -299,6 +354,7 @@ print(result.strategy.executed_mode)
 Mode selection rules:
 
 - `plan(...).run()` defaults to semantic execution
+- `plan(...).graph_cot().run()` keeps direct semantic execution but selects the Graph-CoT sub-mode
 - `plan(...).react()` uses graph-scoped single-agent routing
 - `plan(...).advanced()` or `plan(...).debate()` uses explicit debate mode
 - `result.strategy.advanced_debate_recommended` tells you when debate is worth trying
@@ -354,13 +410,14 @@ seocho.configure(base_url="http://localhost:8001", workspace_id="default")
 
 print(seocho.ask("What do you know about Alex?"))
 
-semantic = seocho.semantic(
+receipt = seocho.ask_response(
     "Who manages the Seoul retail account?",
     graph_ids=["kgnormal"],
     reasoning_mode=True,
     repair_budget=2,
 )
-print(semantic.response)
+print(receipt.response)
+print(receipt.runtime_mode)
 
 advanced = seocho.advanced(
     "Compare what the baseline and finance graphs know about Alex.",
@@ -445,8 +502,8 @@ from seocho import Seocho
 remote = Seocho(base_url="http://localhost:8010", workspace_id="default")
 
 print(remote.ask("What do you know about Alex?"))
-semantic = remote.semantic("Who manages Seoul retail?", databases=["neo4j"])
-print(semantic.route)
+receipt = remote.ask_response("Who manages Seoul retail?", databases=["neo4j"])
+print(receipt.runtime_mode)
 ```
 
 Portable bundle limits in the current implementation:
@@ -564,10 +621,11 @@ seocho stop
 
 Use this decision rule:
 
-1. Start with `ask` or `chat` for memory-first use.
-2. Use `semantic(...)` for graph-grounded retrieval.
+1. Start with `ask()` for almost all querying.
+2. Use `ask_response()` when you want the same surface plus runtime metadata.
 3. Add `reasoning_mode=True` before reaching for debate.
-4. Use `advanced()` only when you explicitly want multi-agent comparison.
+4. Use `semantic(...)` only when you explicitly need the advanced graph-QA surface.
+5. Use `advanced()` only when you explicitly want multi-agent comparison.
 
 ## 16. Agent-Level Sessions
 
@@ -615,8 +673,8 @@ guardrail for teams that change ontology profiles over time.
 HTTP runtime mode exposes the same guardrail through typed SDK responses:
 
 ```python
-semantic = client.semantic("Who manages Seoul retail?", databases=["kgnormal"])
-print(semantic.ontology_context_mismatch["mismatch"])
+receipt = client.ask_response("Who manages Seoul retail?", databases=["kgnormal"])
+print(receipt.ontology_context_mismatch["mismatch"])
 
 chat = client.chat("What do we know about Seoul retail?", databases=["kgnormal"])
 print(chat.ontology_context_mismatch.get("warning", ""))
@@ -694,7 +752,7 @@ The YAML must include an `ontology:` section. If the section is missing, or it
 does not declare a binding like `profile`, `ontology_id`, `package_id`, or
 `path`, SEOCHO raises a `ValueError`.
 
-See [AGENT_DESIGN_SPECS.md](AGENT_DESIGN_SPECS.md) and the
+See [AGENT_DESIGN_SPECS.md](https://github.com/tteon/seocho/blob/main/docs/AGENT_DESIGN_SPECS.md) and the
 [`examples/agent_designs/`](https://github.com/tteon/seocho/tree/main/examples/agent_designs)
 directory for three starter patterns:
 
@@ -728,7 +786,7 @@ For `graph_model: lpg`, SEOCHO installs a property-graph-oriented extraction
 prompt by default so the model can preserve source-grounded scalar properties
 without collapsing period-specific metrics.
 
-See [INDEXING_DESIGN_SPECS.md](INDEXING_DESIGN_SPECS.md) and the
+See [INDEXING_DESIGN_SPECS.md](https://github.com/tteon/seocho/blob/main/docs/INDEXING_DESIGN_SPECS.md) and the
 [`examples/indexing_designs/`](https://github.com/tteon/seocho/tree/main/examples/indexing_designs)
 directory for starter designs covering:
 
@@ -788,7 +846,7 @@ The practical ontology file flow is:
 ## 19. Read Next
 
 - `APPLY_YOUR_DATA.md`
-- `QUICKSTART.md`
+- `../QUICKSTART.md`
 - `GRAPH_MEMORY_API.md`
 
 That keeps the default path deterministic and inspectable while still leaving a

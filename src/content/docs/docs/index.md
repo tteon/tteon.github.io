@@ -17,47 +17,51 @@ now?
 
 | If you need to... | Start here |
 |---|---|
-| get a first local success path | [QUICKSTART.md](/docs/quickstart/) |
-| understand local `ask()` vs runtime `semantic/react/debate` | [QUICKSTART.md#11-execution-modes-matter](QUICKSTART.md#11-execution-modes-matter) |
+| get a first local success path | [../QUICKSTART.md](/docs/quickstart/) |
+| understand local `ask()` vs runtime `semantic/react/debate` | [../README.md#execution-surfaces](/docs/#execution-surfaces) |
+| bring up the full local runtime stack | [RUNTIME_DEPLOYMENT.md](https://github.com/tteon/seocho/blob/main/docs/RUNTIME_DEPLOYMENT.md) |
 | follow a runnable notebook walkthrough | [../examples/quickstart.ipynb](../examples/quickstart.ipynb) |
-| understand SEOCHO with architecture snippets | [BEGINNER_GUIDE.md](BEGINNER_GUIDE.md) |
+| understand SEOCHO with architecture snippets | [BEGINNER_GUIDE.md](https://github.com/tteon/seocho/blob/main/docs/BEGINNER_GUIDE.md) |
 | use the Python SDK directly | [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/) |
-| declare reusable agent patterns in YAML | [AGENT_DESIGN_SPECS.md](AGENT_DESIGN_SPECS.md) |
-| declare graph-model-aware indexing in YAML | [INDEXING_DESIGN_SPECS.md](INDEXING_DESIGN_SPECS.md) |
+| declare reusable agent patterns in YAML | [AGENT_DESIGN_SPECS.md](https://github.com/tteon/seocho/blob/main/docs/AGENT_DESIGN_SPECS.md) |
+| declare graph-model-aware indexing in YAML | [INDEXING_DESIGN_SPECS.md](https://github.com/tteon/seocho/blob/main/docs/INDEXING_DESIGN_SPECS.md) |
 | bring your own ontology and data | [APPLY_YOUR_DATA.md](/docs/apply_your_data/) |
 | inspect files, artifacts, and traces | [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/) |
 | understand the system design | [ARCHITECTURE.md](/docs/architecture/) |
-| present SEOCHO to a technical audience | [presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md](presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md) |
+| understand the top-level repository layout | [REPOSITORY_LAYOUT.md](https://github.com/tteon/seocho/blob/main/docs/REPOSITORY_LAYOUT.md) |
+| present SEOCHO to a technical audience | [presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md](https://github.com/tteon/seocho/blob/main/docs/presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md) |
 | measure behavior with FinDER and benchmark tracks | [BENCHMARKS.md](https://github.com/tteon/seocho/blob/main/docs/BENCHMARKS.md) |
 
 Recommended onboarding order:
 
 1. [WHY_SEOCHO.md](/docs/why_seocho/)
-2. [QUICKSTART.md](/docs/quickstart/)
+2. [../QUICKSTART.md](/docs/quickstart/)
 3. [../examples/quickstart.ipynb](../examples/quickstart.ipynb)
-4. [BEGINNER_GUIDE.md](BEGINNER_GUIDE.md)
+4. [BEGINNER_GUIDE.md](https://github.com/tteon/seocho/blob/main/docs/BEGINNER_GUIDE.md)
 5. [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/)
 6. [APPLY_YOUR_DATA.md](/docs/apply_your_data/)
 7. [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/)
 8. [ARCHITECTURE.md](/docs/architecture/)
-9. [presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md](presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md)
+9. [presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md](https://github.com/tteon/seocho/blob/main/docs/presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md)
 
 ## Product Entry Points
 
 - [WHY_SEOCHO.md](/docs/why_seocho/): product framing and ontology-aligned value
   proposition
-- [QUICKSTART.md](/docs/quickstart/): shortest local success path
+- [../QUICKSTART.md](/docs/quickstart/): shortest local success path
+- [RUNTIME_DEPLOYMENT.md](https://github.com/tteon/seocho/blob/main/docs/RUNTIME_DEPLOYMENT.md): full local runtime
+  deployment guide for Docker stack, services, and environment setup
 - [../examples/quickstart.ipynb](../examples/quickstart.ipynb): runnable
   notebook covering ontology, indexing design, agent design, indexing, query,
   `.env`-backed provider setup, safe Ladybug fallback, optional Neo4j/DozerDB,
   and provider comparison
-- [BEGINNER_GUIDE.md](BEGINNER_GUIDE.md): first-run guide that connects SDK
+- [BEGINNER_GUIDE.md](https://github.com/tteon/seocho/blob/main/docs/BEGINNER_GUIDE.md): first-run guide that connects SDK
   snippets to architecture seams
 - [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/): public
   Python SDK path and API examples
-- [AGENT_DESIGN_SPECS.md](AGENT_DESIGN_SPECS.md): YAML-backed agent patterns
+- [AGENT_DESIGN_SPECS.md](https://github.com/tteon/seocho/blob/main/docs/AGENT_DESIGN_SPECS.md): YAML-backed agent patterns
   with required ontology bindings
-- [INDEXING_DESIGN_SPECS.md](INDEXING_DESIGN_SPECS.md): YAML-backed indexing
+- [INDEXING_DESIGN_SPECS.md](https://github.com/tteon/seocho/blob/main/docs/INDEXING_DESIGN_SPECS.md): YAML-backed indexing
   variants for LPG, RDF, hybrid, and inquiry-cycle defaults
 - [APPLY_YOUR_DATA.md](/docs/apply_your_data/): ingest your own records and query
   them safely
@@ -69,11 +73,11 @@ Recommended onboarding order:
 ## Architecture And Operations
 
 - [ARCHITECTURE.md](/docs/architecture/): system architecture and runtime/module map
-- [INTERNAL_CLASS_DESIGN.md](INTERNAL_CLASS_DESIGN.md): internal orchestration
+- [INTERNAL_CLASS_DESIGN.md](https://github.com/tteon/seocho/blob/main/docs/INTERNAL_CLASS_DESIGN.md): internal orchestration
   seam classes (`DomainEvent`, `IngestionFacade`, `QueryProxy`,
   `AgentFactory`, `AgentStateMachine`) used while the modular monolith is
   still being decomposed
-- [presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md](presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md):
+- [presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md](https://github.com/tteon/seocho/blob/main/docs/presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md):
   20-30 minute beginner-friendly product and architecture deck
 - [RUNTIME_PACKAGE_MIGRATION.md](https://github.com/tteon/seocho/blob/main/docs/RUNTIME_PACKAGE_MIGRATION.md): staged
   `extraction/` to `runtime/` migration plan
@@ -83,9 +87,9 @@ Recommended onboarding order:
   ontology context contract across indexing, query, and agents
 - [PROPERTY_GRAPH_LENS_STRATEGY.md](https://github.com/tteon/seocho/blob/main/docs/PROPERTY_GRAPH_LENS_STRATEGY.md):
   semantic overlay strategy for property graphs
-- [INTERNAL_CLASS_DESIGN.md](INTERNAL_CLASS_DESIGN.md): internal orchestration
+- [INTERNAL_CLASS_DESIGN.md](https://github.com/tteon/seocho/blob/main/docs/INTERNAL_CLASS_DESIGN.md): internal orchestration
   seams for the modular monolith
-- [MODULE_OWNERSHIP_MAP.md](MODULE_OWNERSHIP_MAP.md): canonical module
+- [MODULE_OWNERSHIP_MAP.md](https://github.com/tteon/seocho/blob/main/docs/MODULE_OWNERSHIP_MAP.md): canonical module
   ownership and compatibility boundaries
 - [WORKFLOW.md](/docs/workflow/): operational workflow
 
@@ -94,6 +98,8 @@ Recommended onboarding order:
 - [ISSUE_TASK_SYSTEM.md](https://github.com/tteon/seocho/blob/main/docs/ISSUE_TASK_SYSTEM.md): sprint and task governance
 - [BEADS_OPERATING_MODEL.md](https://github.com/tteon/seocho/blob/main/docs/BEADS_OPERATING_MODEL.md): `.beads` execution
   contract
+- [REPOSITORY_LAYOUT.md](https://github.com/tteon/seocho/blob/main/docs/REPOSITORY_LAYOUT.md): root directory intent,
+  canonical edit surfaces, and legacy/local-only paths
 - [OPEN_SOURCE_PLAYBOOK.md](/docs/open_source_playbook/): contributor onboarding
 - [decisions/DECISION_LOG.md](https://github.com/tteon/seocho/blob/main/docs/decisions/DECISION_LOG.md): architecture decision
   history
@@ -104,6 +110,9 @@ Recommended onboarding order:
 - GitHub `README.md` is the fastest product landing page.
 - `docs/*` is the source of truth for long-form product, operator, and system
   contracts.
-- `tteon.github.io/` mirrors selected pages for `https://seocho.blog`.
-- If a source doc changes materially, update the mirrored website page and
-  validate drift with the website repo checks.
+- `website/` is the tracked Astro/Starlight source for `https://seocho.blog`.
+- `website/scripts/generate-docs.mjs` materializes selected `/docs/*` and
+  `/blog/*` pages from the repo-root source docs at build time.
+- Generated mirror files under `website/src/content/docs/docs/` are derived
+  artifacts; edit the repo-root source docs instead.
+- Validate the site with `cd website && npm ci && npm run check:docs && npm run build && bash scripts/check-built-links.sh`.
