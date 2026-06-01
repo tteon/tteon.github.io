@@ -75,14 +75,14 @@ const fileMappings = [
       '> *Source mirrored from `seocho/docs/README.md`*\n\n',
   },
   {
-    src: 'docs/QUICKSTART.md',
+    src: 'QUICKSTART.md',
     dest: 'quickstart.md',
     frontmatter:
       '---\n' +
       'title: Quickstart\n' +
       'description: Get SEOCHO up and running in 5 minutes.\n' +
       '---\n\n' +
-      '> *Source mirrored from `seocho/docs/QUICKSTART.md`*\n\n',
+      '> *Source mirrored from `seocho/QUICKSTART.md`*\n\n',
   },
   {
     src: 'docs/APPLY_YOUR_DATA.md',
