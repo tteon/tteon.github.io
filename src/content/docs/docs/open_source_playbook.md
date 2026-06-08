@@ -122,7 +122,7 @@ Source-of-truth docs live in this repository.
 For stable website publishing, keep these routes and their mirrored repo docs in
 sync:
 
-- [`/docs/quickstart/`](/docs/quickstart/)
+- [`/docs/tutorial/`](/docs/tutorial/)
 - [`/docs/apply_your_data/`](/docs/apply_your_data/)
 - [`/docs/python_sdk/`](/docs/python_sdk/)
 - [`/docs/architecture/`](/docs/architecture/)

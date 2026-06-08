@@ -70,11 +70,6 @@ const fileMappings = [
         frontmatter: `---\ntitle: Docs Home\ndescription: Central Documentation Index for SEOCHO\n---\n\n> *Source mirrored from \`seocho/docs/README.md\`*\n\n`
     },
     {
-        src: 'docs/QUICKSTART.md',
-        dest: 'quickstart.md',
-        frontmatter: `---\ntitle: Quickstart\ndescription: Get SEOCHO up and running in 5 minutes.\n---\n\n> *Source mirrored from \`seocho/docs/QUICKSTART.md\`*\n\n`
-    },
-    {
         src: 'docs/APPLY_YOUR_DATA.md',
         dest: 'apply_your_data.md',
         frontmatter: `---\ntitle: Bring Your Data\ndescription: How to load your own records into SEOCHO and query them safely.\n---\n\n> *Source mirrored from \`seocho/docs/APPLY_YOUR_DATA.md\`*\n\n`
