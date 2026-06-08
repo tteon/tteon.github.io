@@ -35,7 +35,7 @@ Primary surfaces:
 - `runtime/middleware.py`
 - `runtime/policy.py`
 - `docs/decisions/`
-- `docs/BEADS_OPERATING_MODEL.md`
+- `docs/ISSUE_TASK_SYSTEM.md`
 
 Long-term target:
 
@@ -57,9 +57,9 @@ Responsibilities:
 
 Primary surfaces:
 
-- `seocho/rules.py` — canonical rule inference/validation
-- `seocho/index/pipeline.py` — canonical indexing with `enable_rule_constraints` + `embedding_backend`
-- `seocho/index/linker.py` — canonical embedding-based entity linker
+- `src/seocho/rules.py` — canonical rule inference/validation
+- `src/seocho/index/pipeline.py` — canonical indexing with `enable_rule_constraints` + `embedding_backend`
+- `src/seocho/index/linker.py` — canonical embedding-based entity linker
 - `extraction/pipeline.py` — legacy batch pipeline
 - `extraction/rule_constraints.py` — re-export shim to `seocho.rules`
 - `extraction/data_source.py`
@@ -72,15 +72,10 @@ Primary surfaces:
 - assign `workspace_id`
 - fill or update the relevant `docs/*` sections using the `DEV-*` prefixes defined in `docs/DEVELOPER_INPUT_CONVENTIONS.md`
 - mark any blocker that should stop implementation as `DEV-INPUT-REQUIRED`
-- capture work item using standardized scripts:
-  - `scripts/pm/new-issue.sh`
-  - `scripts/pm/new-task.sh`
-- keep `.beads` as the canonical planning/status tracker
-- if the change touches a shared seam, create a Gastown reservation after the
-  `bd` item exists:
-  - include seam id, owner, `bd` id, branch/worktree, write scope, and TTL
-  - use `.agents/gastown/shared-seams.yaml` as the repo seam registry
-  - treat Gastown as coordination only, not a second planning system
+- capture public work state in GitHub issues, pull requests, or the current
+  maintainer-designated tracker
+- keep local agent coordination tools private to the developer workspace; do
+  not commit `.beads/`, `.agents/`, `.claude/`, or similar local tool state
 - for semantic retrieval or graph-grounded answer work, align the change with
   `docs/GRAPH_RAG_AGENT_HANDOFF_SPEC.md`
 - confirm philosophy alignment against [`/docs/philosophy/`](/docs/philosophy/) (ontology evidence, router/graph mapping, traceability)
@@ -130,20 +125,15 @@ Semantic path summary:
   - `GraphRAG-Bench` for retrieval / reasoning
   - the bundled tutorial sample is onboarding-only and must not be reported as
     benchmark evidence
-- optional one-command landing wrapper: `scripts/land.sh --task-id <id> --fix --pull --push`
-- run sprint label lint (`scripts/pm/lint-items.sh --sprint <id>`)
 - run agent docs lint (`scripts/pm/lint-agent-docs.sh`)
-- release or hand off any Gastown reservation before merge
-- close issue, rebase, bootstrap, push
+- close or update the linked public issue or PR
+- rebase, push
 - verify branch is up to date with origin
 
 Operational notes:
 
-- use `scripts/pm/lint-items.sh` with internal `bd --sandbox` execution so linting reads the local workspace without extra auto-sync behavior.
-- when using git worktrees, prefer `bd --sandbox ...` for repo-local issue operations to avoid cross-worktree side effects
-- for Beads/Dolt lifecycle issues, run `scripts/pm/bd-recover.sh` before any
-  reinstall, reset, or deletion; use `--fix` only when `bd doctor` or
-  `bd dolt show` fails
+- local tracker linting may be used in maintainer workspaces, but it is not a
+  public repository contract
 - current dev quality gates in `Makefile` run against `extraction-service`.
 - default `make up` now rebuilds an image-backed `extraction-service` so the
   running runtime matches a known source snapshot.
@@ -154,30 +144,35 @@ Operational notes:
 - legacy `semantic-service` is opt-in only via `docker compose --profile legacy-semantic up -d semantic-service`.
 - when decomposing large files, prefer the internal seam classes documented in
   `docs/INTERNAL_CLASS_DESIGN.md` before introducing new top-level services
-- local SDK orchestration extracted from `seocho/client.py` should land in
-  `seocho/local_engine.py` before any broader facade redesign
+- local SDK orchestration extracted from `src/seocho/client.py` should land in
+  `src/seocho/local_engine.py` before any broader facade redesign
 
-## Docs Website Sync
+## Docs Website
 
 - source of truth: `README.md` + `docs/*` in this repository
 - publish-critical docs for seocho.blog sync:
   - [`/docs/`](/docs/)
-  - [`/docs/quickstart/`](/docs/quickstart/)
+  - `docs/RUNTIME_DEPLOYMENT.md`
   - [`/docs/apply_your_data/`](/docs/apply_your_data/)
   - [`/docs/python_sdk/`](/docs/python_sdk/)
+  - [`/docs/tutorial/`](/docs/tutorial/)
+  - [`/docs/open_source_playbook/`](/docs/open_source_playbook/)
   - [`/docs/architecture/`](/docs/architecture/)
   - [`/docs/workflow/`](/docs/workflow/)
 - repo-side source-doc contract is checked by `.github/workflows/docs-consistency.yml`
   using `bash scripts/ci/check-doc-contracts.sh`
-- website updates are maintained directly in the `tteon.github.io/` workspace
-- website validation currently includes:
-  - `npm run check:sync`
-  - `bash scripts/check-doc-quality.sh`
-  - `npm run build`
-  - `bash scripts/check-built-links.sh`
-- `tteon.github.io/scripts/sync.mjs` can be used as a local helper when syncing
-  selected docs, but mirrored pages are still reviewable content, not a blind
-  publish target
+- the tracked website app lives in `website/`
+- `website/scripts/generate-docs.mjs` materializes selected `/docs/*` and
+  `/blog/*` pages from repo-root source docs at build/dev time
+- generated mirror files under `website/src/content/docs/docs/` are derived
+  artifacts; edit the repo-root source docs instead
+- website validation currently lives in `.github/workflows/docs-site-quality.yml`
+  and includes:
+  - `cd website && npm ci`
+  - `cd website && npm run check:docs`
+  - `cd website && npm run build`
+  - `cd website && bash scripts/check-built-links.sh`
+- deployment to GitHub Pages lives in `.github/workflows/docs-site-deploy.yml`
 
 5. Basic CI
 
@@ -191,15 +186,8 @@ Operational notes:
   - `bash scripts/ci/check-module-ownership-contract.sh`
   - `scripts/pm/lint-agent-docs.sh`
 
-Runtime migration slices should use the repo-local skill:
-
-- `.agents/skills/runtime-migration-slice/SKILL.md`
-
-Install repo-managed hooks once per clone:
-
-```bash
-scripts/pm/install-git-hooks.sh
-```
+Runtime migration slices should follow `docs/RUNTIME_PACKAGE_MIGRATION.md` and
+the runtime shell validation contract in `scripts/ci/check-runtime-shell-contract.sh`.
 
 6. Daily Codex Maintenance Automation
 
@@ -212,7 +200,6 @@ scripts/pm/install-git-hooks.sh
 - if any required secret is missing, the workflow exits successfully after an
   explicit skip notice and creates no PR
 - prompt contract: `.github/codex/prompts/daily-maintenance-pr.md`
-- skill contract: `.agents/skills/daily-maintenance-pr/SKILL.md`
 - PR contract:
   - draft PR only
   - branch `codex/daily-maintenance`
@@ -233,7 +220,6 @@ scripts/pm/install-git-hooks.sh
 - if any required secret is missing, the workflow exits successfully after an
   explicit skip notice and creates no PR
 - prompt contract: `.github/codex/prompts/periodic-review-pr.md`
-- skill contract: `.agents/skills/periodic-review-pr/SKILL.md`
 - PR contract:
   - draft PR only
   - branch `codex/periodic-review`

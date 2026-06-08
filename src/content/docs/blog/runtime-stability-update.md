@@ -15,7 +15,7 @@ If you are an external team or an open-source contributor looking to adopt the S
 
 ## 1. Reproducible User Activation Path & New Quickstart
 
-We have completely overhauled our [Quick Start guide](/docs/quickstart/) to follow a strict, reproducible User Activation Critical Path. 
+We have completely overhauled our [Tutorial](/docs/tutorial/) to follow a strict, reproducible User Activation Critical Path.
 
 Previously, setting up the graph and running the agents could be highly environmental. Moving forward, no architecture changes will be merged unless this exact user path functions flawlessly:
 
