@@ -9,7 +9,7 @@ description: Central Documentation Index for SEOCHO
 SEOCHO docs are organized around one question: what do you need to do right
 now?
 
-[![Quickstart](https://img.shields.io/badge/Quickstart-First_Run-2563eb)](/docs/quickstart/)
+[![Quickstart](https://img.shields.io/badge/Quickstart-First_Run-2563eb)](../QUICKSTART.md)
 [![Python SDK](https://img.shields.io/badge/Python_SDK-Examples-0f766e)](/docs/python_sdk/)
 [![Architecture Deep Dive](https://img.shields.io/badge/Architecture-Deep_Dive-7c3aed)](/docs/architecture/)
 
@@ -17,8 +17,9 @@ now?
 
 | If you need to... | Start here |
 |---|---|
-| get a first local success path | [QUICKSTART.md](/docs/quickstart/) |
-| understand local `ask()` vs runtime `semantic/react/debate` | [QUICKSTART.md#11-execution-modes-matter](QUICKSTART.md#11-execution-modes-matter) |
+| get a first local success path | [../QUICKSTART.md](../QUICKSTART.md) |
+| understand local `ask()` vs runtime `semantic/react/debate` | [../README.md#execution-surfaces](../README.md#execution-surfaces) |
+| bring up the full local runtime stack | [RUNTIME_DEPLOYMENT.md](RUNTIME_DEPLOYMENT.md) |
 | follow a runnable notebook walkthrough | [../examples/quickstart.ipynb](../examples/quickstart.ipynb) |
 | understand SEOCHO with architecture snippets | [BEGINNER_GUIDE.md](BEGINNER_GUIDE.md) |
 | use the Python SDK directly | [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/) |
@@ -27,13 +28,16 @@ now?
 | bring your own ontology and data | [APPLY_YOUR_DATA.md](/docs/apply_your_data/) |
 | inspect files, artifacts, and traces | [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/) |
 | understand the system design | [ARCHITECTURE.md](/docs/architecture/) |
+| understand the top-level repository layout | [REPOSITORY_LAYOUT.md](REPOSITORY_LAYOUT.md) |
+| review repository hierarchy cleanup priorities | [REPOSITORY_HIERARCHY_REVIEW.md](REPOSITORY_HIERARCHY_REVIEW.md) |
+| understand GitHub automation | [GITHUB_AUTOMATION.md](GITHUB_AUTOMATION.md) |
 | present SEOCHO to a technical audience | [presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md](presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md) |
 | measure behavior with FinDER and benchmark tracks | [BENCHMARKS.md](https://github.com/tteon/seocho/blob/main/docs/BENCHMARKS.md) |
 
 Recommended onboarding order:
 
 1. [WHY_SEOCHO.md](/docs/why_seocho/)
-2. [QUICKSTART.md](/docs/quickstart/)
+2. [../QUICKSTART.md](../QUICKSTART.md)
 3. [../examples/quickstart.ipynb](../examples/quickstart.ipynb)
 4. [BEGINNER_GUIDE.md](BEGINNER_GUIDE.md)
 5. [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/)
@@ -46,7 +50,9 @@ Recommended onboarding order:
 
 - [WHY_SEOCHO.md](/docs/why_seocho/): product framing and ontology-aligned value
   proposition
-- [QUICKSTART.md](/docs/quickstart/): shortest local success path
+- [../QUICKSTART.md](../QUICKSTART.md): shortest local success path
+- [RUNTIME_DEPLOYMENT.md](RUNTIME_DEPLOYMENT.md): full local runtime
+  deployment guide for Docker stack, services, and environment setup
 - [../examples/quickstart.ipynb](../examples/quickstart.ipynb): runnable
   notebook covering ontology, indexing design, agent design, indexing, query,
   `.env`-backed provider setup, safe Ladybug fallback, optional Neo4j/DozerDB,
@@ -87,13 +93,19 @@ Recommended onboarding order:
   seams for the modular monolith
 - [MODULE_OWNERSHIP_MAP.md](MODULE_OWNERSHIP_MAP.md): canonical module
   ownership and compatibility boundaries
+- [ARCHITECTURE_HEALTH.md](ARCHITECTURE_HEALTH.md): per-domain quality
+  scorecard (grade + coverage + gaps, tracked over time)
 - [WORKFLOW.md](/docs/workflow/): operational workflow
+- [GITHUB_AUTOMATION.md](GITHUB_AUTOMATION.md): GitHub Actions, Codex
+  automation, and `.github/` placement rules
 
 ## Contributor References
 
 - [ISSUE_TASK_SYSTEM.md](https://github.com/tteon/seocho/blob/main/docs/ISSUE_TASK_SYSTEM.md): sprint and task governance
-- [BEADS_OPERATING_MODEL.md](https://github.com/tteon/seocho/blob/main/docs/BEADS_OPERATING_MODEL.md): `.beads` execution
-  contract
+- [REPOSITORY_LAYOUT.md](REPOSITORY_LAYOUT.md): root directory intent,
+  canonical edit surfaces, and legacy/local-only paths
+- [REPOSITORY_HIERARCHY_REVIEW.md](REPOSITORY_HIERARCHY_REVIEW.md):
+  architecture review of repo hierarchy cleanup priorities and tradeoffs
 - [OPEN_SOURCE_PLAYBOOK.md](/docs/open_source_playbook/): contributor onboarding
 - [decisions/DECISION_LOG.md](https://github.com/tteon/seocho/blob/main/docs/decisions/DECISION_LOG.md): architecture decision
   history
@@ -104,6 +116,9 @@ Recommended onboarding order:
 - GitHub `README.md` is the fastest product landing page.
 - `docs/*` is the source of truth for long-form product, operator, and system
   contracts.
-- `tteon.github.io/` mirrors selected pages for `https://seocho.blog`.
-- If a source doc changes materially, update the mirrored website page and
-  validate drift with the website repo checks.
+- `website/` is the tracked Astro/Starlight source for `https://seocho.blog`.
+- `website/scripts/generate-docs.mjs` materializes selected `/docs/*` and
+  `/blog/*` pages from the repo-root source docs at build time.
+- Generated mirror files under `website/src/content/docs/docs/` are derived
+  artifacts; edit the repo-root source docs instead.
+- Validate the site with `cd website && npm ci && npm run check:docs && npm run build && bash scripts/check-built-links.sh`.
