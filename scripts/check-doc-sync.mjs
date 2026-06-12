@@ -75,16 +75,6 @@ const fileMappings = [
       '> *Source mirrored from `seocho/docs/README.md`*\n\n',
   },
   {
-    src: 'docs/QUICKSTART.md',
-    dest: 'quickstart.md',
-    frontmatter:
-      '---\n' +
-      'title: Quickstart\n' +
-      'description: Get SEOCHO up and running in 5 minutes.\n' +
-      '---\n\n' +
-      '> *Source mirrored from `seocho/docs/QUICKSTART.md`*\n\n',
-  },
-  {
     src: 'docs/APPLY_YOUR_DATA.md',
     dest: 'apply_your_data.md',
     frontmatter:
@@ -168,7 +158,6 @@ const fileMappings = [
 const routeReplacements = new Map([
   ['`docs/WHY_SEOCHO.md`', '[`/docs/why_seocho/`](/docs/why_seocho/)'],
   ['`docs/README.md`', '[`/docs/`](/docs/)'],
-  ['`docs/QUICKSTART.md`', '[`/docs/quickstart/`](/docs/quickstart/)'],
   ['`docs/APPLY_YOUR_DATA.md`', '[`/docs/apply_your_data/`](/docs/apply_your_data/)'],
   ['`docs/PYTHON_INTERFACE_QUICKSTART.md`', '[`/docs/python_sdk/`](/docs/python_sdk/)'],
   ['`docs/FILES_AND_ARTIFACTS.md`', '[`/docs/files_and_artifacts/`](/docs/files_and_artifacts/)'],
@@ -178,7 +167,6 @@ const routeReplacements = new Map([
   ['`docs/TUTORIAL_FIRST_RUN.md`', '[`/docs/tutorial/`](/docs/tutorial/)'],
   ['`docs/OPEN_SOURCE_PLAYBOOK.md`', '[`/docs/open_source_playbook/`](/docs/open_source_playbook/)'],
   ['(WHY_SEOCHO.md)', '(/docs/why_seocho/)'],
-  ['(QUICKSTART.md)', '(/docs/quickstart/)'],
   ['(PYTHON_INTERFACE_QUICKSTART.md)', '(/docs/python_sdk/)'],
   ['(APPLY_YOUR_DATA.md)', '(/docs/apply_your_data/)'],
   ['(FILES_AND_ARTIFACTS.md)', '(/docs/files_and_artifacts/)'],

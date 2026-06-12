@@ -26,19 +26,19 @@ planes:
 
 - **Public facade**: `Seocho.add()`, `Seocho.ask()`, `Seocho.local()`, and
   `Seocho.remote()` stay stable for users.
-- **Data plane**: `seocho/index/*` owns document/file ingestion, extraction,
+- **Data plane**: `src/seocho/index/*` owns document/file ingestion, extraction,
   linking, rule assessment, and graph writes.
-- **Control plane**: `seocho/query/*` owns intent extraction, ontology-aware
+- **Control plane**: `src/seocho/query/*` owns intent extraction, ontology-aware
   strategy selection, evidence bundles, semantic routing, debate reuse, and
   answer synthesis.
-- **Ontology plane**: `seocho/ontology.py` and `seocho/ontology_context.py`
+- **Ontology plane**: `src/seocho/ontology.py` and `src/seocho/ontology_context.py`
   provide the schema contract and compact context hash that both indexing and
   querying carry.
 - **Runtime shell**: `runtime/*` owns HTTP routes, request validation, policy,
   readiness, workspace/database registry, and deployment-specific health.
 - **Compatibility shell**: `extraction/*` is being reduced to legacy import
   compatibility and batch-only helpers while canonical logic moves into
-  `seocho/*` and `runtime/*`.
+  `src/seocho/*` and `runtime/*`.
 
 The key invariant is that ontology context must survive the full loop:
 
@@ -62,12 +62,6 @@ Default local activation is intentionally smaller than the full historical repo:
 - `evaluation-interface`
 
 This is the supported first-run path for developers.
-The old `semantic-service` still exists, but only behind the explicit compose
-profile:
-
-```bash
-docker compose --profile legacy-semantic up -d semantic-service
-```
 
 That distinction matters because most current onboarding, API verification, and
 platform UX flow through `extraction-service`, not the standalone legacy
@@ -155,15 +149,15 @@ This critical path is the default acceptance gate for user-facing releases.
 
 Canonical SDK control-plane modules:
 
-- `seocho/agent/`
-- `seocho/query/`
-- `seocho/http_transport.py`
-- `seocho/ontology.py` as the stable public ontology facade
-- `seocho/ontology_context.py` for compact shared ontology context descriptors and cache
-- `seocho/ontology_serialization.py` for JSON-LD persistence
-- `seocho/ontology_artifacts.py` for runtime artifact and typed prompt generation
-- `seocho/ontology_governance.py` for offline diff/check/export flows
-- `seocho/runtime_contract.py`
+- `src/seocho/agent/`
+- `src/seocho/query/`
+- `src/seocho/http_transport.py`
+- `src/seocho/ontology.py` as the stable public ontology facade
+- `src/seocho/ontology_context.py` for compact shared ontology context descriptors and cache
+- `src/seocho/ontology_serialization.py` for JSON-LD persistence
+- `src/seocho/ontology_artifacts.py` for runtime artifact and typed prompt generation
+- `src/seocho/ontology_governance.py` for offline diff/check/export flows
+- `src/seocho/runtime_contract.py`
 
 Primary modules:
 
@@ -189,7 +183,8 @@ Long-term package shape:
 We are intentionally choosing `runtime/` over `server/` because the shell owns
 more than HTTP route files. The staged migration contract lives in
 `docs/RUNTIME_PACKAGE_MIGRATION.md`. Contributor-facing placement guidance
-lives in `docs/MODULE_OWNERSHIP_MAP.md`.
+lives in `docs/MODULE_OWNERSHIP_MAP.md`, and each ownership domain's quality
+grade + open gaps are tracked in `docs/ARCHITECTURE_HEALTH.md`.
 
 ## Internal Orchestration Seams (2026-04-17)
 
@@ -220,10 +215,10 @@ Explicit non-goal for this slice:
 Ontology remains a first-class SDK primitive, but it should no longer behave as
 one monolithic implementation file.
 
-- `seocho/ontology.py`
+- `src/seocho/ontology.py`
   - stable public `Ontology`, `NodeDef`, `RelDef`, and `P` surface
   - schema validation, SHACL derivation, and prompt-facing API entrypoints
-- `seocho/ontology_context.py`
+- `src/seocho/ontology_context.py`
   - stable `ontology_context_hash` descriptor shared by indexing, query, traces, and agent sessions
   - small in-process cache for compiled extraction/query/agent context artifacts
   - SKOS-style glossary/vocabulary hash derived from ontology labels, aliases, properties, and relationship terms
@@ -234,13 +229,13 @@ one monolithic implementation file.
   - aligns workspace, graph/database scope, ontology profile, glossary identity, policy, tool use, debate, session carryover, and evidence status
 - Target property-graph lens contract: `docs/PROPERTY_GRAPH_LENS_STRATEGY.md`
   - preserves schemaless graph flexibility while marking only agent-visible anchors, evidence sources, evidence paths, provenance, importance, confidence, and context metadata
-- `seocho/ontology_serialization.py`
+- `src/seocho/ontology_serialization.py`
   - canonical JSON-LD load/save helpers
   - no runtime governance side effects
-- `seocho/ontology_artifacts.py`
+- `src/seocho/ontology_artifacts.py`
   - runtime-facing typed artifact promotion
   - approved artifacts, semantic prompt context, vocabulary shaping
-- `seocho/ontology_governance.py`
+- `src/seocho/ontology_governance.py`
   - offline check/diff/export/OWL inspection path
 
 Canonical direction:
@@ -255,13 +250,13 @@ Canonical direction:
 `Seocho` should stay a public facade, not a second home for canonical engine
 logic.
 
-- `seocho/client.py`
+- `src/seocho/client.py`
   - public SDK facade and orchestration entrypoints
-- `seocho/http_transport.py`
+- `src/seocho/http_transport.py`
   - HTTP request/response wrapping and exception mapping
-- `seocho/client_artifacts.py`
+- `src/seocho/client_artifacts.py`
   - ontology-to-runtime-artifact bridge helpers
-- `seocho/query/*`, `seocho/agent/*`, `seocho/ontology_*`
+- `src/seocho/query/*`, `src/seocho/agent/*`, `seocho/ontology_*`
   - canonical engine subdomains used by the facade
 
 Canonical direction:
@@ -279,9 +274,9 @@ Canonical direction:
 
 Primary modules:
 
-- `seocho/rules.py` — canonical rule inference/validation (shared by SDK + server)
-- `seocho/index/pipeline.py` — canonical indexing pipeline with rule + embedding support
-- `seocho/index/linker.py` — canonical embedding-based entity linker
+- `src/seocho/rules.py` — canonical rule inference/validation (shared by SDK + server)
+- `src/seocho/index/pipeline.py` — canonical indexing pipeline with rule + embedding support
+- `src/seocho/index/linker.py` — canonical embedding-based entity linker
 - `extraction/pipeline.py` — legacy batch pipeline
 - `extraction/rule_constraints.py` — re-export shim to `seocho.rules`
 - `extraction/vector_store.py` — adapter shim to `seocho.store.vector`
@@ -366,21 +361,51 @@ Why this path exists:
 - fulltext-first lookup improves recall for imperfect user entity strings
 - semantic re-ranking + dedup reduces wrong-node selection before Cypher generation
 
+Planned `graph_cot` semantic sub-mode:
+
+```text
+User Question
+    │
+    ▼
+SemanticLayer
+    │
+    ▼
+QuerySupervisorAgent
+    │
+    ▼
+Text2CypherAgent
+    │
+    ▼
+AnswerGenerationAgent
+    │
+    ▼
+AnswerGuardrailAgent
+    │
+    ▼
+Finalize
+```
+
+`query_mode="graph_cot"` keeps the same public semantic API surface, but the
+intended internal lane is more explicit than the baseline semantic flow. The
+typed artifacts for this lane live in `src/seocho/query/graph_cot_contracts.py`,
+and the per-agent reasoning/tool specs live in
+`src/seocho/query/graph_cot_design.py`.
+
 Canonical direction:
 
-- `seocho/query/` is the canonical query engine surface
+- `src/seocho/query/` is the canonical query engine surface
 - local SDK and server runtime should share planner, executor, and answer
-  shaping contracts from `seocho/query/*`
+  shaping contracts from `src/seocho/query/*`
 - semantic query Phase A now also shares intent, support assessment, strategy
   selection, Cypher validation, and insufficiency contracts from
-  `seocho/query/{intent,strategy_chooser,cypher_validator,insufficiency,contracts}.py`
+  `src/seocho/query/{intent,strategy_chooser,cypher_validator,insufficiency,contracts}.py`
 - semantic query Phase B now also shares constraint-slice building and run
-  metadata persistence from `seocho/query/{constraints,run_registry}.py`
+  metadata persistence from `src/seocho/query/{constraints,run_registry}.py`
 - semantic query Phase C now also shares entity resolution, route selection,
   LPG/RDF specialists, and answer framing from
-  `seocho/query/semantic_agents.py`
+  `src/seocho/query/semantic_agents.py`
 - semantic query Phase D now also shares `SemanticAgentFlow` orchestration from
-  `seocho/query/semantic_flow.py`; extraction keeps runtime injection and
+  `src/seocho/query/semantic_flow.py`; extraction keeps runtime injection and
   compatibility aliases only
 - `extraction/*` should keep transport and runtime orchestration concerns, not
   grow a second query engine
@@ -420,14 +445,14 @@ compatibility roles.
 - compatibility alias now:
   - `extraction/runtime_ingest.py`
 - canonical helper seams now shared with runtime ingest:
-  - `seocho/index/runtime_memory.py`
-  - `seocho/index/runtime_artifacts.py`
+  - `src/seocho/index/runtime_memory.py`
+  - `src/seocho/index/runtime_artifacts.py`
 - migrate later:
   - remaining runtime ingest orchestration beyond extraction/linking setup
 
 Shared ingestion seam:
 
-- `seocho/index/extraction_engine.py`
+- `src/seocho/index/extraction_engine.py`
   - canonical extraction prompt rendering
   - canonical linking prompt rendering
   - canonical graph payload normalization
@@ -453,14 +478,14 @@ relevance.
 
 Primary implementation anchors:
 
-- `seocho/query/intent.py`
-- `seocho/query/strategy_chooser.py`
-- `seocho/query/cypher_validator.py`
-- `seocho/query/insufficiency.py`
+- `src/seocho/query/intent.py`
+- `src/seocho/query/strategy_chooser.py`
+- `src/seocho/query/cypher_validator.py`
+- `src/seocho/query/insufficiency.py`
 - `extraction/semantic_query_flow.py` as the compatibility surface during migration
 - `runtime/memory_service.py`
 - `runtime/public_memory_api.py`
-- `seocho/types.py`
+- `src/seocho/types.py`
 
 Reference design brief: `docs/GRAPH_RAG_AGENT_HANDOFF_SPEC.md`
 
@@ -506,9 +531,9 @@ Offline ontology governance operators should prefer the SDK CLI surface:
 
 ### Extraction Layer
 
-| CanonicalExtractionEngine | `seocho/index/extraction_engine.py` | Shared extraction/linking prompt + normalization seam for SDK and extraction compatibility paths |
-| RuntimeMemoryHelpers | `seocho/index/runtime_memory.py` | Shared deterministic memory-graph shaping helpers for SDK/runtime ingestion paths |
-| RuntimeArtifactHelpers | `seocho/index/runtime_artifacts.py` | Shared deterministic runtime semantic-artifact merge, vocabulary, and summary helpers |
+| CanonicalExtractionEngine | `src/seocho/index/extraction_engine.py` | Shared extraction/linking prompt + normalization seam for SDK and extraction compatibility paths |
+| RuntimeMemoryHelpers | `src/seocho/index/runtime_memory.py` | Shared deterministic memory-graph shaping helpers for SDK/runtime ingestion paths |
+| RuntimeArtifactHelpers | `src/seocho/index/runtime_artifacts.py` | Shared deterministic runtime semantic-artifact merge, vocabulary, and summary helpers |
 | OntologyPromptBridge | `extraction/ontology_prompt_bridge.py` | Backward-compatible ontology → prompt bridge; new code should prefer ontology contracts directly |
 | EntityExtractor | `extraction/extractor.py` | Legacy OpenAI extractor wrapper retained for compatibility paths that have not yet moved to the canonical seam |
 | EntityLinker | `extraction/linker.py` | Legacy LLM linker wrapper retained for compatibility paths that have not yet moved to the canonical seam |
