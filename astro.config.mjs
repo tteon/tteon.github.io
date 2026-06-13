@@ -49,6 +49,7 @@ export default defineConfig({
                         { label: 'Overview', link: '/sdk/' },
                         { label: 'Getting Started', link: '/sdk/getting-started/' },
                         { label: 'Ontology and Semantic Artifacts', link: '/sdk/ontology-guide/' },
+                        { label: 'Ontology Enforcement Modes', link: '/sdk/enforcement-modes/' },
                         { label: 'API Reference', link: '/sdk/api-reference/' },
                         { label: 'Examples', link: '/sdk/examples/' },
                     ]
