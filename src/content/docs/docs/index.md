@@ -17,8 +17,9 @@ now?
 
 | If you need to... | Start here |
 |---|---|
+| understand why SEOCHO exists | [WHY_SEOCHO.md](/docs/why_seocho/) |
 | get a first local success path | [../QUICKSTART.md](../QUICKSTART.md) |
-| understand local `ask()` vs runtime `semantic/react/debate` | [../README.md#execution-surfaces](../README.md#execution-surfaces) |
+| understand local `ask()` vs runtime `semantic/react/debate` | [../README.md#choose-a-mode](../README.md#choose-a-mode) |
 | bring up the full local runtime stack | [RUNTIME_DEPLOYMENT.md](RUNTIME_DEPLOYMENT.md) |
 | follow a runnable notebook walkthrough | [../examples/quickstart.ipynb](../examples/quickstart.ipynb) |
 | understand SEOCHO with architecture snippets | [BEGINNER_GUIDE.md](BEGINNER_GUIDE.md) |
@@ -29,7 +30,6 @@ now?
 | inspect files, artifacts, and traces | [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/) |
 | understand the system design | [ARCHITECTURE.md](/docs/architecture/) |
 | understand the top-level repository layout | [REPOSITORY_LAYOUT.md](REPOSITORY_LAYOUT.md) |
-| review repository hierarchy cleanup priorities | [REPOSITORY_HIERARCHY_REVIEW.md](REPOSITORY_HIERARCHY_REVIEW.md) |
 | understand GitHub automation | [GITHUB_AUTOMATION.md](GITHUB_AUTOMATION.md) |
 | present SEOCHO to a technical audience | [presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md](presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md) |
 | measure behavior with FinDER and benchmark tracks | [BENCHMARKS.md](https://github.com/tteon/seocho/blob/main/docs/BENCHMARKS.md) |
@@ -110,6 +110,24 @@ Recommended onboarding order:
 - [decisions/DECISION_LOG.md](https://github.com/tteon/seocho/blob/main/docs/decisions/DECISION_LOG.md): architecture decision
   history
 - [../CONTRIBUTING.md](https://github.com/tteon/seocho/blob/main/CONTRIBUTING.md): contribution flow and PR rules
+
+## Internal & Maintainer Docs
+
+These are working documents (planning, reviews, migrations, known issues). They
+are not part of the getting-started path — skip them on a first read.
+
+- [AGENT_SERVER_REFACTOR_PLAN.md](AGENT_SERVER_REFACTOR_PLAN.md)
+- [RUNTIME_PACKAGE_MIGRATION.md](https://github.com/tteon/seocho/blob/main/docs/RUNTIME_PACKAGE_MIGRATION.md)
+- [ARCHITECTURE_HEALTH.md](ARCHITECTURE_HEALTH.md)
+- [REPOSITORY_HIERARCHY_REVIEW.md](REPOSITORY_HIERARCHY_REVIEW.md)
+- [PHILOSOPHY_FEASIBILITY_REVIEW.md](PHILOSOPHY_FEASIBILITY_REVIEW.md)
+- [PROMPT_ASSEMBLY_DISCUSSION_MEMO.md](PROMPT_ASSEMBLY_DISCUSSION_MEMO.md)
+- [BASELINE_INSTRUCTIONS.md](BASELINE_INSTRUCTIONS.md)
+- [KNOWN_ISSUE.md](KNOWN_ISSUE.md)
+
+> Follow-up: physically relocating these under `docs/internal/` is tracked
+> separately because the `website/` doc generator and several cross-links
+> reference their current paths.
 
 ## Docs Sync Integration
 
