@@ -44,7 +44,7 @@ const stack = [
             <span class="text-sm font-medium text-zinc-200">copy-paste local path</span>
             <span class="text-xs text-zinc-500">Python</span>
           </div>
-          <pre class="overflow-x-auto text-sm leading-6 text-zinc-300"><code>{`from seocho import Seocho, Ontology, NodeDef, RelDef, Property
+          <pre tabindex="0" class="overflow-x-auto text-sm leading-6 text-zinc-300"><code>{`from seocho import Seocho, Ontology, NodeDef, RelDef, Property
 
 ontology = Ontology(
     name="work",
@@ -129,7 +129,7 @@ print(client.ask("Where did Marie Curie work?"))`}</code></pre>
           <h2 class="seocho-display text-3xl font-semibold text-[var(--seocho-paper)] md:text-4xl">Latest updates</h2>
           <p class="mt-2 text-sm text-zinc-500">Release-linked updates from the public GitHub trail.</p>
         </div>
-        <a href="https://github.com/TTEON/seocho/commits/main/" target="_blank" rel="noopener noreferrer" class="brand-link-light">Commits</a>
+        <a href="https://github.com/TTEON/seocho/commits/main/" target="_blank" rel="noopener noreferrer" aria-label="View latest commits on GitHub" class="brand-link-light">Commits</a>
       </div>
       <ChangelogList />
     </section>

@@ -40,19 +40,19 @@ const signals = [
         <a href="/docs/quickstart/" class="brand-button brand-button-secondary">
           Run the quickstart
         </a>
-        <a href="https://github.com/TTEON/seocho" target="_blank" rel="noopener noreferrer" class="brand-button brand-button-ghost">
+        <a href="https://github.com/TTEON/seocho" target="_blank" rel="noopener noreferrer" aria-label="View SEOCHO repository on GitHub" class="brand-button brand-button-ghost">
           GitHub
         </a>
       </div>
     </div>
 
-    <div class="mt-16 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <dl class="mt-16 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       {signals.map(([label, value]) => (
         <div class="brand-signal">
-          <span class="text-[0.68rem] font-semibold uppercase text-zinc-500">{label}</span>
-          <strong class="mt-2 block text-sm font-semibold text-zinc-100">{value}</strong>
+          <dt class="text-[0.68rem] font-semibold uppercase text-zinc-500">{label}</dt>
+          <dd class="mt-2 block text-sm font-semibold text-zinc-100">{value}</dd>
         </div>
       ))}
-    </div>
+    </dl>
   </div>
 </section>
