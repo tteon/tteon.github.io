@@ -1,7 +1,6 @@
 ---
 title: Docs Home
 description: Central Documentation Index for SEOCHO
-slug: docs
 ---
 
 > *Source mirrored from `seocho/docs/README.md`*
@@ -126,7 +125,7 @@ Use these after the first local success:
 
 | Topic | Reference |
 |---|---|
-| Architecture details | [Architecture](/docs/architecture/), [Graph-RAG Agent Handoff Spec](https://github.com/tteon/seocho/blob/main/docs/GRAPH_RAG_AGENT_HANDOFF_SPEC.md) |
+| Architecture details | [Architecture](/docs/architecture/), [Internal Class Design](https://github.com/tteon/seocho/blob/main/docs/INTERNAL_CLASS_DESIGN.md), [Graph-RAG Agent Handoff Spec](https://github.com/tteon/seocho/blob/main/docs/GRAPH_RAG_AGENT_HANDOFF_SPEC.md) |
 | Repository shape | [Repository Layout](https://github.com/tteon/seocho/blob/main/docs/REPOSITORY_LAYOUT.md), [Workflow](/docs/workflow/) |
 | Automation | [GitHub Automation](https://github.com/tteon/seocho/blob/main/docs/GITHUB_AUTOMATION.md), [Release And Community Operations](/docs/release_and_community_operations/) |
 | Design history | [Decision Log](https://github.com/tteon/seocho/blob/main/docs/decisions/DECISION_LOG.md), [Reference Docs](https://github.com/tteon/seocho/blob/main/docs/reference/README.md) |

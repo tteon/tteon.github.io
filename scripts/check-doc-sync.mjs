@@ -66,12 +66,11 @@ const fileMappings = [
   },
   {
     src: 'docs/README.md',
-    dest: 'index.md',
+    dest: '../docs.md',
     frontmatter:
       '---\n' +
       'title: Docs Home\n' +
       'description: Central Documentation Index for SEOCHO\n' +
-      'slug: docs\n' +
       '---\n\n' +
       '> *Source mirrored from `seocho/docs/README.md`*\n\n',
   },

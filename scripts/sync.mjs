@@ -66,8 +66,8 @@ const fileMappings = [
     },
     {
         src: 'docs/README.md',
-        dest: 'index.md',
-        frontmatter: `---\ntitle: Docs Home\ndescription: Central Documentation Index for SEOCHO\nslug: docs\n---\n\n> *Source mirrored from \`seocho/docs/README.md\`*\n\n`
+        dest: '../docs.md',
+        frontmatter: `---\ntitle: Docs Home\ndescription: Central Documentation Index for SEOCHO\n---\n\n> *Source mirrored from \`seocho/docs/README.md\`*\n\n`
     },
     {
         src: 'QUICKSTART.md',
@@ -239,6 +239,7 @@ function rewriteWebsiteRoutes(content) {
 
 function cleanGeneratedOutputs() {
     fs.rmSync(TARGET_DOCS_DIR, { recursive: true, force: true });
+    fs.rmSync(path.join(WORK_DIR, 'src', 'content', 'docs', 'docs.md'), { force: true });
     fs.rmSync(path.join(TARGET_BLOG_DIR, 'philosophy.md'), { force: true });
     fs.rmSync(path.join(TARGET_BLOG_DIR, 'feasibility-review-framework.md'), { force: true });
     fs.mkdirSync(TARGET_DOCS_DIR, { recursive: true });
