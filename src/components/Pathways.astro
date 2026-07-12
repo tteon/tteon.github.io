@@ -1,34 +1,34 @@
 ---
 const paths = [
   {
-    eyebrow: 'Product',
-    title: 'Why SEOCHO',
+    eyebrow: 'Understand',
+    title: 'Map the system',
     description:
-      'Understand the ontology-first graph memory model before you choose an install path or runtime shape.',
-    href: '/docs/why_seocho/',
-    cta: 'Read the framing',
+      'Learn the core loop, vocabulary, modes, and code ownership before opening the reference docs.',
+    href: '/learn/',
+    cta: 'Read the guide',
   },
   {
-    eyebrow: 'SDK',
-    title: 'Build Locally',
+    eyebrow: 'First run',
+    title: 'Build locally',
     description:
-      'Use Seocho.local(...) for the first run, then add files, graph stores, and runtime artifacts when needed.',
-    href: '/docs/python_sdk/',
-    cta: 'Start with the SDK',
+      'Use Seocho.local(...) to define one ontology, add one fact, and ask one graph-grounded question.',
+    href: '/docs/quickstart/',
+    cta: 'Run quickstart',
   },
   {
     eyebrow: 'Runtime',
-    title: 'Run The Platform',
+    title: 'Share the contract',
     description:
-      'Start the local UI, API, and DozerDB stack when other agents or services need an HTTP contract.',
+      'Start the UI, API, policy checks, and DozerDB stack when other agents need HTTP access.',
     href: '/docs/runtime_deployment/',
     cta: 'Run the runtime',
   },
   {
-    eyebrow: 'Open Source',
-    title: 'Contribute',
+    eyebrow: 'Community',
+    title: 'Contribute safely',
     description:
-      'Use the public issue, PR, release, and community rules when you want to help shape the project.',
+      'Use the issue, PR, release, and Discord rules when you want to help shape the project.',
     href: '/docs/open_source_playbook/',
     cta: 'Read the playbook',
   },
@@ -37,10 +37,10 @@ const paths = [
 
 <section class="max-w-6xl mx-auto px-6 py-18 w-full animate-fade-up delay-100 z-10">
   <div class="mb-10 text-center md:text-left">
-    <p class="uppercase tracking-[0.28em] text-[0.72rem] text-cyan-300/75 mb-3 font-medium">Choose Your Entry Path</p>
-    <h2 class="seocho-display text-3xl md:text-5xl text-white mb-3 leading-tight">Start from the surface that matches your job.</h2>
+    <p class="uppercase text-[0.72rem] text-cyan-300/75 mb-3 font-medium">Choose your entry path</p>
+    <h2 class="seocho-display text-3xl md:text-5xl text-white mb-3 leading-tight">Start from the job you have today.</h2>
     <p class="text-zinc-400 text-lg max-w-3xl">
-      SEOCHO has three distinct entry points: product framing, local ontology-first authoring, and runtime consumption.
+      SEOCHO has distinct entry points: concept map, local authoring, runtime operation, and contribution.
       Pick one instead of reading the repo like a file dump.
     </p>
   </div>
@@ -50,7 +50,7 @@ const paths = [
       <a href={path.href} class="group relative overflow-hidden rounded-lg border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-7 transition-all hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.09),rgba(255,255,255,0.03))]">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.14),transparent_48%),radial-gradient(circle_at_bottom_right,rgba(245,158,11,0.12),transparent_46%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
         <div class="relative z-10">
-          <p class="uppercase tracking-[0.22em] text-[0.72rem] text-zinc-500 mb-4 font-medium">{path.eyebrow}</p>
+          <p class="uppercase text-[0.72rem] text-zinc-500 mb-4 font-medium">{path.eyebrow}</p>
           <h3 class="seocho-display text-2xl text-white mb-4 leading-tight">{path.title}</h3>
           <p class="text-zinc-400 leading-relaxed min-h-[5.5rem]">{path.description}</p>
           <div class="mt-8 inline-flex items-center gap-2 text-sm font-medium text-zinc-200 transition-colors group-hover:text-white">

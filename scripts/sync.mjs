@@ -67,7 +67,7 @@ const fileMappings = [
     {
         src: 'docs/README.md',
         dest: 'index.md',
-        frontmatter: `---\ntitle: Docs Home\ndescription: Central Documentation Index for SEOCHO\n---\n\n> *Source mirrored from \`seocho/docs/README.md\`*\n\n`
+        frontmatter: `---\ntitle: Docs Home\ndescription: Central Documentation Index for SEOCHO\nslug: docs\n---\n\n> *Source mirrored from \`seocho/docs/README.md\`*\n\n`
     },
     {
         src: 'QUICKSTART.md',

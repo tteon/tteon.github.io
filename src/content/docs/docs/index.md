@@ -1,27 +1,65 @@
 ---
 title: Docs Home
 description: Central Documentation Index for SEOCHO
+slug: docs
 ---
 
 > *Source mirrored from `seocho/docs/README.md`*
 
 
-SEOCHO docs are organized around jobs, not around the repository tree. Start
-with the path that matches what you are trying to do today, then move deeper
-only when you need the extra detail.
+SEOCHO is ontology-aligned middleware for agents that need graph memory they can
+inspect, govern, and reuse. Read this page as the project map: it explains the
+core loop first, then points you to the smallest useful next document.
+
+If you are reading on `seocho.blog`, the fastest one-page map is the
+[Concept Guide](https://seocho.blog/learn/).
+
+## What SEOCHO Is
+
+SEOCHO keeps one ontology contract aligned across ingestion, graph writes,
+retrieval, answer synthesis, and runtime APIs.
+
+| Piece | Plain meaning |
+|---|---|
+| Ontology | the allowed entities, relationships, and properties |
+| Indexing | turns raw text or records into graph-shaped facts |
+| Graph memory | stores facts, provenance, constraints, and query evidence |
+| Semantic query | resolves intent against the ontology before generating graph queries |
+| Runtime | exposes the same graph contract over HTTP for agents and apps |
+
+The fastest first run is `Seocho.local(...)`. It does not require Neo4j,
+DozerDB, or a web server. Use the runtime only when another process needs a
+shared API, UI, or deployment boundary.
+
+## The Core Loop
+
+```text
+ontology
+  -> ingest records or documents
+  -> extract graph facts that fit the ontology
+  -> write graph state with provenance
+  -> ask ontology-aware questions
+  -> inspect traces, artifacts, and evidence
+```
+
+That loop is the product. Everything else in the repository exists to make the
+loop more repeatable, observable, or deployable.
 
 ## Choose Your Path
 
-| I want to... | Start here | What you should get |
+| If you want to... | Start here | Stop when you can... |
 |---|---|---|
-| understand the product idea | [Why SEOCHO](/docs/why_seocho/) | why ontology-first graph memory is different from generic AI memory |
-| get a first local success | [Quickstart](/docs/quickstart/) | install, define a tiny ontology, add text, ask a question |
-| use SEOCHO from Python | [Python SDK](/docs/python_sdk/) | local SDK, HTTP client, semantic query, and artifact examples |
-| bring my own records or files | [Bring Your Data](/docs/apply_your_data/) | ingestion paths, graph targets, query order, and inspection points |
-| run the local platform | [Runtime Deployment](/docs/runtime_deployment/) | UI, API, DozerDB, environment, and troubleshooting |
-| contribute to the project | [Open Source Playbook](/docs/open_source_playbook/) | issue/PR workflow, labels, examples, and review expectations |
+| understand why SEOCHO exists | [Why SEOCHO](/docs/why_seocho/) | explain ontology-first graph memory in one paragraph |
+| get a first local success | [Quickstart](/docs/quickstart/) | define one ontology, add text, ask one question |
+| use the Python SDK | [Python SDK](/docs/python_sdk/) | choose local, remote, or explicit backend mode |
+| load your own records or files | [Bring Your Data](/docs/apply_your_data/) | pick an ingest path and target graph |
+| run the platform stack | [Runtime Deployment](/docs/runtime_deployment/) | start UI, API, and graph services locally |
+| describe repeatable runs in YAML | [Run Specs](/docs/run_specs/) | declare ontology, documents, questions, and sweeps |
+| contribute publicly | [Open Source Playbook](/docs/open_source_playbook/) | open a scoped issue or PR with validation evidence |
 
-If you are new, use this order:
+## Read In Order
+
+New users should not read the repository tree top to bottom. Use this sequence:
 
 1. [Why SEOCHO](/docs/why_seocho/)
 2. [Quickstart](/docs/quickstart/)
@@ -30,26 +68,36 @@ If you are new, use this order:
 5. [Files and Artifacts](/docs/files_and_artifacts/)
 6. [Architecture](/docs/architecture/)
 
-## The Mental Model
+## Concept Map
 
-SEOCHO keeps one ontology contract aligned across four surfaces:
+| Concept | What to remember | Read next |
+|---|---|---|
+| Ontology contract | one schema-like object should guide extraction and querying | [Why SEOCHO](/docs/why_seocho/) |
+| Embedded local path | use `Seocho.local(...)` for first success and experiments | [Quickstart](/docs/quickstart/) |
+| Explicit graph backend | use Neo4j or DozerDB when graph state must be shared or inspected externally | [Python SDK](/docs/python_sdk/) |
+| Runtime shell | HTTP boundary for UI, policy, traces, and multi-agent consumers | [Runtime Deployment](/docs/runtime_deployment/) |
+| Run spec | YAML declaration for repeatable ontology, document, model, and question runs | [Run Specs](/docs/run_specs/) |
+| Evidence and traces | generated files should make graph behavior auditable | [Files and Artifacts](/docs/files_and_artifacts/) |
+| Debate mode | advanced comparison mode, not the default retrieval path | [Python SDK](/docs/python_sdk/) |
 
-| Surface | What the ontology controls |
-|---|---|
-| Ingestion | which entities, relationships, and properties should be extracted |
-| Graph writes | constraints, provenance, and schema-shaped payloads |
-| Querying | schema-aware retrieval, Cypher generation, and bounded repair |
-| Runtime | HTTP-facing semantic artifacts, traces, policy, and `workspace_id` scope |
+## System Surfaces
 
-The fastest first run is `Seocho.local(...)`. The runtime path is for teams that
-want a shared API, UI, and DozerDB-backed deployment.
+| Surface | Owner path | Main question |
+|---|---|---|
+| Public SDK | `src/seocho/` | how do users ingest, query, and configure SEOCHO from Python? |
+| Query and retrieval | `src/seocho/query/` | how does intent become graph-grounded evidence? |
+| Indexing and graph shaping | `src/seocho/index/` | how do documents become graph facts? |
+| Runtime API | `runtime/` | how do external agents and apps consume the graph contract? |
+| Extraction compatibility | `extraction/` | which legacy imports or batch paths still need to work? |
+| Examples | `examples/` | what should a real user copy first? |
+| Docs and governance | `docs/` | what contract should future contributors preserve? |
 
 ## Common Questions
 
 | Question | Short answer | Read next |
 |---|---|---|
 | Do I need Neo4j or DozerDB for hello world? | No. `Seocho.local(...)` uses the embedded local path by default. | [Quickstart](/docs/quickstart/) |
-| When should I use the runtime? | When another process or agent needs to consume the same graph contract over HTTP. | [Runtime Deployment](/docs/runtime_deployment/) |
+| When should I use the runtime? | When another process or agent needs the same graph contract over HTTP. | [Runtime Deployment](/docs/runtime_deployment/) |
 | Where do generated artifacts go? | Local graph data, semantic artifacts, rule profiles, and traces are filesystem-visible. | [Files and Artifacts](/docs/files_and_artifacts/) |
 | Is debate the default mode? | No. Start with semantic graph QA and use debate only for explicit comparison work. | [Python SDK](/docs/python_sdk/) |
 | Where are release and Discord rules? | GitHub releases and docs are canonical; Discord is for curated community updates. | [Release And Community Operations](/docs/release_and_community_operations/) |

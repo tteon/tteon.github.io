@@ -30,44 +30,49 @@ export default defineConfig({
             sidebar: [
                 { label: 'Home', link: '/' },
                 {
-                    label: 'Start Here', items: [
-                        { label: 'Docs Home', link: '/docs/' },
+                    label: 'Understand', items: [
+                        { label: 'Overview', link: '/docs/' },
+                        { label: 'Concept Guide', link: '/learn/' },
                         { label: 'Why SEOCHO', link: '/docs/why_seocho/' },
+                    ]
+                },
+                {
+                    label: 'Start', items: [
                         { label: 'Quickstart', link: '/docs/quickstart/' },
+                        { label: 'Python SDK Guide', link: '/docs/python_sdk/' },
                         { label: 'Bring Your Data', link: '/docs/apply_your_data/' },
                     ]
                 },
                 {
                     label: 'Build', items: [
-                        { label: 'Python SDK Guide', link: '/docs/python_sdk/' },
                         { label: 'Run Specs', link: '/docs/run_specs/' },
-                        { label: 'Files and Artifacts', link: '/docs/files_and_artifacts/' },
                         { label: 'Tutorial', link: '/docs/tutorial/' },
                         { label: 'Examples', link: '/examples/' },
+                        { label: 'Files and Artifacts', link: '/docs/files_and_artifacts/' },
+                        { label: 'Architecture', link: '/docs/architecture/' },
                     ]
                 },
                 {
                     label: 'Operate', items: [
                         { label: 'Runtime Deployment', link: '/docs/runtime_deployment/' },
-                        { label: 'Architecture', link: '/docs/architecture/' },
                         { label: 'Workflow', link: '/docs/workflow/' },
-                        { label: 'Philosophy', link: '/docs/philosophy/' }
+                        { label: 'Release & Community', link: '/docs/release_and_community_operations/' },
+                        { label: 'Community', link: '/community/' },
                     ]
                 },
                 {
-                    label: 'Python SDK', items: [
-                        { label: 'Overview', link: '/sdk/' },
-                        { label: 'Getting Started', link: '/sdk/getting-started/' },
+                    label: 'Reference', items: [
+                        { label: 'SDK Overview', link: '/sdk/' },
+                        { label: 'SDK Getting Started', link: '/sdk/getting-started/' },
                         { label: 'Ontology and Semantic Artifacts', link: '/sdk/ontology-guide/' },
                         { label: 'API Reference', link: '/sdk/api-reference/' },
-                        { label: 'Examples', link: '/sdk/examples/' },
+                        { label: 'SDK Examples', link: '/sdk/examples/' },
+                        { label: 'Philosophy', link: '/docs/philosophy/' },
                     ]
                 },
                 {
                     label: 'Contribute', items: [
                         { label: 'Open Source Playbook', link: '/docs/open_source_playbook/' },
-                        { label: 'Release & Community', link: '/docs/release_and_community_operations/' },
-                        { label: 'Community', link: '/community/' },
                         { label: 'Changelog', link: '/changelog/' },
                     ]
                 },

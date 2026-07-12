@@ -1,11 +1,47 @@
 ---
 title: Examples
-description: Runtime-first examples for ingesting data and querying SEOCHO.
+description: Copyable SEOCHO examples from local graph memory to runtime APIs.
+slug: examples
 ---
 
-# Examples
+Start local. Move to runtime when another process needs to consume the same
+graph contract.
 
-## 1. Raw Records to a Graph Target
+## 1. Local Graph Memory
+
+```python
+from seocho import Seocho, Ontology, NodeDef, RelDef, Property
+
+ontology = Ontology(
+    name="accounts",
+    nodes={
+        "Company": NodeDef(properties={"name": Property(str, unique=True)}),
+        "Product": NodeDef(properties={"name": Property(str, unique=True)}),
+    },
+    relationships={
+        "PROVIDES": RelDef(source="Company", target="Product"),
+    },
+)
+
+client = Seocho.local(ontology, llm="mara/MiniMax-M2.5")
+client.add("Beta provides risk analytics to ACME.")
+
+print(client.ask("What does Beta provide?"))
+```
+
+## 2. Index Multiple Records
+
+```python
+client.add_batch([
+    "ACME acquired Beta in 2024.",
+    "Beta provides risk analytics to ACME.",
+    "ACME uses the risk analytics product for compliance review.",
+])
+
+print(client.ask("How is Beta related to ACME?", reasoning_mode=True))
+```
+
+## 3. Use A Running Runtime
 
 ```python
 from seocho import Seocho
@@ -23,7 +59,7 @@ result = client.raw_ingest(
 print(result.status)
 ```
 
-## 2. Semantic Query with Bounded Repair
+## 4. Query With Bounded Repair
 
 ```python
 semantic = client.semantic(
@@ -33,23 +69,10 @@ semantic = client.semantic(
     repair_budget=2,
 )
 
-print(semantic.route)
 print(semantic.response)
-print(semantic.semantic_context["reasoning"])
 ```
 
-## 3. Explicit Cross-Graph Comparison
-
-```python
-advanced = client.advanced(
-    "Compare what the baseline and finance graphs know about ACME.",
-    graph_ids=["kgnormal", "kgfibo"],
-)
-
-print(advanced.debate_state)
-```
-
-## 4. Direct API Usage
+## 5. Direct Runtime API
 
 ```bash
 curl -sS -X POST http://localhost:8001/platform/ingest/raw \
@@ -63,20 +86,10 @@ curl -sS -X POST http://localhost:8001/platform/ingest/raw \
   }'
 ```
 
-```bash
-curl -sS -X POST http://localhost:8001/run_agent_semantic \
-  -H "Content-Type: application/json" \
-  -d '{
-    "workspace_id": "default",
-    "query": "What is ACME related to?",
-    "databases": ["accounts_graph"],
-    "reasoning_mode": true,
-    "repair_budget": 2
-  }'
-```
-
 ## Next
 
-- [`/docs/apply_your_data/`](/docs/apply_your_data/)
-- [`/docs/python_sdk/`](/docs/python_sdk/)
-- [`/sdk/examples/`](/sdk/examples/)
+- [Quickstart](/docs/quickstart/)
+- [Concept Guide](/learn/)
+- [Bring Your Data](/docs/apply_your_data/)
+- [Python SDK](/docs/python_sdk/)
+- [SDK Examples](/sdk/examples/)
