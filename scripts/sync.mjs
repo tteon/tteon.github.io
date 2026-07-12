@@ -227,6 +227,11 @@ const routeReplacements = new Map([
     ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/rdf_deductive_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/rdf_deductive_finance.yaml)`],
     ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/hybrid_inquiry_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/hybrid_inquiry_finance.yaml)`],
     ['(../website/public/images/docs-core-loop.svg)', '(/images/docs-core-loop.svg)'],
+    ['src="../website/public/images/docs-core-loop.svg"', 'src="/images/docs-core-loop.svg"'],
+    ['(../website/public/images/docs-reader-map.svg)', '(/images/docs-reader-map.svg)'],
+    ['src="../website/public/images/docs-reader-map.svg"', 'src="/images/docs-reader-map.svg"'],
+    ['(../website/public/images/docs-evidence-loop.svg)', '(/images/docs-evidence-loop.svg)'],
+    ['src="../website/public/images/docs-evidence-loop.svg"', 'src="/images/docs-evidence-loop.svg"'],
 ]);
 
 function rewriteWebsiteRoutes(content) {
