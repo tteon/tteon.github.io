@@ -3,7 +3,7 @@ title: Workflow
 description: End-to-end Operational Workflow.
 source_repo: tteon/seocho
 source_path: docs/WORKFLOW.md
-source_commit: 42d055fa6301b282d8458e79d3ec7b673656ae15
+source_commit: 3175ae573876e9bedf24dddc6435f65936c86689
 ---
 
 > *Source mirrored from `seocho/docs/WORKFLOW.md`*
@@ -207,11 +207,23 @@ Primary surfaces:
   - `cd website && npm run check:docs`
   - `cd website && npm run build`
   - `cd website && bash scripts/check-built-links.sh`
+- the same workflow also checks the live `seocho.blog` presentation contract by
+  checking out `tteon/tteon.github.io`, rendering its mirrors with
+  `SEOCHO_SOURCE_REPO=$GITHUB_WORKSPACE/seocho`, and running:
+  - `npm run check:sync`
+  - `npm run check:docs`
+  - `npm run build:ci`
+  - `bash scripts/check-built-links.sh`
 - the in-repo deployment workflow is `.github/workflows/docs-site-deploy.yml`,
   but it performs a Pages preflight and skips deployment while Pages is not
   enabled on `tteon/seocho`
-- for live docs changes today, also run the Pages repository's sync drift,
-  docs quality, static build, and built-link gates before pushing it
+- `.github/workflows/docs-website-sync-dispatch.yml` dispatches the
+  `tteon/tteon.github.io` auto-sync workflow after docs changes land on main
+  when `SEOCHO_BLOG_SYNC_TOKEN` is configured; the scheduled site-side sync is
+  the fallback
+- for live docs changes today, the Pages repository's mirror contract lives in
+  `scripts/docs-contract.mjs`; both `scripts/sync.mjs` and
+  `scripts/check-doc-sync.mjs` consume that same contract
 
 ## Basic CI
 
