@@ -3,7 +3,7 @@ title: Docs Home
 description: Central Documentation Index for SEOCHO
 source_repo: tteon/seocho
 source_path: docs/README.md
-source_commit: f5978fea6d806b1fb8b303d4bfddcbae060c9094
+source_commit: fd307ce03fab6cdac6211c5c3a33c8555ae32b8f
 ---
 
 > *Source mirrored from `seocho/docs/README.md`*
@@ -168,7 +168,7 @@ Use these after the first local success:
 
 | Topic | Reference |
 |---|---|
-| Architecture details | [Architecture Overview](/docs/architecture/), [Runtime Architecture](/docs/runtime_architecture/), [Query Architecture](/docs/query_architecture/), [Maintainer Architecture Notes](/docs/maintainer_architecture_notes/) |
+| Architecture details | [Architecture Overview](/docs/architecture/), [Runtime Architecture](/docs/runtime_architecture/), [Query Architecture](/docs/query_architecture/), [Maintainer Architecture Notes](/docs/maintainer_architecture_notes/), [Internal Class Design](https://github.com/tteon/seocho/blob/main/docs/INTERNAL_CLASS_DESIGN.md) |
 | Repository shape | [Repository Layout](https://github.com/tteon/seocho/blob/main/docs/REPOSITORY_LAYOUT.md), [Workflow](/docs/workflow/) |
 | Automation | [GitHub Automation](https://github.com/tteon/seocho/blob/main/docs/GITHUB_AUTOMATION.md), [Release And Community Operations](/docs/release_and_community_operations/) |
 | Design history | [Decision Log](https://github.com/tteon/seocho/blob/main/docs/decisions/DECISION_LOG.md), [Reference Docs](https://github.com/tteon/seocho/blob/main/docs/reference/README.md) |
