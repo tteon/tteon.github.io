@@ -46,15 +46,17 @@ export default defineConfig({
                 {
                     label: 'Build', items: [
                         { label: 'Run Specs', link: '/docs/run_specs/' },
+                        { label: 'Query Architecture', link: '/docs/query_architecture/' },
                         { label: 'Tutorial', link: '/docs/tutorial/' },
                         { label: 'Examples', link: '/examples/' },
                         { label: 'Files and Artifacts', link: '/docs/files_and_artifacts/' },
-                        { label: 'Architecture', link: '/docs/architecture/' },
+                        { label: 'Architecture Overview', link: '/docs/architecture/' },
                     ]
                 },
                 {
                     label: 'Operate', items: [
                         { label: 'Runtime Deployment', link: '/docs/runtime_deployment/' },
+                        { label: 'Runtime Architecture', link: '/docs/runtime_architecture/' },
                         { label: 'Workflow', link: '/docs/workflow/' },
                         { label: 'Release & Community', link: '/docs/release_and_community_operations/' },
                         { label: 'Community', link: '/community/' },
@@ -73,6 +75,7 @@ export default defineConfig({
                 {
                     label: 'Contribute', items: [
                         { label: 'Open Source Playbook', link: '/docs/open_source_playbook/' },
+                        { label: 'Maintainer Architecture Notes', link: '/docs/maintainer_architecture_notes/' },
                         { label: 'Changelog', link: '/changelog/' },
                     ]
                 },

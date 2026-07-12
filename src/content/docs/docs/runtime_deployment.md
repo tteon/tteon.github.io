@@ -3,7 +3,7 @@ title: Runtime Deployment
 description: Full local runtime deployment guide for the Docker stack, services, and environment setup.
 source_repo: tteon/seocho
 source_path: docs/RUNTIME_DEPLOYMENT.md
-source_commit: d10a72202460db2b6dba67c13281dc8227163aa1
+source_commit: f5978fea6d806b1fb8b303d4bfddcbae060c9094
 ---
 
 > *Source mirrored from `seocho/docs/RUNTIME_DEPLOYMENT.md`*
@@ -416,3 +416,4 @@ the constraint forbids loading. Mock-oracle Layer-1
 - [`/docs/tutorial/`](/docs/tutorial/)
 - `docs/BEGINNER_PIPELINES_DEMO.md`
 - [`/docs/architecture/`](/docs/architecture/)
+- [`/docs/runtime_architecture/`](/docs/runtime_architecture/)

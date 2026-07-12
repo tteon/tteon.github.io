@@ -3,7 +3,7 @@ title: Open Source Playbook
 description: Extension guide for ontology, data, agent, and runtime integration.
 source_repo: tteon/seocho
 source_path: docs/OPEN_SOURCE_PLAYBOOK.md
-source_commit: d10a72202460db2b6dba67c13281dc8227163aa1
+source_commit: f5978fea6d806b1fb8b303d4bfddcbae060c9094
 ---
 
 > *Source mirrored from `seocho/docs/OPEN_SOURCE_PLAYBOOK.md`*
@@ -232,6 +232,9 @@ Docs sync critical set for seocho.blog:
 - [`/docs/python_sdk/`](/docs/python_sdk/)
 - [`/docs/run_specs/`](/docs/run_specs/)
 - [`/docs/architecture/`](/docs/architecture/)
+- [`/docs/runtime_architecture/`](/docs/runtime_architecture/)
+- [`/docs/query_architecture/`](/docs/query_architecture/)
+- [`/docs/maintainer_architecture_notes/`](/docs/maintainer_architecture_notes/)
 - [`/docs/workflow/`](/docs/workflow/)
 - [`/docs/open_source_playbook/`](/docs/open_source_playbook/)
 - [`/docs/release_and_community_operations/`](/docs/release_and_community_operations/)

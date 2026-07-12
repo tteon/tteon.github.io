@@ -3,7 +3,7 @@ title: Docs Home
 description: Central Documentation Index for SEOCHO
 source_repo: tteon/seocho
 source_path: docs/README.md
-source_commit: d10a72202460db2b6dba67c13281dc8227163aa1
+source_commit: f5978fea6d806b1fb8b303d4bfddcbae060c9094
 ---
 
 > *Source mirrored from `seocho/docs/README.md`*
@@ -124,20 +124,20 @@ or links that another person can inspect.
 
 | Area | Documents |
 |---|---|
-| Product idea | [Why SEOCHO](/docs/why_seocho/), [Philosophy](/docs/philosophy/), [Architecture](/docs/architecture/) |
+| Product idea | [Why SEOCHO](/docs/why_seocho/), [Philosophy](/docs/philosophy/), [Architecture Overview](/docs/architecture/) |
 | Getting started | [Quickstart](/docs/quickstart/), [Python SDK](/docs/python_sdk/), [Bring Your Data](/docs/apply_your_data/) |
 | Repeatable runs | [Run Specs](/docs/run_specs/), [Tutorial First Run](/docs/tutorial/), [Files and Artifacts](/docs/files_and_artifacts/) |
-| Operations | [Runtime Deployment](/docs/runtime_deployment/), [Workflow](/docs/workflow/), [Release And Community Operations](/docs/release_and_community_operations/) |
+| Operations | [Runtime Deployment](/docs/runtime_deployment/), [Runtime Architecture](/docs/runtime_architecture/), [Workflow](/docs/workflow/), [Release And Community Operations](/docs/release_and_community_operations/) |
 | Open source work | [Open Source Playbook](/docs/open_source_playbook/), [Issue Task System](https://github.com/tteon/seocho/blob/main/docs/ISSUE_TASK_SYSTEM.md), [Contributing](https://github.com/tteon/seocho/blob/main/CONTRIBUTING.md) |
 
 The map follows this structure:
 
 | Docs pattern | Purpose | SEOCHO examples |
 |---|---|---|
-| Concepts | explain why the system exists and which words matter | [Why SEOCHO](/docs/why_seocho/), [Architecture](/docs/architecture/) |
+| Concepts | explain why the system exists and which words matter | [Why SEOCHO](/docs/why_seocho/), [Architecture Overview](/docs/architecture/) |
 | Tutorials | guide a first successful run | [Quickstart](/docs/quickstart/), [Tutorial First Run](/docs/tutorial/) |
 | How-to guides | solve a concrete task | [Bring Your Data](/docs/apply_your_data/), [Run Specs](/docs/run_specs/) |
-| Reference | preserve contracts, surfaces, and decisions | [Files and Artifacts](/docs/files_and_artifacts/), [Decision Log](https://github.com/tteon/seocho/blob/main/docs/decisions/DECISION_LOG.md) |
+| Reference | preserve contracts, surfaces, and decisions | [Files and Artifacts](/docs/files_and_artifacts/), [Query Architecture](/docs/query_architecture/), [Decision Log](https://github.com/tteon/seocho/blob/main/docs/decisions/DECISION_LOG.md) |
 
 ## Common Questions
 
@@ -168,7 +168,7 @@ Use these after the first local success:
 
 | Topic | Reference |
 |---|---|
-| Architecture details | [Architecture](/docs/architecture/), [Internal Class Design](https://github.com/tteon/seocho/blob/main/docs/INTERNAL_CLASS_DESIGN.md), [Graph-RAG Agent Handoff Spec](https://github.com/tteon/seocho/blob/main/docs/GRAPH_RAG_AGENT_HANDOFF_SPEC.md) |
+| Architecture details | [Architecture Overview](/docs/architecture/), [Runtime Architecture](/docs/runtime_architecture/), [Query Architecture](/docs/query_architecture/), [Maintainer Architecture Notes](/docs/maintainer_architecture_notes/) |
 | Repository shape | [Repository Layout](https://github.com/tteon/seocho/blob/main/docs/REPOSITORY_LAYOUT.md), [Workflow](/docs/workflow/) |
 | Automation | [GitHub Automation](https://github.com/tteon/seocho/blob/main/docs/GITHUB_AUTOMATION.md), [Release And Community Operations](/docs/release_and_community_operations/) |
 | Design history | [Decision Log](https://github.com/tteon/seocho/blob/main/docs/decisions/DECISION_LOG.md), [Reference Docs](https://github.com/tteon/seocho/blob/main/docs/reference/README.md) |

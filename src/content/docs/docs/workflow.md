@@ -3,7 +3,7 @@ title: Workflow
 description: End-to-end Operational Workflow.
 source_repo: tteon/seocho
 source_path: docs/WORKFLOW.md
-source_commit: d10a72202460db2b6dba67c13281dc8227163aa1
+source_commit: f5978fea6d806b1fb8b303d4bfddcbae060c9094
 ---
 
 > *Source mirrored from `seocho/docs/WORKFLOW.md`*
@@ -189,6 +189,9 @@ Primary surfaces:
   - [`/docs/run_specs/`](/docs/run_specs/)
   - [`/docs/release_and_community_operations/`](/docs/release_and_community_operations/)
   - [`/docs/architecture/`](/docs/architecture/)
+  - [`/docs/runtime_architecture/`](/docs/runtime_architecture/)
+  - [`/docs/query_architecture/`](/docs/query_architecture/)
+  - [`/docs/maintainer_architecture_notes/`](/docs/maintainer_architecture_notes/)
   - [`/docs/workflow/`](/docs/workflow/)
 - repo-side source-doc contract is checked by `.github/workflows/docs-consistency.yml`
   using `bash scripts/ci/check-doc-contracts.sh`

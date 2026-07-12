@@ -3,7 +3,7 @@ title: Run Specs
 description: Declare ontology, documents, questions, models, and sweeps in YAML.
 source_repo: tteon/seocho
 source_path: docs/RUN_SPECS.md
-source_commit: d10a72202460db2b6dba67c13281dc8227163aa1
+source_commit: f5978fea6d806b1fb8b303d4bfddcbae060c9094
 ---
 
 > *Source mirrored from `seocho/docs/RUN_SPECS.md`*
