@@ -19,6 +19,20 @@ If you want the bring-your-own-data path immediately, continue with
 [`/docs/apply_your_data/`](/docs/apply_your_data/).
 If you are measuring quality or latency, continue with `docs/BENCHMARKS.md`.
 
+## What This Page Gives You
+
+| Need | Read | Success looks like |
+|---|---|---|
+| start the local runtime | [Setup](#2-setup) -> [Start the Runtime](#3-start-the-runtime) | `docker compose ps` shows the core services |
+| choose the right execution path | [Execution Modes Matter](#11-execution-modes-matter) | you know local SDK vs runtime semantic vs debate |
+| verify through the UI | [First Success: UI Path](#4-first-success-ui-path) | one ingest and one semantic question work |
+| verify through the API | [First Success: Direct API Path](#5-first-success-direct-api-path) | curl returns route and response fields |
+| verify through Python | [First Success: Python SDK Path](#6-first-success-python-sdk-path) | `ask_response(...)` returns support metadata |
+| debug local files | [Know Where Your Files Go](#13-know-where-your-files-go) | you can find graph data, artifacts, and traces |
+
+Default path: use semantic graph QA first. Use react/debate only when you
+explicitly need agentic tool use or multi-agent comparison.
+
 ## 1. Prerequisites
 
 - Docker and Docker Compose
@@ -392,7 +406,7 @@ live runner filters out fixtures 05/06 (`finance_metric_lookup`,
 the constraint forbids loading. Mock-oracle Layer-1
 (`uv run pytest tests/seocho/test_gopts_ranking.py`) still covers them.
 
-## 13. Read Next
+## 15. Read Next
 
 - [`/docs/python_sdk/`](/docs/python_sdk/)
 - [`/docs/apply_your_data/`](/docs/apply_your_data/)

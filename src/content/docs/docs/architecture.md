@@ -18,6 +18,20 @@ Current baseline:
 - Canonical neutral artifact: JSONL
 - Graph backend: DozerDB (Neo4j protocol compatible)
 
+## Reader Guide
+
+This page is the system map. It is not the first-run path.
+
+| If you need to understand... | Start with | Then read |
+|---|---|---|
+| the current product boundary | [Architecture In One Page](#architecture-in-one-page) | [Local Runtime Shape](#local-runtime-shape) |
+| where files and evidence live | [Storage And Artifact Layout](#storage-and-artifact-layout) | [Files And Artifacts](/docs/files_and_artifacts/) |
+| which module owns a change | [Module Map](#module-map) | [Repository Layout](https://github.com/tteon/seocho/blob/main/docs/REPOSITORY_LAYOUT.md) |
+| current implementation priorities | [Priority Execution Board](#priority-execution-board-2026-02-21) | linked ADRs and issues |
+
+Read `WHY_SEOCHO.md` first if you need the product idea. Read
+`RUNTIME_DEPLOYMENT.md` first if you only need to run the stack.
+
 ## Architecture In One Page
 
 SEOCHO is an ontology-aligned modular monolith. The product boundary is one
