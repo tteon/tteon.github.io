@@ -3,7 +3,7 @@ title: Docs Home
 description: Central Documentation Index for SEOCHO
 source_repo: tteon/seocho
 source_path: docs/README.md
-source_commit: fd307ce03fab6cdac6211c5c3a33c8555ae32b8f
+source_commit: 72673335f2bdcad80dc63b08ec5dbb189d6365d7
 ---
 
 > *Source mirrored from `seocho/docs/README.md`*
@@ -138,6 +138,33 @@ The map follows this structure:
 | Tutorials | guide a first successful run | [Quickstart](/docs/quickstart/), [Tutorial First Run](/docs/tutorial/) |
 | How-to guides | solve a concrete task | [Bring Your Data](/docs/apply_your_data/), [Run Specs](/docs/run_specs/) |
 | Reference | preserve contracts, surfaces, and decisions | [Files and Artifacts](/docs/files_and_artifacts/), [Query Architecture](/docs/query_architecture/), [Decision Log](https://github.com/tteon/seocho/blob/main/docs/decisions/DECISION_LOG.md) |
+
+## System Deep-Dive Map
+
+Generated code indexes such as [DeepWiki](https://deepwiki.com/tteon/seocho)
+are useful as secondary maps, but the source docs in this repository remain the
+contract. Use this table to move from a system area to the maintained guide.
+
+| System area | What you are trying to understand | Maintained docs |
+|---|---|---|
+| Product overview | why SEOCHO exists and where it fits | [Why SEOCHO](/docs/why_seocho/), [Architecture Overview](/docs/architecture/) |
+| SDK and client interface | how users call SEOCHO from Python | [Python SDK](/docs/python_sdk/), [Quickstart](/docs/quickstart/) |
+| Ontology system | how schema, context, drift checks, and governance shape behavior | [Why SEOCHO](/docs/why_seocho/), [SDK Ontology Guide](https://seocho.blog/sdk/ontology-guide/), [Maintainer Architecture Notes](/docs/maintainer_architecture_notes/) |
+| Indexing and ingestion | how documents become graph facts | [Bring Your Data](/docs/apply_your_data/), [Run Specs](/docs/run_specs/), [Files and Artifacts](/docs/files_and_artifacts/) |
+| Query and agent orchestration | how questions become evidence-backed answers | [Query Architecture](/docs/query_architecture/), [Graph-RAG Agent Handoff Spec](https://github.com/tteon/seocho/blob/main/docs/GRAPH_RAG_AGENT_HANDOFF_SPEC.md) |
+| Runtime and HTTP API | how the shared service is composed and operated | [Runtime Deployment](/docs/runtime_deployment/), [Runtime Architecture](/docs/runtime_architecture/) |
+| Storage and graph backends | where graph state, generated files, and backend assumptions live | [Files and Artifacts](/docs/files_and_artifacts/), [Runtime Architecture](/docs/runtime_architecture/) |
+| LLM, tracing, and evaluation | how runs stay inspectable and how claims are validated | [Files and Artifacts](/docs/files_and_artifacts/), [Runtime Architecture](/docs/runtime_architecture/), [Workflow](/docs/workflow/) |
+| Developer tooling and CI | how contributors keep changes reviewable and deployable | [Open Source Playbook](/docs/open_source_playbook/), [Workflow](/docs/workflow/), [Maintainer Architecture Notes](/docs/maintainer_architecture_notes/) |
+
+Current gap list:
+
+| Gap | Current workaround | Good future doc |
+|---|---|---|
+| ontology internals are split across product, SDK, and maintainer docs | start from the SDK ontology guide, then read maintainer notes | `Ontology Architecture` |
+| indexing/data-plane internals are spread across how-to and artifact docs | start from Bring Your Data, Run Specs, and Files and Artifacts | `Indexing Architecture` |
+| graph backend details are mostly operational today | start from Files and Artifacts and Runtime Architecture | `Storage And Backend Guide` |
+| tracing/evaluation guidance is distributed across workflow and runtime docs | start from Files and Artifacts, Runtime Architecture, and Workflow | `Tracing And Evaluation Guide` |
 
 ## Common Questions
 

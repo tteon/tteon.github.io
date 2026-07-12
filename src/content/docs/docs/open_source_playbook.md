@@ -3,7 +3,7 @@ title: Open Source Playbook
 description: Extension guide for ontology, data, agent, and runtime integration.
 source_repo: tteon/seocho
 source_path: docs/OPEN_SOURCE_PLAYBOOK.md
-source_commit: fd307ce03fab6cdac6211c5c3a33c8555ae32b8f
+source_commit: 72673335f2bdcad80dc63b08ec5dbb189d6365d7
 ---
 
 > *Source mirrored from `seocho/docs/OPEN_SOURCE_PLAYBOOK.md`*

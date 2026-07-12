@@ -3,7 +3,7 @@ title: Quickstart
 description: Get SEOCHO up and running in 5 minutes.
 source_repo: tteon/seocho
 source_path: QUICKSTART.md
-source_commit: fd307ce03fab6cdac6211c5c3a33c8555ae32b8f
+source_commit: 72673335f2bdcad80dc63b08ec5dbb189d6365d7
 ---
 
 > *Source mirrored from `seocho/QUICKSTART.md`*
