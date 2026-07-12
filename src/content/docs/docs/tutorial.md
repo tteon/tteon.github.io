@@ -3,7 +3,7 @@ title: First Run Tutorial
 description: End-to-end tutorial to start services, verify APIs, and run agent chat.
 source_repo: tteon/seocho
 source_path: docs/TUTORIAL_FIRST_RUN.md
-source_commit: 3175ae573876e9bedf24dddc6435f65936c86689
+source_commit: 35910646243b9ef4a0302f4492c8742a42624d80
 ---
 
 > *Source mirrored from `seocho/docs/TUTORIAL_FIRST_RUN.md`*

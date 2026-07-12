@@ -6,7 +6,7 @@ authors:
 excerpt: Multi-role feasibility review framework and Go/No-Go rubric for graph data implementations.
 source_repo: tteon/seocho
 source_path: docs/PHILOSOPHY_FEASIBILITY_REVIEW.md
-source_commit: 3175ae573876e9bedf24dddc6435f65936c86689
+source_commit: 35910646243b9ef4a0302f4492c8742a42624d80
 ---
 
 > *Source mirrored from `seocho/docs/PHILOSOPHY_FEASIBILITY_REVIEW.md`*
