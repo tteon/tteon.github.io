@@ -21,9 +21,9 @@ jobs:
         with:
           node-version: 20
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
       - name: Build Astro Site
-        run: npm run build
+        run: npm run build:ci
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

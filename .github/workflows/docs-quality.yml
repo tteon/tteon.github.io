@@ -30,7 +30,7 @@ jobs:
         run: npm run check:docs
 
       - name: Build site
-        run: npm run build
+        run: npm run build:ci
 
       - name: Check built internal links
         run: bash scripts/check-built-links.sh

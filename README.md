@@ -23,10 +23,10 @@ Current sync policy is local-helper based, not remote auto-sync:
 - if you improve a mirrored page here, check whether the same contract change
   belongs in the main repo too
 
-## GitHub Pages Boundaries
+## Hosting Boundaries
 
-`seocho.blog` is a static GitHub Pages site. Treat it as a fast public docs and
-product surface, not as a hosted SEOCHO runtime.
+`seocho.blog` currently deploys as a static GitHub Pages site. Treat it as a
+fast public docs and product surface, not as a hosted SEOCHO runtime.
 
 Good fits:
 
@@ -51,6 +51,13 @@ Docs UX policy:
 - internal migration and governance docs should stay discoverable but out of
   the first-read path
 
+GitHub Pages is not a hard constraint. If the site needs server-side previews,
+webhooks, protected routes, edge functions, analytics routing, or richer
+deployment controls, keep the Astro output static and move the deployment target
+to a platform such as Cloudflare Pages, Netlify, Vercel, or OpenAI Sites. Keep
+`seocho.blog` as the canonical domain and keep the same validation gates before
+cutover.
+
 Read [AGENTS.md](AGENTS.md) before making doc or site changes.
 
 ## Local Development
@@ -67,7 +74,16 @@ Read [AGENTS.md](AGENTS.md) before making doc or site changes.
    ```bash
    npm run build
    ```
-4. Run doc quality and built-link checks:
+4. If Astro content cache looks stale, stop the dev server and run a clean
+   rebuild:
+   ```bash
+   npm run rebuild
+   ```
+   CI and deploy use `npm run build:ci`, which clears `dist/` and `.astro/`
+   before building. During local development, do not delete `.astro/` while
+   `npm run dev` is running; it can briefly break Astro's generated content
+   imports.
+5. Run doc quality and built-link checks:
    ```bash
    npm run check:sync
    bash scripts/check-doc-quality.sh

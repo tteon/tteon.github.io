@@ -5,7 +5,11 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "clean": "node scripts/clean-astro-cache.mjs",
+    "clean:astro": "node scripts/clean-astro-cache.mjs --astro",
     "build": "astro build",
+    "build:ci": "node scripts/clean-astro-cache.mjs --ci && astro build",
+    "rebuild": "node scripts/clean-astro-cache.mjs --force && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "check:docs": "bash scripts/check-doc-quality.sh",
