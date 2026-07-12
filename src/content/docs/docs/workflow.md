@@ -79,7 +79,7 @@ Primary surfaces:
 - for semantic retrieval or graph-grounded answer work, align the change with
   `docs/GRAPH_RAG_AGENT_HANDOFF_SPEC.md`
 - confirm philosophy alignment against [`/docs/philosophy/`](/docs/philosophy/) (ontology evidence, router/graph mapping, traceability)
-- for architecture-significant work, run a panel feasibility review using `docs/PHILOSOPHY_FEASIBILITY_REVIEW.md`
+- for architecture-significant work, run a panel feasibility review using [`/blog/feasibility-review-framework/`](/blog/feasibility-review-framework/)
 - before coding, have the agent restate the active `DEV-DECISION`, `DEV-CONSTRAINT`, `DEV-API-CONTRACT`, and `DEV-ACCEPTANCE` lines it will implement
 
 2. Ingestion and graph build
@@ -129,6 +129,8 @@ Semantic path summary:
 - close or update the linked public issue or PR
 - rebase, push
 - verify branch is up to date with origin
+- for releases, follow [`/docs/release_and_community_operations/`](/docs/release_and_community_operations/), update
+  `CHANGELOG.md`, and draft the `#seocho` Discord announcement before publishing
 
 Operational notes:
 
@@ -151,18 +153,24 @@ Operational notes:
 - source of truth: `README.md` + `docs/*` in this repository
 - publish-critical docs for seocho.blog sync:
   - [`/docs/`](/docs/)
-  - `docs/RUNTIME_DEPLOYMENT.md`
+  - [`/docs/runtime_deployment/`](/docs/runtime_deployment/)
   - [`/docs/apply_your_data/`](/docs/apply_your_data/)
   - [`/docs/python_sdk/`](/docs/python_sdk/)
   - [`/docs/tutorial/`](/docs/tutorial/)
   - [`/docs/open_source_playbook/`](/docs/open_source_playbook/)
+  - [`/docs/run_specs/`](/docs/run_specs/)
+  - [`/docs/release_and_community_operations/`](/docs/release_and_community_operations/)
   - [`/docs/architecture/`](/docs/architecture/)
   - [`/docs/workflow/`](/docs/workflow/)
 - repo-side source-doc contract is checked by `.github/workflows/docs-consistency.yml`
   using `bash scripts/ci/check-doc-contracts.sh`
-- the tracked website app lives in `website/`
+- the tracked website source app lives in `website/`
+- current public deployment for `https://seocho.blog` is still
+  `tteon/tteon.github.io` GitHub Pages until Pages is enabled on `tteon/seocho`
 - `website/scripts/generate-docs.mjs` materializes selected `/docs/*` and
-  `/blog/*` pages from repo-root source docs at build/dev time
+  `/blog/*` pages from repo-root source docs for the in-repo site app
+- the `scripts/sync.mjs` helper in `tteon/tteon.github.io` mirrors the selected
+  source docs into the live GitHub Pages repository
 - generated mirror files under `website/src/content/docs/docs/` are derived
   artifacts; edit the repo-root source docs instead
 - website validation currently lives in `.github/workflows/docs-site-quality.yml`
@@ -171,7 +179,11 @@ Operational notes:
   - `cd website && npm run check:docs`
   - `cd website && npm run build`
   - `cd website && bash scripts/check-built-links.sh`
-- deployment to GitHub Pages lives in `.github/workflows/docs-site-deploy.yml`
+- the in-repo deployment workflow is `.github/workflows/docs-site-deploy.yml`,
+  but it performs a Pages preflight and skips deployment while Pages is not
+  enabled on `tteon/seocho`
+- for live docs changes today, also run the Pages repository's sync drift,
+  docs quality, static build, and built-link gates before pushing it
 
 5. Basic CI
 
@@ -243,3 +255,5 @@ the runtime shell validation contract in `scripts/ci/check-runtime-shell-contrac
 - log architecture decisions as ADRs
 - track context graph events and quality metrics
 - schedule follow-up issues for unresolved risks
+- keep release readiness and open-source community operations aligned with
+  [`/docs/release_and_community_operations/`](/docs/release_and_community_operations/)

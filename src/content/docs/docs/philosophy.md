@@ -5,6 +5,7 @@ description: Core Design Philosophy Charter and Operating Principles.
 
 > *Source mirrored from `seocho/docs/PHILOSOPHY.md`*
 
+
 This document captures the non-negotiable design philosophy for SEOCHO and how it maps to implementation.
 
 ## Core Philosophy
@@ -15,66 +16,67 @@ This document captures the non-negotiable design philosophy for SEOCHO and how i
 4. Map graph instances to graph agents in a 1:1 model.
 5. Keep router agent as the default request entrypoint and delegate to graph agents that can answer the query.
 6. Use supervisor-style orchestration for router <-> graph-agent collaboration, with ontology metadata driving query-to-instance allocation.
-7. Track and manage all agent-layer flow data with Opik.
+7. Track and manage all agent-layer flow data through a vendor-neutral trace contract, with JSONL as the canonical artifact and Opik as the preferred team exporter.
 
 ## Additional Perspectives
 
-- **Provenance-first evidence model:**
+- Provenance-first evidence model:
   - Every extracted fact, inferred rule, and routing decision must be traceable to source records/chunks.
-- **Confidence-aware decisioning:**
+- Confidence-aware decisioning:
   - Semantic disambiguation and routing should expose confidence and support deterministic human override.
-- **Contract-first DAG integration:**
+- Contract-first DAG integration:
   - Backend emits strict topology metadata (`node_id`, `parent_id`, `parent_ids`) for frontend workflow canvas rendering.
   - UI consumes backend topology directly and must avoid heuristic-only lineage reconstruction.
-- **Practical readiness before promotion:**
+- Practical readiness before promotion:
   - Rule profiles must pass readiness checks (`/rules/assess`) before governance promotion/export.
-- **Versioned ontology lifecycle:**
+- Versioned ontology lifecycle:
   - Ontology files (`.ttl`, hint artifacts, profiles) are control-plane assets with explicit versioning and rollback.
-- **Observability as a product surface:**
-  - Opik traces are not only debugging artifacts; they are operating evidence for trust and governance.
-- **Cost-and-SLO bounded orchestration:**
+- Observability as a product surface:
+  - Trace artifacts must remain portable and reviewable outside any single vendor.
+  - Opik traces are preferred team-facing evidence for trust and governance, not the only valid runtime contract.
+- Cost-and-SLO bounded orchestration:
   - Debate/semantic paths must expose measurable latency and cost envelopes for production viability.
-- **Deterministic degradation:**
+- Deterministic degradation:
   - Router/graph-agent flows require explicit fallback behavior when confidence or topology contracts are not met.
 
 ## Expert Feasibility Lens
 
 For multi-role feasibility reviews (frontend/backend/architect/software engineer/DBA), use:
 
-- `docs/PHILOSOPHY_FEASIBILITY_REVIEW.md`
+- [`/blog/feasibility-review-framework/`](/blog/feasibility-review-framework/)
 
 ## Implementation Mapping
 
-- **Ontology-guided extraction/linking:**
+- Ontology-guided extraction/linking:
   - `extraction/ontology_prompt_bridge.py`
   - `extraction/extractor.py`
   - `extraction/linker.py`
-- **SHACL-like rule lifecycle:**
+- SHACL-like rule lifecycle:
   - `extraction/rule_constraints.py`
   - `extraction/rule_api.py`
   - `extraction/rule_export.py`
-- **Graph instance and agent mapping:**
+- Graph instance and agent mapping:
   - `extraction/database_manager.py`
   - `extraction/agent_factory.py`
   - `extraction/debate.py`
-- **Router/supervisor and semantic orchestration:**
+- Router/supervisor and semantic orchestration:
   - `extraction/agent_server.py`
   - `extraction/semantic_query_flow.py`
-- **Flow telemetry and auditability:**
+- Flow telemetry and auditability:
   - `extraction/tracing.py`
-  - Opik profile in `docker-compose.yml`
+  - JSONL trace artifacts and optional Opik profile in `docker-compose.yml`
 
 ## Operating Checks
 
 Before promotion to production-like use:
 
-1. **Rules:**
+1. Rules:
    - Run `/rules/assess` and review `practical_readiness`, `violation_breakdown`, `export_preview`.
-2. **Routing:**
+2. Routing:
    - Confirm router decisions align with ontology-backed graph metadata.
-3. **Traceability:**
-   - Verify Opik spans include enough metadata to reconstruct decision path.
-4. **UI contract:**
+3. Traceability:
+   - Verify JSONL traces and, when enabled, Opik spans include enough metadata to reconstruct decision path.
+4. UI contract:
    - Ensure workflow canvas lineage uses backend topology fields, not inferred-only links.
-5. **Governance:**
+5. Governance:
    - Persist ontology/rule artifacts as versioned files and record change rationale in decision docs.

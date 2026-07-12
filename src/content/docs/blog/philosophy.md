@@ -46,7 +46,7 @@ This document captures the non-negotiable design philosophy for SEOCHO and how i
 
 For multi-role feasibility reviews (frontend/backend/architect/software engineer/DBA), use:
 
-- `docs/PHILOSOPHY_FEASIBILITY_REVIEW.md`
+- [`/blog/feasibility-review-framework/`](/blog/feasibility-review-framework/)
 
 ## Implementation Mapping
 

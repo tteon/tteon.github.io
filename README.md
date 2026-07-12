@@ -13,9 +13,8 @@ This repository hosts the official documentation and landing page for the [SEOCH
 This repository is the website presentation layer.
 
 - public domain: `https://seocho.blog`
-- main repo source of truth: `/home/hadry/lab/seocho`
-- core source docs usually come from `/home/hadry/lab/seocho/README.md` and
-  `/home/hadry/lab/seocho/docs/*`
+- main repo source of truth: `https://github.com/tteon/seocho`
+- core source docs usually come from `seocho/README.md` and `seocho/docs/*`
 
 Current sync policy is local-helper based, not remote auto-sync:
 
@@ -23,6 +22,34 @@ Current sync policy is local-helper based, not remote auto-sync:
 - mirrored pages should say `Source mirrored from ...`
 - if you improve a mirrored page here, check whether the same contract change
   belongs in the main repo too
+
+## GitHub Pages Boundaries
+
+`seocho.blog` is a static GitHub Pages site. Treat it as a fast public docs and
+product surface, not as a hosted SEOCHO runtime.
+
+Good fits:
+
+- Starlight docs, static search, sidebars, and content collections
+- build-time generated pages from repo-root docs
+- static examples, diagrams, screenshots, and release notes
+- links to GitHub issues, PRs, releases, actions, and Discord announcements
+
+Avoid:
+
+- server-side secrets, OAuth callbacks, webhooks, or private context graph data
+- runtime demos that imply a live backend exists on the docs host
+- auto-posting or community workflows that should live in GitHub Actions or
+  Knowledge OS
+- docs pages that are only useful to maintainers on a first read
+
+Docs UX policy:
+
+- `/docs/` should answer "what should I read next?" before it lists files
+- sidebar groups should follow user jobs: start, build, operate, contribute
+- the first code path should be the lightest useful path (`Seocho.local(...)`)
+- internal migration and governance docs should stay discoverable but out of
+  the first-read path
 
 Read [AGENTS.md](AGENTS.md) before making doc or site changes.
 

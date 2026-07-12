@@ -24,6 +24,15 @@ uv pip install "seocho[local]"
 embedded LadybugDB graph path. You do not need to run a server for this first
 example.
 
+Set your provider key. SEOCHO recommends MARA:
+
+```bash
+export MARA_API_KEY=...
+```
+
+Prefer OpenAI/DeepSeek/Kimi? Export that provider's key and swap the `llm=`
+string below (`"openai/gpt-4o"`, `"deepseek/deepseek-chat"`, `"kimi/kimi-k2.5"`).
+
 ## 2. Run The Smallest Example
 
 ```python
@@ -40,7 +49,7 @@ ontology = Ontology(
     },
 )
 
-client = Seocho.local(ontology)
+client = Seocho.local(ontology, llm="mara/MiniMax-M2.5")
 client.add("Marie Curie worked at the University of Paris.")
 
 print(client.ask("Where did Marie Curie work?"))
@@ -57,8 +66,8 @@ What happened:
 The finance-compliance example is the fastest complete project-shaped path:
 
 ```bash
-export OPENAI_API_KEY=...
-python examples/finance-compliance/quickstart.py
+export MARA_API_KEY=...
+uv run python examples/finance-compliance/quickstart.py --llm mara/MiniMax-M2.5
 ```
 
 It ships:
@@ -95,8 +104,8 @@ Then open:
 
 | Need | Start here |
 |---|---|
-| Understand the project | [README.md](README.md) |
-| Use your own ontology and files | [docs/APPLY_YOUR_DATA.md](docs/APPLY_YOUR_DATA.md) |
-| Learn the Python SDK | [docs/PYTHON_INTERFACE_QUICKSTART.md](docs/PYTHON_INTERFACE_QUICKSTART.md) |
-| Run the full platform | [docs/RUNTIME_DEPLOYMENT.md](docs/RUNTIME_DEPLOYMENT.md) |
-| See generated files and traces | [docs/FILES_AND_ARTIFACTS.md](docs/FILES_AND_ARTIFACTS.md) |
+| Understand the project | [README.md](https://github.com/tteon/seocho/blob/main/README.md) |
+| Use your own ontology and files | [docs/APPLY_YOUR_DATA.md](/docs/apply_your_data/) |
+| Learn the Python SDK | [docs/PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/) |
+| Run the full platform | [docs/RUNTIME_DEPLOYMENT.md](/docs/runtime_deployment/) |
+| See generated files and traces | [docs/FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/) |

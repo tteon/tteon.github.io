@@ -6,119 +6,102 @@ description: Central Documentation Index for SEOCHO
 > *Source mirrored from `seocho/docs/README.md`*
 
 
-SEOCHO docs are organized around one question: what do you need to do right
-now?
+SEOCHO docs are organized around jobs, not around the repository tree. Start
+with the path that matches what you are trying to do today, then move deeper
+only when you need the extra detail.
 
-[![Quickstart](https://img.shields.io/badge/Quickstart-First_Run-2563eb)](../QUICKSTART.md)
-[![Python SDK](https://img.shields.io/badge/Python_SDK-Examples-0f766e)](/docs/python_sdk/)
-[![Architecture Deep Dive](https://img.shields.io/badge/Architecture-Deep_Dive-7c3aed)](/docs/architecture/)
+## Choose Your Path
 
-## Start Here
+| I want to... | Start here | What you should get |
+|---|---|---|
+| understand the product idea | [Why SEOCHO](/docs/why_seocho/) | why ontology-first graph memory is different from generic AI memory |
+| get a first local success | [Quickstart](/docs/quickstart/) | install, define a tiny ontology, add text, ask a question |
+| use SEOCHO from Python | [Python SDK](/docs/python_sdk/) | local SDK, HTTP client, semantic query, and artifact examples |
+| bring my own records or files | [Bring Your Data](/docs/apply_your_data/) | ingestion paths, graph targets, query order, and inspection points |
+| run the local platform | [Runtime Deployment](/docs/runtime_deployment/) | UI, API, DozerDB, environment, and troubleshooting |
+| contribute to the project | [Open Source Playbook](/docs/open_source_playbook/) | issue/PR workflow, labels, examples, and review expectations |
 
-| If you need to... | Start here |
+If you are new, use this order:
+
+1. [Why SEOCHO](/docs/why_seocho/)
+2. [Quickstart](/docs/quickstart/)
+3. [Python SDK](/docs/python_sdk/)
+4. [Bring Your Data](/docs/apply_your_data/)
+5. [Files and Artifacts](/docs/files_and_artifacts/)
+6. [Architecture](/docs/architecture/)
+
+## The Mental Model
+
+SEOCHO keeps one ontology contract aligned across four surfaces:
+
+| Surface | What the ontology controls |
 |---|---|
-| get a first local success path | [../QUICKSTART.md](../QUICKSTART.md) |
-| understand local `ask()` vs runtime `semantic/react/debate` | [../README.md#execution-surfaces](../README.md#execution-surfaces) |
-| bring up the full local runtime stack | [RUNTIME_DEPLOYMENT.md](RUNTIME_DEPLOYMENT.md) |
-| follow a runnable notebook walkthrough | [../examples/quickstart.ipynb](../examples/quickstart.ipynb) |
-| understand SEOCHO with architecture snippets | [BEGINNER_GUIDE.md](BEGINNER_GUIDE.md) |
-| use the Python SDK directly | [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/) |
-| declare reusable agent patterns in YAML | [AGENT_DESIGN_SPECS.md](AGENT_DESIGN_SPECS.md) |
-| declare graph-model-aware indexing in YAML | [INDEXING_DESIGN_SPECS.md](INDEXING_DESIGN_SPECS.md) |
-| bring your own ontology and data | [APPLY_YOUR_DATA.md](/docs/apply_your_data/) |
-| inspect files, artifacts, and traces | [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/) |
-| understand the system design | [ARCHITECTURE.md](/docs/architecture/) |
-| understand the top-level repository layout | [REPOSITORY_LAYOUT.md](REPOSITORY_LAYOUT.md) |
-| review repository hierarchy cleanup priorities | [REPOSITORY_HIERARCHY_REVIEW.md](REPOSITORY_HIERARCHY_REVIEW.md) |
-| understand GitHub automation | [GITHUB_AUTOMATION.md](GITHUB_AUTOMATION.md) |
-| present SEOCHO to a technical audience | [presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md](presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md) |
-| measure behavior with FinDER and benchmark tracks | [BENCHMARKS.md](https://github.com/tteon/seocho/blob/main/docs/BENCHMARKS.md) |
+| Ingestion | which entities, relationships, and properties should be extracted |
+| Graph writes | constraints, provenance, and schema-shaped payloads |
+| Querying | schema-aware retrieval, Cypher generation, and bounded repair |
+| Runtime | HTTP-facing semantic artifacts, traces, policy, and `workspace_id` scope |
 
-Recommended onboarding order:
+The fastest first run is `Seocho.local(...)`. The runtime path is for teams that
+want a shared API, UI, and DozerDB-backed deployment.
 
-1. [WHY_SEOCHO.md](/docs/why_seocho/)
-2. [../QUICKSTART.md](../QUICKSTART.md)
-3. [../examples/quickstart.ipynb](../examples/quickstart.ipynb)
-4. [BEGINNER_GUIDE.md](BEGINNER_GUIDE.md)
-5. [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/)
-6. [APPLY_YOUR_DATA.md](/docs/apply_your_data/)
-7. [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/)
-8. [ARCHITECTURE.md](/docs/architecture/)
-9. [presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md](presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md)
+## Common Questions
 
-## Product Entry Points
+| Question | Short answer | Read next |
+|---|---|---|
+| Do I need Neo4j or DozerDB for hello world? | No. `Seocho.local(...)` uses the embedded local path by default. | [Quickstart](/docs/quickstart/) |
+| When should I use the runtime? | When another process or agent needs to consume the same graph contract over HTTP. | [Runtime Deployment](/docs/runtime_deployment/) |
+| Where do generated artifacts go? | Local graph data, semantic artifacts, rule profiles, and traces are filesystem-visible. | [Files and Artifacts](/docs/files_and_artifacts/) |
+| Is debate the default mode? | No. Start with semantic graph QA and use debate only for explicit comparison work. | [Python SDK](/docs/python_sdk/) |
+| Where are release and Discord rules? | GitHub releases and docs are canonical; Discord is for curated community updates. | [Release And Community Operations](/docs/release_and_community_operations/) |
 
-- [WHY_SEOCHO.md](/docs/why_seocho/): product framing and ontology-aligned value
-  proposition
-- [../QUICKSTART.md](../QUICKSTART.md): shortest local success path
-- [RUNTIME_DEPLOYMENT.md](RUNTIME_DEPLOYMENT.md): full local runtime
-  deployment guide for Docker stack, services, and environment setup
-- [../examples/quickstart.ipynb](../examples/quickstart.ipynb): runnable
-  notebook covering ontology, indexing design, agent design, indexing, query,
-  `.env`-backed provider setup, safe Ladybug fallback, optional Neo4j/DozerDB,
-  and provider comparison
-- [BEGINNER_GUIDE.md](BEGINNER_GUIDE.md): first-run guide that connects SDK
-  snippets to architecture seams
-- [PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/): public
-  Python SDK path and API examples
-- [AGENT_DESIGN_SPECS.md](AGENT_DESIGN_SPECS.md): YAML-backed agent patterns
-  with required ontology bindings
-- [INDEXING_DESIGN_SPECS.md](INDEXING_DESIGN_SPECS.md): YAML-backed indexing
-  variants for LPG, RDF, hybrid, and inquiry-cycle defaults
-- [APPLY_YOUR_DATA.md](/docs/apply_your_data/): ingest your own records and query
-  them safely
-- [FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/): where ontology files,
-  semantic artifacts, rule profiles, and traces live
-- [BENCHMARKS.md](https://github.com/tteon/seocho/blob/main/docs/BENCHMARKS.md): FinDER and GraphRAG benchmark tracks
-- [ARCHITECTURE.md](/docs/architecture/): architecture deep dive and module map
+## Builder References
+
+- [Run Specs](/docs/run_specs/): declare ontology, documents, questions, and sweeps in YAML.
+- [Tutorial First Run](/docs/tutorial/): end-to-end local runtime tutorial.
+- [Agent Design Specs](https://github.com/tteon/seocho/blob/main/docs/AGENT_DESIGN_SPECS.md): YAML-backed agent patterns with ontology bindings.
+- [Indexing Design Specs](https://github.com/tteon/seocho/blob/main/docs/INDEXING_DESIGN_SPECS.md): graph-model-aware indexing variants.
+- [Benchmarks](https://github.com/tteon/seocho/blob/main/docs/BENCHMARKS.md): FinDER and GraphRAG benchmark tracks.
 
 ## Architecture And Operations
 
-- [ARCHITECTURE.md](/docs/architecture/): system architecture and runtime/module map
-- [INTERNAL_CLASS_DESIGN.md](INTERNAL_CLASS_DESIGN.md): internal orchestration
-  seam classes (`DomainEvent`, `IngestionFacade`, `QueryProxy`,
-  `AgentFactory`, `AgentStateMachine`) used while the modular monolith is
-  still being decomposed
-- [presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md](presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md):
-  20-30 minute beginner-friendly product and architecture deck
-- [RUNTIME_PACKAGE_MIGRATION.md](https://github.com/tteon/seocho/blob/main/docs/RUNTIME_PACKAGE_MIGRATION.md): staged
-  `extraction/` to `runtime/` migration plan
-- [GRAPH_RAG_AGENT_HANDOFF_SPEC.md](https://github.com/tteon/seocho/blob/main/docs/GRAPH_RAG_AGENT_HANDOFF_SPEC.md):
-  intent-first graph answer contract
-- [ONTOLOGY_RUN_CONTEXT_STRATEGY.md](https://github.com/tteon/seocho/blob/main/docs/ONTOLOGY_RUN_CONTEXT_STRATEGY.md):
-  ontology context contract across indexing, query, and agents
-- [PROPERTY_GRAPH_LENS_STRATEGY.md](https://github.com/tteon/seocho/blob/main/docs/PROPERTY_GRAPH_LENS_STRATEGY.md):
-  semantic overlay strategy for property graphs
-- [INTERNAL_CLASS_DESIGN.md](INTERNAL_CLASS_DESIGN.md): internal orchestration
-  seams for the modular monolith
-- [MODULE_OWNERSHIP_MAP.md](MODULE_OWNERSHIP_MAP.md): canonical module
-  ownership and compatibility boundaries
-- [ARCHITECTURE_HEALTH.md](ARCHITECTURE_HEALTH.md): per-domain quality
-  scorecard (grade + coverage + gaps, tracked over time)
-- [WORKFLOW.md](/docs/workflow/): operational workflow
-- [GITHUB_AUTOMATION.md](GITHUB_AUTOMATION.md): GitHub Actions, Codex
-  automation, and `.github/` placement rules
+- [Architecture](/docs/architecture/): system architecture and module map.
+- [Workflow](/docs/workflow/): canonical development and operations workflow.
+- [Graph-RAG Agent Handoff Spec](https://github.com/tteon/seocho/blob/main/docs/GRAPH_RAG_AGENT_HANDOFF_SPEC.md): intent-first graph answer contract.
+- [Repository Layout](https://github.com/tteon/seocho/blob/main/docs/REPOSITORY_LAYOUT.md): root directory intent and canonical edit surfaces.
+- [GitHub Automation](https://github.com/tteon/seocho/blob/main/docs/GITHUB_AUTOMATION.md): CI, docs deploy, labels, Discord, and maintainer automation.
+- [Release And Community Operations](/docs/release_and_community_operations/): release gates and `#seocho` community rules.
 
 ## Contributor References
 
-- [ISSUE_TASK_SYSTEM.md](https://github.com/tteon/seocho/blob/main/docs/ISSUE_TASK_SYSTEM.md): sprint and task governance
-- [REPOSITORY_LAYOUT.md](REPOSITORY_LAYOUT.md): root directory intent,
-  canonical edit surfaces, and legacy/local-only paths
-- [REPOSITORY_HIERARCHY_REVIEW.md](REPOSITORY_HIERARCHY_REVIEW.md):
-  architecture review of repo hierarchy cleanup priorities and tradeoffs
-- [OPEN_SOURCE_PLAYBOOK.md](/docs/open_source_playbook/): contributor onboarding
-- [decisions/DECISION_LOG.md](https://github.com/tteon/seocho/blob/main/docs/decisions/DECISION_LOG.md): architecture decision
-  history
-- [../CONTRIBUTING.md](https://github.com/tteon/seocho/blob/main/CONTRIBUTING.md): contribution flow and PR rules
+- [Open Source Playbook](/docs/open_source_playbook/): contributor onboarding.
+- [Issue Task System](https://github.com/tteon/seocho/blob/main/docs/ISSUE_TASK_SYSTEM.md): public issue and task metadata.
+- [Decision Log](https://github.com/tteon/seocho/blob/main/docs/decisions/DECISION_LOG.md): architecture decision history.
+- [Contributing](https://github.com/tteon/seocho/blob/main/CONTRIBUTING.md): PR and contribution flow.
 
-## Docs Sync Integration
+## Internal And Maintainer Docs
+
+These are useful after you know the product path. They are not part of the
+first-read sequence.
+
+- [Architecture Health](https://github.com/tteon/seocho/blob/main/docs/ARCHITECTURE_HEALTH.md)
+- [Internal Class Design](https://github.com/tteon/seocho/blob/main/docs/INTERNAL_CLASS_DESIGN.md)
+- [Runtime Package Migration](https://github.com/tteon/seocho/blob/main/docs/RUNTIME_PACKAGE_MIGRATION.md)
+- [Repository Hierarchy Review](https://github.com/tteon/seocho/blob/main/docs/REPOSITORY_HIERARCHY_REVIEW.md)
+- [Philosophy Feasibility Review](/blog/feasibility-review-framework/)
+- [Known Issue](https://github.com/tteon/seocho/blob/main/docs/KNOWN_ISSUE.md)
+
+## Docs Site Integration
 
 - GitHub `README.md` is the fastest product landing page.
 - `docs/*` is the source of truth for long-form product, operator, and system
   contracts.
-- `website/` is the tracked Astro/Starlight source for `https://seocho.blog`.
+- `website/` is the tracked Astro/Starlight source app in this repository.
+- Current live deployment for `https://seocho.blog` is still owned by
+  `tteon/tteon.github.io` GitHub Pages until Pages is enabled on `tteon/seocho`.
 - `website/scripts/generate-docs.mjs` materializes selected `/docs/*` and
-  `/blog/*` pages from the repo-root source docs at build time.
+  `/blog/*` pages from repo-root source docs for the in-repo site app.
+- the `scripts/sync.mjs` helper in `tteon/tteon.github.io` mirrors selected
+  source docs into the live GitHub Pages repository.
 - Generated mirror files under `website/src/content/docs/docs/` are derived
   artifacts; edit the repo-root source docs instead.
 - Validate the site with `cd website && npm ci && npm run check:docs && npm run build && bash scripts/check-built-links.sh`.
