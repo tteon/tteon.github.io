@@ -8,6 +8,7 @@ const targets = ['dist'];
 
 if (removeAstro) {
   targets.push('.astro');
+  targets.push('node_modules/.astro');
 }
 
 function astroDevLooksActive() {

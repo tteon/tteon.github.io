@@ -1,6 +1,9 @@
 ---
 title: Python SDK
 description: Developer-first guide to ingest data and query SEOCHO through the Python SDK.
+source_repo: tteon/seocho
+source_path: docs/PYTHON_INTERFACE_QUICKSTART.md
+source_commit: 42d055fa6301b282d8458e79d3ec7b673656ae15
 ---
 
 > *Source mirrored from `seocho/docs/PYTHON_INTERFACE_QUICKSTART.md`*

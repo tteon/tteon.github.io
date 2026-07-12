@@ -4,6 +4,9 @@ date: 2026-05-01
 authors:
   - seocho
 excerpt: Extract domain rules and high-value semantics from heterogeneous data into a SHACL-like semantic layer.
+source_repo: tteon/seocho
+source_path: docs/PHILOSOPHY.md
+source_commit: 42d055fa6301b282d8458e79d3ec7b673656ae15
 ---
 
 > *Source mirrored from `seocho/docs/PHILOSOPHY.md`*

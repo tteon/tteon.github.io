@@ -7,6 +7,8 @@ name: Auto-sync mirrored docs
 # maintainer can merge the refresh.
 
 on:
+  repository_dispatch:
+    types: ["seocho-docs-updated"]
   schedule:
     # Daily at 13:00 UTC / 22:00 Asia/Seoul — captures one day's upstream
     # doc edits in a single PR.
@@ -45,9 +47,14 @@ jobs:
 
       - name: Open or update auto-sync PR if drift
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.SEOCHO_BLOG_SYNC_TOKEN }}
+          FALLBACK_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
+          if [[ -z "${GH_TOKEN}" ]]; then
+            export GH_TOKEN="${FALLBACK_GITHUB_TOKEN}"
+          fi
+
           if [[ -z "$(git status --porcelain)" ]]; then
             echo "No drift detected; mirrored docs already current."
             exit 0

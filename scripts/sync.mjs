@@ -2,320 +2,129 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { execSync } from 'child_process';
+import { createFileMappings, renderMirroredContent } from './docs-contract.mjs';
 
 const WORK_DIR = process.cwd();
 const EXPLICIT_SOURCE_REPO = process.env.SEOCHO_SOURCE_REPO;
 const LOCAL_SEOCHO_REPO_DIR = EXPLICIT_SOURCE_REPO || path.resolve(WORK_DIR, '..');
 const USE_LOCAL_SOURCE =
-    Boolean(EXPLICIT_SOURCE_REPO) &&
-    fs.existsSync(path.join(LOCAL_SEOCHO_REPO_DIR, 'README.md')) &&
-    fs.existsSync(path.join(LOCAL_SEOCHO_REPO_DIR, 'docs'));
+  Boolean(EXPLICIT_SOURCE_REPO) &&
+  fs.existsSync(path.join(LOCAL_SEOCHO_REPO_DIR, 'README.md')) &&
+  fs.existsSync(path.join(LOCAL_SEOCHO_REPO_DIR, 'docs'));
 const TEMP_ROOT = fs.mkdtempSync(path.join(os.tmpdir(), 'seocho-site-sync-'));
 const SEOCHO_REPO_DIR = USE_LOCAL_SOURCE
-    ? LOCAL_SEOCHO_REPO_DIR
-    : path.join(TEMP_ROOT, 'seocho');
+  ? LOCAL_SEOCHO_REPO_DIR
+  : path.join(TEMP_ROOT, 'seocho');
 const TARGET_DOCS_DIR = path.join(WORK_DIR, 'src', 'content', 'docs', 'docs');
 const TARGET_BLOG_DIR = path.join(WORK_DIR, 'src', 'content', 'docs', 'blog');
-const SOURCE_BLOB_BASE = 'https://github.com/tteon/seocho/blob/main/';
-const SOURCE_TREE_BASE = 'https://github.com/tteon/seocho/tree/main/';
 const UPDATES_JSON_PATH = path.join(WORK_DIR, 'src', 'data', 'updates.json');
 
-// Ensure target directories exist
-if (!fs.existsSync(TARGET_DOCS_DIR)) {
-    fs.mkdirSync(TARGET_DOCS_DIR, { recursive: true });
-}
-if (!fs.existsSync(TARGET_BLOG_DIR)) {
-    fs.mkdirSync(TARGET_BLOG_DIR, { recursive: true });
-}
-if (!fs.existsSync(path.dirname(UPDATES_JSON_PATH))) {
-    fs.mkdirSync(path.dirname(UPDATES_JSON_PATH), { recursive: true });
+if (USE_LOCAL_SOURCE) {
+  console.log(`Using explicit SEOCHO source at ${SEOCHO_REPO_DIR}`);
+} else {
+  console.log('Cloning tteon/seocho to extract docs...');
+  execSync(`git clone --filter=blob:none https://github.com/tteon/seocho.git ${SEOCHO_REPO_DIR}`, {
+    stdio: 'inherit',
+  });
 }
 
-// 1. Fetching external repository.
-// Full commit history is required: sourceDateFor() uses `git log -1 -- <file>`
-// to resolve each source file's last-modified date for blog frontmatter.
-// A `--depth 1` clone collapses that to a single synthesized commit (today's
-// date), which makes mirrored blog dates drift day-over-day and causes the
-// check-doc-sync gate to fail on every CI run after the first.
-// --filter=blob:none keeps the clone cheap by lazy-fetching file contents.
-if (USE_LOCAL_SOURCE) {
-    console.log(`Using explicit SEOCHO source at ${SEOCHO_REPO_DIR}`);
-} else {
-    console.log('Cloning tteon/seocho to extract docs...');
-    execSync(`git clone --filter=blob:none https://github.com/tteon/seocho.git ${SEOCHO_REPO_DIR}`);
+function gitOutput(args, fallback = '') {
+  try {
+    return execSync(`git -C "${SEOCHO_REPO_DIR}" ${args}`, {
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .toString()
+      .trim() || fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 function sourceDateFor(relPath) {
-    try {
-        const output = execSync(
-            `git -C "${SEOCHO_REPO_DIR}" log -1 --format=%cs -- "${relPath}"`,
-            { stdio: ['ignore', 'pipe', 'ignore'] }
-        ).toString().trim();
-        return output || new Date().toISOString().split('T')[0];
-    } catch {
-        return new Date().toISOString().split('T')[0];
-    }
+  return gitOutput(`log -1 --format=%cs -- "${relPath}"`, new Date().toISOString().split('T')[0]);
 }
 
-// 2. Mapping Files to copy over to Starlight
-const fileMappings = [
-    {
-        src: 'docs/WHY_SEOCHO.md',
-        dest: 'why_seocho.md',
-        frontmatter: `---\ntitle: Why SEOCHO\ndescription: Why SEOCHO is ontology-first and graph-native instead of generic memory-first.\n---\n\n> *Source mirrored from \`seocho/docs/WHY_SEOCHO.md\`*\n\n`
-    },
-    {
-        src: 'docs/README.md',
-        dest: '../docs.md',
-        frontmatter: `---\ntitle: Docs Home\ndescription: Central Documentation Index for SEOCHO\n---\n\n> *Source mirrored from \`seocho/docs/README.md\`*\n\n`
-    },
-    {
-        src: 'QUICKSTART.md',
-        dest: 'quickstart.md',
-        frontmatter: `---\ntitle: Quickstart\ndescription: Get SEOCHO up and running in 5 minutes.\n---\n\n> *Source mirrored from \`seocho/QUICKSTART.md\`*\n\n`
-    },
-    {
-        src: 'docs/RUNTIME_DEPLOYMENT.md',
-        dest: 'runtime_deployment.md',
-        frontmatter: `---\ntitle: Runtime Deployment\ndescription: Full local runtime deployment guide for the Docker stack, services, and environment setup.\n---\n\n> *Source mirrored from \`seocho/docs/RUNTIME_DEPLOYMENT.md\`*\n\n`
-    },
-    {
-        src: 'docs/APPLY_YOUR_DATA.md',
-        dest: 'apply_your_data.md',
-        frontmatter: `---\ntitle: Bring Your Data\ndescription: How to load your own records into SEOCHO and query them safely.\n---\n\n> *Source mirrored from \`seocho/docs/APPLY_YOUR_DATA.md\`*\n\n`
-    },
-    {
-        src: 'docs/PYTHON_INTERFACE_QUICKSTART.md',
-        dest: 'python_sdk.md',
-        frontmatter: `---\ntitle: Python SDK\ndescription: Developer-first guide to ingest data and query SEOCHO through the Python SDK.\n---\n\n> *Source mirrored from \`seocho/docs/PYTHON_INTERFACE_QUICKSTART.md\`*\n\n`
-    },
-    {
-        src: 'docs/FILES_AND_ARTIFACTS.md',
-        dest: 'files_and_artifacts.md',
-        frontmatter: `---\ntitle: Files and Artifacts\ndescription: Where ontology files, graph state, rule profiles, semantic artifacts, and traces live.\n---\n\n> *Source mirrored from \`seocho/docs/FILES_AND_ARTIFACTS.md\`*\n\n`
-    },
-    {
-        src: 'docs/RUN_SPECS.md',
-        dest: 'run_specs.md',
-        frontmatter: `---\ntitle: Run Specs\ndescription: Declare ontology, documents, questions, models, and sweeps in YAML.\n---\n\n> *Source mirrored from \`seocho/docs/RUN_SPECS.md\`*\n\n`
-    },
-    {
-        src: 'docs/ARCHITECTURE.md',
-        dest: 'architecture.md',
-        frontmatter: `---\ntitle: Architecture\ndescription: System Architecture and Module Map.\n---\n\n> *Source mirrored from \`seocho/docs/ARCHITECTURE.md\`*\n\n`
-    },
-    {
-        src: 'docs/WORKFLOW.md',
-        dest: 'workflow.md',
-        isBlog: false,
-        frontmatter: `---\ntitle: Workflow\ndescription: End-to-end Operational Workflow.\n---\n\n> *Source mirrored from \`seocho/docs/WORKFLOW.md\`*\n\n`
-    },
-    {
-        src: 'docs/TUTORIAL_FIRST_RUN.md',
-        dest: 'tutorial.md',
-        frontmatter: `---\ntitle: First Run Tutorial\ndescription: End-to-end tutorial to start services, verify APIs, and run agent chat.\n---\n\n> *Source mirrored from \`seocho/docs/TUTORIAL_FIRST_RUN.md\`*\n\n`
-    },
-    {
-        src: 'docs/OPEN_SOURCE_PLAYBOOK.md',
-        dest: 'open_source_playbook.md',
-        frontmatter: `---\ntitle: Open Source Playbook\ndescription: Extension guide for ontology, data, agent, and runtime integration.\n---\n\n> *Source mirrored from \`seocho/docs/OPEN_SOURCE_PLAYBOOK.md\`*\n\n`
-    },
-    {
-        src: 'docs/RELEASE_AND_COMMUNITY_OPERATIONS.md',
-        dest: 'release_and_community_operations.md',
-        frontmatter: `---\ntitle: Release And Community Operations\ndescription: Release gates, Discord update policy, and open-source community operating rules.\n---\n\n> *Source mirrored from \`seocho/docs/RELEASE_AND_COMMUNITY_OPERATIONS.md\`*\n\n`
-    },
-    {
-        src: 'docs/PHILOSOPHY.md',
-        dest: 'philosophy.md',
-        frontmatter: `---\ntitle: Philosophy\ndescription: Core Design Philosophy Charter and Operating Principles.\n---\n\n> *Source mirrored from \`seocho/docs/PHILOSOPHY.md\`*\n\n`
-    },
-    {
-        src: 'docs/PHILOSOPHY.md',
-        dest: 'philosophy.md',
-        isBlog: true,
-        frontmatter: `---\ntitle: "SEOCHO Design Philosophy & Operating Principles"\ndate: ${sourceDateFor('docs/PHILOSOPHY.md')}\nauthors:\n  - seocho\nexcerpt: Extract domain rules and high-value semantics from heterogeneous data into a SHACL-like semantic layer.\n---\n\n> *Source mirrored from \`seocho/docs/PHILOSOPHY.md\`*\n\n`
-    },
-    {
-        src: 'docs/PHILOSOPHY_FEASIBILITY_REVIEW.md',
-        dest: 'feasibility-review-framework.md',
-        isBlog: true,
-        frontmatter: `---\ntitle: "Feasibility Review Framework & Rubrics"\ndate: ${sourceDateFor('docs/PHILOSOPHY_FEASIBILITY_REVIEW.md')}\nauthors:\n  - seocho\nexcerpt: Multi-role feasibility review framework and Go/No-Go rubric for graph data implementations.\n---\n\n> *Source mirrored from \`seocho/docs/PHILOSOPHY_FEASIBILITY_REVIEW.md\`*\n\n`
-    }
-];
-
-const routeReplacements = new Map([
-    ['`docs/WHY_SEOCHO.md`', '[`/docs/why_seocho/`](/docs/why_seocho/)'],
-    ['`docs/README.md`', '[`/docs/`](/docs/)'],
-    ['`QUICKSTART.md`', '[`/docs/quickstart/`](/docs/quickstart/)'],
-    ['`docs/RUNTIME_DEPLOYMENT.md`', '[`/docs/runtime_deployment/`](/docs/runtime_deployment/)'],
-    ['`docs/APPLY_YOUR_DATA.md`', '[`/docs/apply_your_data/`](/docs/apply_your_data/)'],
-    ['`docs/PYTHON_INTERFACE_QUICKSTART.md`', '[`/docs/python_sdk/`](/docs/python_sdk/)'],
-    ['`docs/FILES_AND_ARTIFACTS.md`', '[`/docs/files_and_artifacts/`](/docs/files_and_artifacts/)'],
-    ['`docs/RUN_SPECS.md`', '[`/docs/run_specs/`](/docs/run_specs/)'],
-    ['`docs/ARCHITECTURE.md`', '[`/docs/architecture/`](/docs/architecture/)'],
-    ['`docs/WORKFLOW.md`', '[`/docs/workflow/`](/docs/workflow/)'],
-    ['`docs/TUTORIAL_FIRST_RUN.md`', '[`/docs/tutorial/`](/docs/tutorial/)'],
-    ['`docs/OPEN_SOURCE_PLAYBOOK.md`', '[`/docs/open_source_playbook/`](/docs/open_source_playbook/)'],
-    ['`docs/RELEASE_AND_COMMUNITY_OPERATIONS.md`', '[`/docs/release_and_community_operations/`](/docs/release_and_community_operations/)'],
-    ['`docs/PHILOSOPHY.md`', '[`/docs/philosophy/`](/docs/philosophy/)'],
-    ['`docs/PHILOSOPHY_FEASIBILITY_REVIEW.md`', '[`/blog/feasibility-review-framework/`](/blog/feasibility-review-framework/)'],
-    ['(../README.md#execution-surfaces)', `(${SOURCE_BLOB_BASE}README.md#execution-surfaces)`],
-    ['(../README.md#choose-a-mode)', `(${SOURCE_BLOB_BASE}README.md#choose-a-mode)`],
-    ['(../README.md)', `(${SOURCE_BLOB_BASE}README.md)`],
-    ['(README.md)', `(${SOURCE_BLOB_BASE}README.md)`],
-    ['(../QUICKSTART.md)', '(/docs/quickstart/)'],
-    ['(RELEASE_AND_COMMUNITY_OPERATIONS.md)', '(/docs/release_and_community_operations/)'],
-    ['(RUN_SPECS.md)', '(/docs/run_specs/)'],
-    ['(WHY_SEOCHO.md)', '(/docs/why_seocho/)'],
-    ['(QUICKSTART.md)', '(/docs/quickstart/)'],
-    ['(docs/RUNTIME_DEPLOYMENT.md)', '(/docs/runtime_deployment/)'],
-    ['(RUNTIME_DEPLOYMENT.md)', '(/docs/runtime_deployment/)'],
-    ['(docs/APPLY_YOUR_DATA.md)', '(/docs/apply_your_data/)'],
-    ['(docs/PYTHON_INTERFACE_QUICKSTART.md)', '(/docs/python_sdk/)'],
-    ['(docs/FILES_AND_ARTIFACTS.md)', '(/docs/files_and_artifacts/)'],
-    ['(docs/RUN_SPECS.md)', '(/docs/run_specs/)'],
-    ['(docs/RELEASE_AND_COMMUNITY_OPERATIONS.md)', '(/docs/release_and_community_operations/)'],
-    ['(PYTHON_INTERFACE_QUICKSTART.md)', '(/docs/python_sdk/)'],
-    ['(APPLY_YOUR_DATA.md)', '(/docs/apply_your_data/)'],
-    ['(FILES_AND_ARTIFACTS.md)', '(/docs/files_and_artifacts/)'],
-    ['(ARCHITECTURE.md)', '(/docs/architecture/)'],
-    ['(WORKFLOW.md)', '(/docs/workflow/)'],
-    ['(TUTORIAL_FIRST_RUN.md)', '(/docs/tutorial/)'],
-    ['(OPEN_SOURCE_PLAYBOOK.md)', '(/docs/open_source_playbook/)'],
-    ['(PHILOSOPHY.md)', '(/docs/philosophy/)'],
-    ['(PHILOSOPHY_FEASIBILITY_REVIEW.md)', '(/blog/feasibility-review-framework/)'],
-    ['(BENCHMARKS.md)', `(${SOURCE_BLOB_BASE}docs/BENCHMARKS.md)`],
-    ['(AGENT_DESIGN_SPECS.md)', `(${SOURCE_BLOB_BASE}docs/AGENT_DESIGN_SPECS.md)`],
-    ['(INDEXING_DESIGN_SPECS.md)', `(${SOURCE_BLOB_BASE}docs/INDEXING_DESIGN_SPECS.md)`],
-    ['(BEGINNER_GUIDE.md)', `(${SOURCE_BLOB_BASE}docs/BEGINNER_GUIDE.md)`],
-    ['(BEGINNER_PIPELINES_DEMO.md)', `(${SOURCE_BLOB_BASE}docs/BEGINNER_PIPELINES_DEMO.md)`],
-    ['(REPOSITORY_LAYOUT.md)', `(${SOURCE_BLOB_BASE}docs/REPOSITORY_LAYOUT.md)`],
-    ['(GITHUB_AUTOMATION.md)', `(${SOURCE_BLOB_BASE}docs/GITHUB_AUTOMATION.md)`],
-    ['(ARCHITECTURE_HEALTH.md)', `(${SOURCE_BLOB_BASE}docs/ARCHITECTURE_HEALTH.md)`],
-    ['(INTERNAL_CLASS_DESIGN.md)', `(${SOURCE_BLOB_BASE}docs/INTERNAL_CLASS_DESIGN.md)`],
-    ['(MODULE_OWNERSHIP_MAP.md)', `(${SOURCE_BLOB_BASE}docs/MODULE_OWNERSHIP_MAP.md)`],
-    ['(USECASES.md)', `(${SOURCE_BLOB_BASE}docs/USECASES.md)`],
-    ['(presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md)', `(${SOURCE_BLOB_BASE}docs/presentations/SEOCHO_OVERVIEW_DEEP_DIVE.md)`],
-    ['(RUNTIME_PACKAGE_MIGRATION.md)', `(${SOURCE_BLOB_BASE}docs/RUNTIME_PACKAGE_MIGRATION.md)`],
-    ['(GRAPH_RAG_AGENT_HANDOFF_SPEC.md)', `(${SOURCE_BLOB_BASE}docs/GRAPH_RAG_AGENT_HANDOFF_SPEC.md)`],
-    ['(ONTOLOGY_RUN_CONTEXT_STRATEGY.md)', `(${SOURCE_BLOB_BASE}docs/ONTOLOGY_RUN_CONTEXT_STRATEGY.md)`],
-    ['(PROPERTY_GRAPH_LENS_STRATEGY.md)', `(${SOURCE_BLOB_BASE}docs/PROPERTY_GRAPH_LENS_STRATEGY.md)`],
-    ['(ISSUE_TASK_SYSTEM.md)', `(${SOURCE_BLOB_BASE}docs/ISSUE_TASK_SYSTEM.md)`],
-    ['(REPOSITORY_HIERARCHY_REVIEW.md)', `(${SOURCE_BLOB_BASE}docs/REPOSITORY_HIERARCHY_REVIEW.md)`],
-    ['(KNOWN_ISSUE.md)', `(${SOURCE_BLOB_BASE}docs/KNOWN_ISSUE.md)`],
-    ['(BEADS_OPERATING_MODEL.md)', `(${SOURCE_BLOB_BASE}docs/BEADS_OPERATING_MODEL.md)`],
-    ['(decisions/DECISION_LOG.md)', `(${SOURCE_BLOB_BASE}docs/decisions/DECISION_LOG.md)`],
-    ['(reference/README.md)', `(${SOURCE_BLOB_BASE}docs/reference/README.md)`],
-    ['(archive/README.md)', `(${SOURCE_BLOB_BASE}docs/archive/README.md)`],
-    ['(maintainers/README.md)', `(${SOURCE_BLOB_BASE}docs/maintainers/README.md)`],
-    ['(../CONTRIBUTING.md)', `(${SOURCE_BLOB_BASE}CONTRIBUTING.md)`],
-    ['(../examples/agent_designs/)', `(${SOURCE_TREE_BASE}examples/agent_designs)`],
-    ['(../examples/indexing_designs/)', `(${SOURCE_TREE_BASE}examples/indexing_designs)`],
-    ['(../examples/agent_designs/planning_multi_agent_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/agent_designs/planning_multi_agent_finance.yaml)`],
-    ['(../examples/agent_designs/reflection_chain_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/agent_designs/reflection_chain_finance.yaml)`],
-    ['(../examples/agent_designs/memory_tool_use_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/agent_designs/memory_tool_use_finance.yaml)`],
-    ['(../examples/indexing_designs/lpg_finance_provenance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/lpg_finance_provenance.yaml)`],
-    ['(../examples/indexing_designs/rdf_deductive_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/rdf_deductive_finance.yaml)`],
-    ['(../examples/indexing_designs/hybrid_inquiry_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/hybrid_inquiry_finance.yaml)`],
-    ['(/tmp/seocho-land-finder-e2e/examples/agent_designs)', `(${SOURCE_TREE_BASE}examples/agent_designs)`],
-    ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs)', `(${SOURCE_TREE_BASE}examples/indexing_designs)`],
-    ['(/tmp/seocho-land-finder-e2e/examples/agent_designs/planning_multi_agent_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/agent_designs/planning_multi_agent_finance.yaml)`],
-    ['(/tmp/seocho-land-finder-e2e/examples/agent_designs/reflection_chain_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/agent_designs/reflection_chain_finance.yaml)`],
-    ['(/tmp/seocho-land-finder-e2e/examples/agent_designs/memory_tool_use_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/agent_designs/memory_tool_use_finance.yaml)`],
-    ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/lpg_finance_provenance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/lpg_finance_provenance.yaml)`],
-    ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/rdf_deductive_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/rdf_deductive_finance.yaml)`],
-    ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/hybrid_inquiry_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/hybrid_inquiry_finance.yaml)`],
-    ['(../website/public/images/docs-core-loop.svg)', '(/images/docs-core-loop.svg)'],
-    ['src="../website/public/images/docs-core-loop.svg"', 'src="/images/docs-core-loop.svg"'],
-    ['(../website/public/images/docs-reader-map.svg)', '(/images/docs-reader-map.svg)'],
-    ['src="../website/public/images/docs-reader-map.svg"', 'src="/images/docs-reader-map.svg"'],
-    ['(../website/public/images/docs-evidence-loop.svg)', '(/images/docs-evidence-loop.svg)'],
-    ['src="../website/public/images/docs-evidence-loop.svg"', 'src="/images/docs-evidence-loop.svg"'],
-]);
-
-function rewriteWebsiteRoutes(content) {
-    let rewritten = content;
-    for (const [sourceRef, routeLink] of routeReplacements.entries()) {
-        rewritten = rewritten.replaceAll(sourceRef, routeLink);
-    }
-    return rewritten;
+function sourceCommitForRepo() {
+  return gitOutput('rev-parse HEAD', 'unknown');
 }
 
 function cleanGeneratedOutputs() {
-    fs.rmSync(TARGET_DOCS_DIR, { recursive: true, force: true });
-    fs.rmSync(path.join(WORK_DIR, 'src', 'content', 'docs', 'docs.md'), { force: true });
-    fs.rmSync(path.join(TARGET_BLOG_DIR, 'philosophy.md'), { force: true });
-    fs.rmSync(path.join(TARGET_BLOG_DIR, 'feasibility-review-framework.md'), { force: true });
-    fs.mkdirSync(TARGET_DOCS_DIR, { recursive: true });
-    fs.mkdirSync(TARGET_BLOG_DIR, { recursive: true });
+  fs.rmSync(TARGET_DOCS_DIR, { recursive: true, force: true });
+  fs.rmSync(path.join(WORK_DIR, 'src', 'content', 'docs', 'docs.md'), { force: true });
+  fs.rmSync(path.join(TARGET_BLOG_DIR, 'philosophy.md'), { force: true });
+  fs.rmSync(path.join(TARGET_BLOG_DIR, 'feasibility-review-framework.md'), { force: true });
+  fs.mkdirSync(TARGET_DOCS_DIR, { recursive: true });
+  fs.mkdirSync(TARGET_BLOG_DIR, { recursive: true });
+  fs.mkdirSync(path.dirname(UPDATES_JSON_PATH), { recursive: true });
 }
 
-// Copy and inject frontmatter
-console.log('Processing and wrapping markdown files...');
-cleanGeneratedOutputs();
-for (const map of fileMappings) {
-    const sourcePath = path.join(SEOCHO_REPO_DIR, map.src);
-    const destDir = map.isBlog ? TARGET_BLOG_DIR : TARGET_DOCS_DIR;
-    const destPath = path.join(destDir, map.dest);
+function syncDocs() {
+  const sourceCommit = sourceCommitForRepo();
+  const fileMappings = createFileMappings({ sourceDateFor, sourceCommit });
 
-    if (fs.existsSync(sourcePath)) {
-        let content = fs.readFileSync(sourcePath, 'utf8');
+  console.log(`Processing mirrored docs from seocho@${sourceCommit.slice(0, 12)}...`);
+  cleanGeneratedOutputs();
 
-        // Attempt to remove existing H1 titles so it doesn't clash with Astro Title
-        content = content.replace(/^#\s(.*?)\n/m, '');
-        content = rewriteWebsiteRoutes(content);
+  for (const mapping of fileMappings) {
+    const sourcePath = path.join(SEOCHO_REPO_DIR, mapping.src);
+    const destDir = mapping.isBlog ? TARGET_BLOG_DIR : TARGET_DOCS_DIR;
+    const destPath = path.join(destDir, mapping.dest);
 
-        fs.writeFileSync(destPath, map.frontmatter + content);
-        console.log(`✅ Synced: ${map.src} -> ${path.join(path.basename(destDir), map.dest)}`);
-    } else {
-        console.warn(`⚠️ Warning: Source file not found ${map.src}`);
+    if (!fs.existsSync(sourcePath)) {
+      console.warn(`Warning: source file not found ${mapping.src}`);
+      continue;
     }
+
+    const sourceContent = fs.readFileSync(sourcePath, 'utf8');
+    fs.writeFileSync(destPath, renderMirroredContent(mapping, sourceContent));
+    console.log(`Synced: ${mapping.src} -> ${path.join(path.basename(destDir), mapping.dest)}`);
+  }
 }
 
-// 3. Fetching Changelog via GitHub API
-console.log('Fetching latest 5 releases from tteon/seocho for Changelog...');
-try {
-    const result = execSync(`curl -s https://api.github.com/repos/tteon/seocho/releases?per_page=5`);
+function syncReleases() {
+  console.log('Fetching latest 5 releases from tteon/seocho for changelog data...');
+  try {
+    const result = execSync('curl -s https://api.github.com/repos/tteon/seocho/releases?per_page=5');
     const releases = JSON.parse(result.toString());
 
-    const updates = releases.map((release) => {
-        // Format Date from ISO -> YYYY-MM-DD
-        const dateStr = release.published_at ? release.published_at.split('T')[0] : 'Unknown';
-        // Use tag name as pseudo-hash/identifier
-        const hash = release.tag_name || 'v0.0.0';
-        return {
-            date: dateStr,
-            message: release.name || release.tag_name,
-            hash: hash,
-            url: release.html_url,
-            body: release.body
-        };
-    });
+    const updates = releases.map((release) => ({
+      date: release.published_at ? release.published_at.split('T')[0] : 'Unknown',
+      message: release.name || release.tag_name,
+      hash: release.tag_name || 'v0.0.0',
+      url: release.html_url,
+      body: release.body,
+    }));
 
     if (updates.length > 0) {
-        fs.writeFileSync(UPDATES_JSON_PATH, JSON.stringify(updates, null, 2));
-        console.log(`✅ Synced ${updates.length} releases into updates.json`);
-    } else {
-        // Preserve the existing fallback so no-release syncs do not churn dates.
-        console.log('⚠️ No releases found, preserving fallback updates.json');
-        const fallbackUpdates = fs.existsSync(UPDATES_JSON_PATH)
-            ? JSON.parse(fs.readFileSync(UPDATES_JSON_PATH, 'utf8'))
-            : [{
-            date: new Date().toISOString().split('T')[0],
-            message: "Sync integration established. Awaiting first release.",
-            hash: "init",
-            url: "https://github.com/tteon/seocho/releases",
-            body: "..."
-        }];
-        fs.writeFileSync(UPDATES_JSON_PATH, JSON.stringify(fallbackUpdates, null, 2));
+      fs.writeFileSync(UPDATES_JSON_PATH, JSON.stringify(updates, null, 2));
+      console.log(`Synced ${updates.length} releases into updates.json`);
+      return;
     }
-} catch (error) {
-    console.error('❌ Failed to fetch Github releases:', error.message);
+
+    console.log('No releases found; preserving fallback updates.json');
+    const fallbackUpdates = fs.existsSync(UPDATES_JSON_PATH)
+      ? JSON.parse(fs.readFileSync(UPDATES_JSON_PATH, 'utf8'))
+      : [
+          {
+            date: new Date().toISOString().split('T')[0],
+            message: 'Sync integration established. Awaiting first release.',
+            hash: 'init',
+            url: 'https://github.com/tteon/seocho/releases',
+            body: '...',
+          },
+        ];
+    fs.writeFileSync(UPDATES_JSON_PATH, JSON.stringify(fallbackUpdates, null, 2));
+  } catch (error) {
+    console.error('Failed to fetch GitHub releases:', error.message);
+  }
 }
 
-// Cleanup Temporary clone
-if (!USE_LOCAL_SOURCE) {
+try {
+  syncDocs();
+  syncReleases();
+  console.log('Sync complete.');
+} finally {
+  if (!USE_LOCAL_SOURCE) {
     fs.rmSync(TEMP_ROOT, { recursive: true, force: true });
+  }
 }
-console.log('🎉 Sync complete!');

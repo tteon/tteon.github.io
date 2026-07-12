@@ -16,9 +16,13 @@ This repository is the website presentation layer.
 - main repo source of truth: `https://github.com/tteon/seocho`
 - core source docs usually come from `seocho/README.md` and `seocho/docs/*`
 
-Current sync policy is local-helper based, not remote auto-sync:
+Current sync policy has both local and remote guardrails:
 
 - `scripts/sync.mjs` can mirror selected docs into this repo
+- `scripts/docs-contract.mjs` is the single mirror contract used by sync and
+  drift checks
+- `.github/workflows/auto-sync-mirrored-docs.yml` refreshes mirrors on a daily
+  schedule and can be triggered by `tteon/seocho` through `repository_dispatch`
 - mirrored pages should say `Source mirrored from ...`
 - if you improve a mirrored page here, check whether the same contract change
   belongs in the main repo too
