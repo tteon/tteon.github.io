@@ -3,7 +3,7 @@ title: Runtime Deployment
 description: Full local runtime deployment guide for the Docker stack, services, and environment setup.
 source_repo: tteon/seocho
 source_path: docs/RUNTIME_DEPLOYMENT.md
-source_commit: 72673335f2bdcad80dc63b08ec5dbb189d6365d7
+source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
 ---
 
 > *Source mirrored from `seocho/docs/RUNTIME_DEPLOYMENT.md`*
