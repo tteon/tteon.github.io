@@ -1,64 +1,69 @@
 ---
 const paths = [
   {
+    number: '01',
     eyebrow: 'Understand',
-    title: 'Map the system',
+    title: 'Read the map',
     description:
-      'Learn the core loop, vocabulary, modes, and code ownership before opening the reference docs.',
+      'Start with the concept guide: ontology, graph memory, query path, runtime, and ownership.',
     href: '/learn/',
-    cta: 'Read the guide',
+    cta: 'Concept guide',
   },
   {
-    eyebrow: 'First run',
-    title: 'Build locally',
+    number: '02',
+    eyebrow: 'Build',
+    title: 'Create local memory',
     description:
-      'Use Seocho.local(...) to define one ontology, add one fact, and ask one graph-grounded question.',
+      'Use Seocho.local(...) to define one ontology, add one fact, and ask one grounded question.',
     href: '/docs/quickstart/',
-    cta: 'Run quickstart',
+    cta: 'Quickstart',
   },
   {
-    eyebrow: 'Runtime',
-    title: 'Share the contract',
+    number: '03',
+    eyebrow: 'Operate',
+    title: 'Run the contract',
     description:
-      'Start the UI, API, policy checks, and DozerDB stack when other agents need HTTP access.',
+      'Move to the runtime when multiple agents need the same HTTP surface, traces, and policy checks.',
     href: '/docs/runtime_deployment/',
-    cta: 'Run the runtime',
+    cta: 'Runtime docs',
   },
   {
-    eyebrow: 'Community',
-    title: 'Contribute safely',
+    number: '04',
+    eyebrow: 'Contribute',
+    title: 'Shape the project',
     description:
-      'Use the issue, PR, release, and Discord rules when you want to help shape the project.',
+      'Use the public issue, release, community, and PR rules to keep changes small and reviewable.',
     href: '/docs/open_source_playbook/',
-    cta: 'Read the playbook',
+    cta: 'Playbook',
   },
 ];
 ---
 
-<section class="max-w-6xl mx-auto px-6 py-18 w-full animate-fade-up delay-100 z-10">
-  <div class="mb-10 text-center md:text-left">
-    <p class="uppercase text-[0.72rem] text-cyan-300/75 mb-3 font-medium">Choose your entry path</p>
-    <h2 class="seocho-display text-3xl md:text-5xl text-white mb-3 leading-tight">Start from the job you have today.</h2>
-    <p class="text-zinc-400 text-lg max-w-3xl">
-      SEOCHO has distinct entry points: concept map, local authoring, runtime operation, and contribution.
-      Pick one instead of reading the repo like a file dump.
-    </p>
-  </div>
+<section class="border-y border-white/10 bg-[#07100d]">
+  <div class="mx-auto w-full max-w-7xl px-5 py-20 md:px-8">
+    <div class="mb-12 max-w-3xl">
+      <p class="mb-3 text-xs font-semibold uppercase text-emerald-200/80">Product paths</p>
+      <h2 class="seocho-display text-4xl font-semibold leading-tight text-[var(--seocho-paper)] md:text-5xl">
+        Start from the work in front of you.
+      </h2>
+      <p class="mt-5 text-base leading-7 text-zinc-400">
+        The site should not ask readers to decode the repository first. Each
+        path names the job, the next page, and the part of SEOCHO it exercises.
+      </p>
+    </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-    {paths.map((path) => (
-      <a href={path.href} class="group relative overflow-hidden rounded-lg border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-7 transition-all hover:-translate-y-1 hover:border-white/20 hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.09),rgba(255,255,255,0.03))]">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.14),transparent_48%),radial-gradient(circle_at_bottom_right,rgba(245,158,11,0.12),transparent_46%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-        <div class="relative z-10">
-          <p class="uppercase text-[0.72rem] text-zinc-500 mb-4 font-medium">{path.eyebrow}</p>
-          <h3 class="seocho-display text-2xl text-white mb-4 leading-tight">{path.title}</h3>
-          <p class="text-zinc-400 leading-relaxed min-h-[5.5rem]">{path.description}</p>
-          <div class="mt-8 inline-flex items-center gap-2 text-sm font-medium text-zinc-200 transition-colors group-hover:text-white">
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      {paths.map((path) => (
+        <a href={path.href} class="brand-path group">
+          <span class="text-xs font-semibold text-emerald-200/70">{path.number}</span>
+          <p class="mt-6 text-[0.68rem] font-semibold uppercase text-zinc-500">{path.eyebrow}</p>
+          <h3 class="mt-3 text-2xl font-semibold text-[var(--seocho-paper)]">{path.title}</h3>
+          <p class="mt-4 min-h-[7rem] text-sm leading-6 text-zinc-400">{path.description}</p>
+          <span class="mt-8 inline-flex text-sm font-semibold text-zinc-200 transition-colors group-hover:text-white">
             {path.cta}
-            <span aria-hidden="true">→</span>
-          </div>
-        </div>
-      </a>
-    ))}
+          </span>
+        </a>
+      ))}
+    </div>
   </div>
 </section>

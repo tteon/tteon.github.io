@@ -78,9 +78,11 @@ export default defineConfig({
                 },
             ],
             head: [
-                { tag: 'link', attrs: { rel: 'icon', href: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>' } },
-                { tag: 'meta', attrs: { property: 'og:image', content: 'https://seocho.blog/og-image.jpg' } },
+                { tag: 'link', attrs: { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' } },
+                { tag: 'meta', attrs: { property: 'og:image', content: 'https://seocho.blog/images/seocho-brand-graph.png' } },
                 { tag: 'meta', attrs: { property: 'og:type', content: 'website' } },
+                { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
+                { tag: 'meta', attrs: { name: 'theme-color', content: '#030405' } },
             ],
         }),
     ],

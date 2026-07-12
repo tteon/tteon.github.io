@@ -1,57 +1,57 @@
 ---
-const concepts = [
+const pillars = [
   {
-    title: 'Ontology contract',
-    body: 'The schema-like object that tells SEOCHO which entities, relationships, and properties are valid.',
+    label: 'Contract',
+    title: 'Ontology first',
+    body: 'Define the entity and relationship vocabulary before agents start writing memory.',
+    tone: 'cyan',
   },
   {
-    title: 'Graph memory',
-    body: 'The persisted graph facts, provenance, constraints, and evidence used by later agent questions.',
+    label: 'Memory',
+    title: 'Graph native',
+    body: 'Persist facts, provenance, and constraints as relationships that can be inspected.',
+    tone: 'emerald',
   },
   {
-    title: 'Semantic query',
-    body: 'A guarded retrieval path that uses ontology and graph context before answer synthesis.',
+    label: 'Answer',
+    title: 'Evidence bound',
+    body: 'Route questions through ontology and graph context before response synthesis.',
+    tone: 'amber',
   },
   {
-    title: 'Runtime surface',
-    body: 'The HTTP layer for apps, agents, policy checks, traces, and shared graph access.',
-  },
-  {
-    title: 'Run spec',
-    body: 'A YAML file that makes ontology, documents, questions, models, and sweeps repeatable.',
-  },
-  {
-    title: 'Evidence trail',
-    body: 'Artifacts and traces that show what SEOCHO extracted, queried, repaired, or skipped.',
+    label: 'Runtime',
+    title: 'Agent ready',
+    body: 'Expose the same contract through SDK calls, HTTP endpoints, traces, and policy checks.',
+    tone: 'ivory',
   },
 ];
 ---
 
-<section class="w-full border-b border-white/10 bg-[#070707]">
-  <div class="mx-auto max-w-7xl px-5 py-20 md:px-8">
-    <div class="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:items-start">
-      <div>
-        <p class="mb-3 text-sm font-medium uppercase text-amber-200/80">Read the project as concepts</p>
-        <h2 class="seocho-display text-4xl font-semibold leading-tight text-white md:text-5xl">
-          The vocabulary is the map.
-        </h2>
-        <p class="mt-5 max-w-xl text-base leading-7 text-zinc-400">
-          SEOCHO becomes much easier once you stop reading it as a pile of files
-          and start reading it as a small set of moving parts.
-        </p>
-        <a href="/learn/" class="mt-7 inline-flex rounded-lg border border-white/15 px-4 py-2.5 text-sm font-semibold text-zinc-100 transition-colors hover:bg-white/10">
-          Open concept guide
-        </a>
-      </div>
+<section class="bg-[var(--seocho-paper)] text-[#11110f]">
+  <div class="mx-auto grid w-full max-w-7xl gap-10 px-5 py-20 md:px-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
+    <div>
+      <p class="mb-3 text-xs font-bold uppercase text-[#35635b]">Brand promise</p>
+      <h2 class="seocho-display max-w-xl text-4xl font-semibold leading-tight text-[#11110f] md:text-5xl">
+        A graph memory system with visible rules.
+      </h2>
+      <p class="mt-5 max-w-xl text-base leading-7 text-[#4d4a43]">
+        SEOCHO should feel closer to infrastructure than a demo app: compact,
+        inspectable, and built around contracts that survive across local
+        experiments, production runtimes, and open-source contribution.
+      </p>
+      <a href="/docs/why_seocho/" class="brand-link-dark mt-7 inline-flex">
+        Why this exists
+      </a>
+    </div>
 
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {concepts.map((concept) => (
-          <div class="rounded-lg border border-white/10 bg-black/35 p-5">
-            <h3 class="text-lg font-semibold text-white">{concept.title}</h3>
-            <p class="mt-3 text-sm leading-6 text-zinc-400">{concept.body}</p>
-          </div>
-        ))}
-      </div>
+    <div class="grid gap-4 sm:grid-cols-2">
+      {pillars.map((pillar) => (
+        <article class={`brand-pillar brand-pillar-${pillar.tone}`}>
+          <p class="text-[0.68rem] font-bold uppercase text-[#5b574e]">{pillar.label}</p>
+          <h3 class="mt-5 text-2xl font-semibold text-[#11110f]">{pillar.title}</h3>
+          <p class="mt-3 text-sm leading-6 text-[#5d594f]">{pillar.body}</p>
+        </article>
+      ))}
     </div>
   </div>
 </section>

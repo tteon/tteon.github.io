@@ -1,66 +1,58 @@
 ---
-const coreSteps = [
-  ['1', 'Define ontology', 'Name the entity and relationship types the graph should allow.'],
-  ['2', 'Index data', 'Turn documents or records into graph facts with provenance.'],
-  ['3', 'Ask questions', 'Resolve intent against ontology and graph evidence before answering.'],
+const signals = [
+  ['Ontology', 'allowed shapes'],
+  ['Graph', 'stored evidence'],
+  ['Query', 'bounded retrieval'],
+  ['Runtime', 'agent access'],
 ];
 ---
 
-<section class="w-full border-b border-white/10 bg-[#030303]">
-  <div class="mx-auto grid min-h-[78vh] w-full max-w-7xl grid-cols-1 gap-12 px-5 pb-16 pt-28 md:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pt-32">
-    <div class="z-10">
-      <p class="mb-5 text-sm font-medium uppercase text-cyan-200/80">
-        Ontology-aligned graph memory for agents
+<section class="brand-hero relative isolate overflow-hidden border-b border-white/10 bg-[#030405]">
+  <img
+    src="/images/seocho-brand-graph.png"
+    alt="Layered ontology, graph memory, and runtime visual for SEOCHO"
+    class="brand-hero-image absolute inset-0 h-full w-full object-cover"
+  />
+  <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(3,4,5,0.98)_0%,rgba(3,4,5,0.9)_29%,rgba(3,4,5,0.44)_58%,rgba(3,4,5,0.68)_100%)]"></div>
+  <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,4,5,0.32),rgba(3,4,5,0.96)_93%)]"></div>
+
+  <div class="relative z-10 mx-auto flex min-h-[88svh] w-full max-w-7xl flex-col justify-center px-5 pb-16 pt-28 md:px-8 lg:pt-32">
+    <div class="max-w-3xl">
+      <p class="brand-kicker mb-6 inline-flex items-center gap-3 text-xs font-semibold uppercase text-[var(--seocho-paper)]/85">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Ontology-aligned memory OS
       </p>
 
-      <h1 class="seocho-display max-w-4xl text-5xl font-semibold leading-none text-white md:text-7xl">
-        One ontology contract from raw data to agent answers.
+      <h1 class="seocho-display max-w-4xl text-5xl font-semibold leading-none text-[var(--seocho-paper)] md:text-7xl">
+        Memory that keeps its shape.
       </h1>
 
       <p class="mt-7 max-w-2xl text-lg leading-8 text-zinc-300 md:text-xl">
-        SEOCHO helps agents build and query graph memory without letting schemas,
-        prompts, runtime APIs, and evidence drift apart.
+        SEOCHO turns ontology, graph facts, semantic queries, and agent runtime
+        into one contract. Teams can inspect what an agent knows, why it knows
+        it, and which relationships it is allowed to use.
       </p>
 
       <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-        <a href="/learn/" class="inline-flex items-center justify-center rounded-lg bg-white px-5 py-3 text-sm font-semibold text-black transition-colors hover:bg-zinc-200">
-          Read the concept guide
+        <a href="/learn/" class="brand-button brand-button-primary">
+          Understand SEOCHO
         </a>
-        <a href="/docs/quickstart/" class="inline-flex items-center justify-center rounded-lg border border-white/15 px-5 py-3 text-sm font-semibold text-zinc-100 transition-colors hover:bg-white/10">
+        <a href="/docs/quickstart/" class="brand-button brand-button-secondary">
           Run the quickstart
         </a>
-        <a href="/docs/apply_your_data/" class="inline-flex items-center justify-center rounded-lg border border-white/10 px-5 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:bg-white/5 hover:text-white">
-          Bring your data
+        <a href="https://github.com/TTEON/seocho" target="_blank" rel="noopener noreferrer" class="brand-button brand-button-ghost">
+          GitHub
         </a>
       </div>
     </div>
 
-    <div class="z-10 grid gap-4">
-      <div class="rounded-lg border border-white/10 bg-white/[0.035] p-5">
-        <div class="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
-          <span class="text-sm font-medium text-zinc-200">SEOCHO core loop</span>
-          <span class="text-xs text-zinc-500">local -> runtime</span>
+    <div class="mt-16 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {signals.map(([label, value]) => (
+        <div class="brand-signal">
+          <span class="text-[0.68rem] font-semibold uppercase text-zinc-500">{label}</span>
+          <strong class="mt-2 block text-sm font-semibold text-zinc-100">{value}</strong>
         </div>
-        <div class="grid gap-3">
-          {coreSteps.map(([number, title, body]) => (
-            <div class="grid grid-cols-[2rem_1fr] gap-3 rounded-lg border border-white/8 bg-black/30 p-4">
-              <div class="flex h-8 w-8 items-center justify-center rounded-md bg-white/10 text-sm font-semibold text-white">{number}</div>
-              <div>
-                <h2 class="text-base font-semibold text-white">{title}</h2>
-                <p class="mt-1 text-sm leading-6 text-zinc-400">{body}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div class="overflow-hidden rounded-lg border border-white/10 bg-black">
-        <img
-          src="/images/hero-graph.png"
-          alt="Graph visualization showing connected concepts and evidence"
-          class="h-auto w-full opacity-85"
-        />
-      </div>
+      ))}
     </div>
   </div>
 </section>

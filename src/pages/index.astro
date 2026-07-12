@@ -5,38 +5,46 @@ import LettaHero from '../components/LettaHero.astro';
 import LettaFeatures from '../components/LettaFeatures.astro';
 import Pathways from '../components/Pathways.astro';
 import LatestBlog from '../components/LatestBlog.astro';
+
+const stack = [
+  ['Ontology contract', 'valid node, relationship, and property shapes'],
+  ['Graph memory', 'facts, provenance, constraints, and repair artifacts'],
+  ['Semantic query', 'ontology-aware retrieval before final answers'],
+  ['Runtime boundary', 'HTTP, traces, policy checks, and shared workspaces'],
+];
 ---
 
 <StarlightPage frontmatter={{ title: 'SEOCHO | Ontology-Aligned Graph Memory', template: 'splash' }} hasSidebar={false}>
-  <main class="landing-override min-h-screen w-full bg-black text-zinc-100 selection:bg-cyan-300/20">
+  <main class="landing-override min-h-screen w-full bg-[var(--seocho-ink)] text-zinc-100 selection:bg-cyan-300/20">
     <LettaHero />
     <LettaFeatures />
     <Pathways />
 
-    <section class="mx-auto grid w-full max-w-7xl gap-8 px-5 py-20 md:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-      <div>
-        <p class="mb-3 text-sm font-medium uppercase text-amber-200/80">First useful run</p>
-        <h2 class="seocho-display text-4xl font-semibold leading-tight text-white md:text-5xl">
-          Start without a server.
-        </h2>
-        <p class="mt-5 max-w-xl text-base leading-7 text-zinc-400">
-          The shortest SEOCHO path is local: define one ontology, add one piece
-          of text, and ask one question. Move to the runtime only when another
-          process needs shared HTTP access.
-        </p>
-        <div class="mt-7 flex flex-wrap gap-3">
-          <a href="/docs/quickstart/" class="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-zinc-200">Quickstart</a>
-          <a href="/docs/python_sdk/" class="rounded-lg border border-white/15 px-4 py-2.5 text-sm font-semibold text-zinc-100 transition-colors hover:bg-white/10">Python SDK</a>
-          <a href="/docs/runtime_deployment/" class="rounded-lg border border-white/10 px-4 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:bg-white/5">Runtime</a>
+    <section class="bg-[#030405]">
+      <div class="mx-auto grid w-full max-w-7xl gap-10 px-5 py-20 md:px-8 lg:grid-cols-[0.88fr_1.12fr] lg:items-start">
+        <div class="min-w-0">
+          <p class="mb-3 text-xs font-semibold uppercase text-amber-200/80">First useful run</p>
+          <h2 class="seocho-display text-4xl font-semibold leading-tight text-[var(--seocho-paper)] md:text-5xl">
+            Prove one memory loop locally.
+          </h2>
+          <p class="mt-5 max-w-xl text-base leading-7 text-zinc-400">
+            The shortest path should feel calm: define the ontology, add one
+            record, ask one question, and inspect the graph contract before
+            touching deployment.
+          </p>
+          <div class="mt-7 flex flex-wrap gap-3">
+            <a href="/docs/quickstart/" class="brand-button brand-button-primary">Quickstart</a>
+            <a href="/docs/python_sdk/" class="brand-button brand-button-secondary">Python SDK</a>
+            <a href="/examples/" class="brand-button brand-button-ghost">Examples</a>
+          </div>
         </div>
-      </div>
 
-      <div class="rounded-lg border border-white/10 bg-[#060606] p-5">
-        <div class="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
-          <span class="text-sm font-medium text-zinc-200">copy-paste local path</span>
-          <span class="text-xs text-zinc-500">Python</span>
-        </div>
-        <pre class="overflow-x-auto text-sm leading-6 text-zinc-300"><code>{`from seocho import Seocho, Ontology, NodeDef, RelDef, Property
+        <div class="brand-code-panel min-w-0">
+          <div class="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
+            <span class="text-sm font-medium text-zinc-200">copy-paste local path</span>
+            <span class="text-xs text-zinc-500">Python</span>
+          </div>
+          <pre class="overflow-x-auto text-sm leading-6 text-zinc-300"><code>{`from seocho import Seocho, Ontology, NodeDef, RelDef, Property
 
 ontology = Ontology(
     name="work",
@@ -52,69 +60,76 @@ ontology = Ontology(
 client = Seocho.local(ontology, llm="mara/MiniMax-M2.5")
 client.add("Marie Curie worked at the University of Paris.")
 print(client.ask("Where did Marie Curie work?"))`}</code></pre>
-      </div>
-    </section>
-
-    <section class="border-y border-white/10 bg-[#050505]">
-      <div class="mx-auto grid w-full max-w-7xl gap-5 px-5 py-16 md:grid-cols-3 md:px-8">
-        <div class="rounded-lg border border-white/10 bg-black/35 p-5">
-          <p class="text-sm font-medium uppercase text-cyan-200/80">1. Local</p>
-          <h2 class="mt-3 text-xl font-semibold text-white">Prove the ontology</h2>
-          <p class="mt-3 text-sm leading-6 text-zinc-400">Use the embedded engine to check that your entity and relationship model is useful.</p>
-        </div>
-        <div class="rounded-lg border border-white/10 bg-black/35 p-5">
-          <p class="text-sm font-medium uppercase text-amber-200/80">2. Data</p>
-          <h2 class="mt-3 text-xl font-semibold text-white">Load real records</h2>
-          <p class="mt-3 text-sm leading-6 text-zinc-400">Bring files, records, or run specs into a graph target you can inspect and query.</p>
-        </div>
-        <div class="rounded-lg border border-white/10 bg-black/35 p-5">
-          <p class="text-sm font-medium uppercase text-emerald-200/80">3. Runtime</p>
-          <h2 class="mt-3 text-xl font-semibold text-white">Share with agents</h2>
-          <p class="mt-3 text-sm leading-6 text-zinc-400">Expose the same ontology-grounded graph contract through HTTP, traces, and policy checks.</p>
         </div>
       </div>
     </section>
 
-    <section class="mx-auto w-full max-w-6xl px-5 py-20 md:px-8">
+    <section class="bg-[var(--seocho-paper)] text-[#11110f]">
+      <div class="mx-auto grid w-full max-w-7xl gap-10 px-5 py-20 md:px-8 lg:grid-cols-[1fr_1fr] lg:items-center">
+        <div class="brand-stack-visual min-w-0" aria-hidden="true">
+          {stack.map(([label], index) => (
+            <div class={`brand-stack-layer brand-stack-layer-${index + 1}`}>
+              <span>{label}</span>
+            </div>
+          ))}
+        </div>
+        <div class="min-w-0">
+          <p class="mb-3 text-xs font-bold uppercase text-[#35635b]">System shape</p>
+          <h2 class="seocho-display text-4xl font-semibold leading-tight md:text-5xl">
+            Four surfaces, one contract.
+          </h2>
+          <div class="mt-8 grid gap-4">
+            {stack.map(([label, body]) => (
+              <div class="brand-stack-copy">
+                <h3 class="text-lg font-semibold">{label}</h3>
+                <p class="mt-1 text-sm leading-6 text-[#5d594f]">{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mx-auto w-full max-w-7xl px-5 py-20 md:px-8">
       <div class="mb-8 flex flex-col gap-4 border-b border-white/10 pb-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p class="mb-3 text-sm font-medium uppercase text-cyan-200/80">Deepen the map</p>
-          <h2 class="seocho-display text-4xl font-semibold text-white md:text-5xl">Read next</h2>
+          <p class="mb-3 text-xs font-semibold uppercase text-cyan-200/80">Docs map</p>
+          <h2 class="seocho-display text-4xl font-semibold text-[var(--seocho-paper)] md:text-5xl">Read next</h2>
         </div>
-        <a href="/docs/" class="text-sm font-semibold text-zinc-300 transition-colors hover:text-white">Open docs home</a>
+        <a href="/docs/" class="brand-link-light">Open docs home</a>
       </div>
       <div class="grid gap-4 md:grid-cols-2">
-        <a href="/learn/" class="rounded-lg border border-white/10 bg-white/[0.03] p-5 transition-colors hover:bg-white/[0.06]">
-          <h3 class="text-lg font-semibold text-white">Concept Guide</h3>
-          <p class="mt-2 text-sm leading-6 text-zinc-400">A one-page map of the vocabulary, modes, request flow, and code ownership.</p>
+        <a href="/learn/" class="brand-read-card">
+          <h3>Concept Guide</h3>
+          <p>A one-page map of vocabulary, modes, request flow, and code ownership.</p>
         </a>
-        <a href="/docs/architecture/" class="rounded-lg border border-white/10 bg-white/[0.03] p-5 transition-colors hover:bg-white/[0.06]">
-          <h3 class="text-lg font-semibold text-white">Architecture</h3>
-          <p class="mt-2 text-sm leading-6 text-zinc-400">The deeper module map for SDK, indexing, query, runtime, and compatibility layers.</p>
+        <a href="/docs/architecture/" class="brand-read-card">
+          <h3>Architecture</h3>
+          <p>The deeper module map for SDK, indexing, query, runtime, and compatibility layers.</p>
         </a>
       </div>
     </section>
 
-    <section class="mx-auto w-full max-w-6xl px-5 py-20 md:px-8">
-      <div class="mb-8 flex items-end justify-between border-b border-white/10 pb-6">
+    <section class="mx-auto w-full max-w-7xl px-5 py-20 md:px-8">
+      <div class="mb-8 flex flex-col gap-4 border-b border-white/10 pb-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p class="mb-3 text-sm font-medium uppercase text-amber-200/80">Writing</p>
-          <h2 class="seocho-display text-4xl font-semibold text-white md:text-5xl">Blog</h2>
+          <p class="mb-3 text-xs font-semibold uppercase text-amber-200/80">Writing</p>
+          <h2 class="seocho-display text-4xl font-semibold text-[var(--seocho-paper)] md:text-5xl">Field notes</h2>
           <p class="mt-2 text-sm text-zinc-500">Concepts, reasoning, and major release notes.</p>
         </div>
-        <a href="/blog/" class="text-sm font-semibold text-zinc-300 transition-colors hover:text-white">All posts</a>
+        <a href="/blog/" class="brand-link-light">All posts</a>
       </div>
       <LatestBlog />
     </section>
 
-    <section class="mx-auto w-full max-w-6xl px-5 pb-24 md:px-8">
-      <div class="mb-8 flex items-end justify-between border-b border-white/10 pb-6">
+    <section class="mx-auto w-full max-w-7xl px-5 pb-24 md:px-8">
+      <div class="mb-8 flex flex-col gap-4 border-b border-white/10 pb-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p class="mb-3 text-sm font-medium uppercase text-cyan-200/80">Project signal</p>
-          <h2 class="seocho-display text-3xl font-semibold text-white md:text-4xl">Latest updates</h2>
+          <p class="mb-3 text-xs font-semibold uppercase text-emerald-200/80">Project signal</p>
+          <h2 class="seocho-display text-3xl font-semibold text-[var(--seocho-paper)] md:text-4xl">Latest updates</h2>
           <p class="mt-2 text-sm text-zinc-500">Release-linked updates from the public GitHub trail.</p>
         </div>
-        <a href="https://github.com/TTEON/seocho/commits/main/" target="_blank" rel="noopener noreferrer" class="text-sm font-semibold text-zinc-300 transition-colors hover:text-white">Commits</a>
+        <a href="https://github.com/TTEON/seocho/commits/main/" target="_blank" rel="noopener noreferrer" class="brand-link-light">Commits</a>
       </div>
       <ChangelogList />
     </section>
