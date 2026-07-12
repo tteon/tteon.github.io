@@ -206,6 +206,9 @@ const routeReplacements = new Map([
     ['(KNOWN_ISSUE.md)', `(${SOURCE_BLOB_BASE}docs/KNOWN_ISSUE.md)`],
     ['(BEADS_OPERATING_MODEL.md)', `(${SOURCE_BLOB_BASE}docs/BEADS_OPERATING_MODEL.md)`],
     ['(decisions/DECISION_LOG.md)', `(${SOURCE_BLOB_BASE}docs/decisions/DECISION_LOG.md)`],
+    ['(reference/README.md)', `(${SOURCE_BLOB_BASE}docs/reference/README.md)`],
+    ['(archive/README.md)', `(${SOURCE_BLOB_BASE}docs/archive/README.md)`],
+    ['(maintainers/README.md)', `(${SOURCE_BLOB_BASE}docs/maintainers/README.md)`],
     ['(../CONTRIBUTING.md)', `(${SOURCE_BLOB_BASE}CONTRIBUTING.md)`],
     ['(../examples/agent_designs/)', `(${SOURCE_TREE_BASE}examples/agent_designs)`],
     ['(../examples/indexing_designs/)', `(${SOURCE_TREE_BASE}examples/indexing_designs)`],
@@ -223,6 +226,7 @@ const routeReplacements = new Map([
     ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/lpg_finance_provenance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/lpg_finance_provenance.yaml)`],
     ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/rdf_deductive_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/rdf_deductive_finance.yaml)`],
     ['(/tmp/seocho-land-finder-e2e/examples/indexing_designs/hybrid_inquiry_finance.yaml)', `(${SOURCE_BLOB_BASE}examples/indexing_designs/hybrid_inquiry_finance.yaml)`],
+    ['(../website/public/images/docs-core-loop.svg)', '(/images/docs-core-loop.svg)'],
 ]);
 
 function rewriteWebsiteRoutes(content) {

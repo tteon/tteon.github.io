@@ -130,7 +130,8 @@ Semantic path summary:
 - rebase, push
 - verify branch is up to date with origin
 - for releases, follow [`/docs/release_and_community_operations/`](/docs/release_and_community_operations/), update
-  `CHANGELOG.md`, and draft the `#seocho` Discord announcement before publishing
+  `CHANGELOG.md`, and draft the `#seocho-updates` Discord announcement before
+  publishing
 
 Operational notes:
 
