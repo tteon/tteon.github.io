@@ -3,7 +3,7 @@ title: Bring Your Data
 description: How to load your own records into SEOCHO and query them safely.
 source_repo: tteon/seocho
 source_path: docs/APPLY_YOUR_DATA.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 00172de72c27807478f7bcbb6db49c8f4a97cf5b
 ---
 
 > *Source mirrored from `seocho/docs/APPLY_YOUR_DATA.md`*
@@ -143,6 +143,48 @@ print(projection.nodes_written)
 SQLite is the default curation backend because qualification is mostly mutable
 case/decision work. If you want larger offline analytical scans, install the
 optional DuckDB extra and pass `qualification_store_backend="duckdb"`.
+
+### 1.5 External Tools And Connectors
+
+Use `seocho connect` when your data already lives in Notion, Slack, DataHub,
+PostgreSQL, Neo4j/DozerDB, LangChain loaders, or LlamaIndex loaders. The
+connector layer is a materialization step: it reads the external system,
+writes a normalized JSONL file, and leaves ontology extraction and graph
+shaping to the normal SEOCHO run.
+
+```bash
+seocho connect notion --data-source-id "$NOTION_DATA_SOURCE_ID" \
+  --output .seocho/connectors/notion.jsonl
+
+seocho connect slack --channel "$SLACK_CHANNEL_ID" \
+  --output .seocho/connectors/slack.jsonl
+
+seocho connect datahub --server "$DATAHUB_SERVER" \
+  --query "*" \
+  --output .seocho/connectors/datahub.jsonl
+
+seocho connect postgres --dsn-env DATABASE_URL \
+  --schema public \
+  --output .seocho/connectors/postgres.jsonl
+
+seocho connect neo4j --database neo4j \
+  --output .seocho/connectors/neo4j.jsonl
+```
+
+Then point a run spec at the generated file:
+
+```yaml
+ontology: ./schema.yaml
+documents:
+  path: ./.seocho/connectors/notion.jsonl
+questions:
+  - What decisions and risks should we review?
+```
+
+Connector JSONL preserves provider metadata and redacts obvious secret-like
+keys before writing. Keep tokens in env vars, not in run specs or committed
+files. See [Connectors](https://github.com/tteon/seocho/blob/main/docs/CONNECTORS.md)
+for provider notes and the Python LangChain/LlamaIndex converters.
 
 ## 2. Structure Records for Raw Ingest
 

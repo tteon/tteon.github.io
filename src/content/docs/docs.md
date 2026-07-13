@@ -3,7 +3,7 @@ title: Docs Home
 description: Central Documentation Index for SEOCHO
 source_repo: tteon/seocho
 source_path: docs/README.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 00172de72c27807478f7bcbb6db49c8f4a97cf5b
 ---
 
 > *Source mirrored from `seocho/docs/README.md`*
@@ -21,7 +21,7 @@ read first, and which words matter before you go deeper.
 | Understand the idea | [Why SEOCHO](/docs/why_seocho/) | you can explain ontology-aligned graph memory in one paragraph |
 | Run the smallest example | [Quickstart](/docs/quickstart/) | you can define one ontology, add text, and ask one question |
 | Use Python directly | [Python SDK](/docs/python_sdk/) | you know when to use local, remote, or explicit backend mode |
-| Bring your own files | [Bring Your Data](/docs/apply_your_data/) | you know how your records enter the graph |
+| Bring files and connectors | [Bring Your Data](/docs/apply_your_data/) -> [Connectors](https://github.com/tteon/seocho/blob/main/docs/CONNECTORS.md) | you know how records from your tools enter the graph |
 | Run a service | [Runtime Deployment](/docs/runtime_deployment/) | you can start the API, UI, and graph services |
 | Contribute | [Open Source Playbook](/docs/open_source_playbook/) | you know how to open a scoped issue or PR |
 
@@ -77,7 +77,7 @@ observable, or deployable.
 | Reader | Best first path |
 |---|---|
 | New user | [Quickstart](/docs/quickstart/) -> [Python SDK](/docs/python_sdk/) |
-| Data or RAG builder | [Bring Your Data](/docs/apply_your_data/) -> [Run Specs](/docs/run_specs/) |
+| Data or RAG builder | [Bring Your Data](/docs/apply_your_data/) -> [Connectors](https://github.com/tteon/seocho/blob/main/docs/CONNECTORS.md) -> [Run Specs](/docs/run_specs/) |
 | Agent developer | [Python SDK](/docs/python_sdk/) -> [Files and Artifacts](/docs/files_and_artifacts/) |
 | Operator | [Runtime Deployment](/docs/runtime_deployment/) -> [Workflow](/docs/workflow/) |
 | Contributor | [Open Source Playbook](/docs/open_source_playbook/) -> [Issue Task System](https://github.com/tteon/seocho/blob/main/docs/ISSUE_TASK_SYSTEM.md) |
@@ -125,7 +125,7 @@ or links that another person can inspect.
 | Area | Documents |
 |---|---|
 | Product idea | [Why SEOCHO](/docs/why_seocho/), [Philosophy](/docs/philosophy/), [Architecture Overview](/docs/architecture/) |
-| Getting started | [Quickstart](/docs/quickstart/), [Python SDK](/docs/python_sdk/), [Bring Your Data](/docs/apply_your_data/) |
+| Getting started | [Quickstart](/docs/quickstart/), [Python SDK](/docs/python_sdk/), [Bring Your Data](/docs/apply_your_data/), [Connectors](https://github.com/tteon/seocho/blob/main/docs/CONNECTORS.md) |
 | Repeatable runs | [Run Specs](/docs/run_specs/), [Tutorial First Run](/docs/tutorial/), [Files and Artifacts](/docs/files_and_artifacts/) |
 | Operations | [Runtime Deployment](/docs/runtime_deployment/), [Runtime Architecture](/docs/runtime_architecture/), [Workflow](/docs/workflow/), [Release And Community Operations](/docs/release_and_community_operations/) |
 | Open source work | [Open Source Playbook](/docs/open_source_playbook/), [Issue Task System](https://github.com/tteon/seocho/blob/main/docs/ISSUE_TASK_SYSTEM.md), [Contributing](https://github.com/tteon/seocho/blob/main/CONTRIBUTING.md) |
@@ -136,7 +136,7 @@ The map follows this structure:
 |---|---|---|
 | Concepts | explain why the system exists and which words matter | [Why SEOCHO](/docs/why_seocho/), [Architecture Overview](/docs/architecture/) |
 | Tutorials | guide a first successful run | [Quickstart](/docs/quickstart/), [Tutorial First Run](/docs/tutorial/) |
-| How-to guides | solve a concrete task | [Bring Your Data](/docs/apply_your_data/), [Run Specs](/docs/run_specs/) |
+| How-to guides | solve a concrete task | [Bring Your Data](/docs/apply_your_data/), [Connectors](https://github.com/tteon/seocho/blob/main/docs/CONNECTORS.md), [Run Specs](/docs/run_specs/) |
 | Reference | preserve contracts, surfaces, and decisions | [Files and Artifacts](/docs/files_and_artifacts/), [Query Architecture](/docs/query_architecture/), [Decision Log](https://github.com/tteon/seocho/blob/main/docs/decisions/DECISION_LOG.md) |
 
 ## System Deep-Dive Map
@@ -150,7 +150,7 @@ contract. Use this table to move from a system area to the maintained guide.
 | Product overview | why SEOCHO exists and where it fits | [Why SEOCHO](/docs/why_seocho/), [Architecture Overview](/docs/architecture/) |
 | SDK and client interface | how users call SEOCHO from Python | [Python SDK](/docs/python_sdk/), [Quickstart](/docs/quickstart/) |
 | Ontology system | how schema, context, drift checks, and governance shape behavior | [Why SEOCHO](/docs/why_seocho/), [SDK Ontology Guide](https://seocho.blog/sdk/ontology-guide/), [Maintainer Architecture Notes](/docs/maintainer_architecture_notes/) |
-| Indexing and ingestion | how documents become graph facts | [Bring Your Data](/docs/apply_your_data/), [Run Specs](/docs/run_specs/), [Files and Artifacts](/docs/files_and_artifacts/) |
+| Indexing and ingestion | how documents become graph facts | [Bring Your Data](/docs/apply_your_data/), [Connectors](https://github.com/tteon/seocho/blob/main/docs/CONNECTORS.md), [Run Specs](/docs/run_specs/), [Files and Artifacts](/docs/files_and_artifacts/) |
 | Query and agent orchestration | how questions become evidence-backed answers | [Query Architecture](/docs/query_architecture/), [Graph-RAG Agent Handoff Spec](https://github.com/tteon/seocho/blob/main/docs/GRAPH_RAG_AGENT_HANDOFF_SPEC.md) |
 | Runtime and HTTP API | how the shared service is composed and operated | [Runtime Deployment](/docs/runtime_deployment/), [Runtime Architecture](/docs/runtime_architecture/) |
 | Storage and graph backends | where graph state, generated files, and backend assumptions live | [Files and Artifacts](/docs/files_and_artifacts/), [Runtime Architecture](/docs/runtime_architecture/) |

@@ -3,7 +3,7 @@ title: Runtime Deployment
 description: Full local runtime deployment guide for the Docker stack, services, and environment setup.
 source_repo: tteon/seocho
 source_path: docs/RUNTIME_DEPLOYMENT.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 00172de72c27807478f7bcbb6db49c8f4a97cf5b
 ---
 
 > *Source mirrored from `seocho/docs/RUNTIME_DEPLOYMENT.md`*
@@ -293,6 +293,50 @@ curl -sS "http://localhost:8001/semantic/runs?workspace_id=default&limit=5&route
 ```bash
 make e2e-smoke
 ```
+
+### Run authoritative PostgreSQL agent memory
+
+PostgreSQL is optional and is not started by the thin SDK or default graph
+quickstart. Enable it when the application needs append-only revisions,
+idempotency receipts, point-in-time reads, and a transactional projection
+outbox.
+
+Set a non-placeholder password in `.env`, then run:
+
+```bash
+make memory-up
+make memory-status
+make memory-smoke
+```
+
+`memory-up` starts PostgreSQL 18 from `docker-compose.memory.yml`, waits for its
+healthcheck, and applies the idempotent schema from
+`seocho.memory.POSTGRES_MEMORY_SCHEMA_SQL`. `memory-smoke` performs a real
+atomic revision/outbox/idempotency commit, repeats the delivery to verify
+idempotency, performs a bounded point-in-time read, and removes its temporary
+workspace. The named volume survives `make memory-down`; delete it only through
+an explicit Docker volume operation when data loss is intended.
+
+PostgreSQL 18 stores major-version-specific data below `/var/lib/postgresql`,
+so the Compose file intentionally mounts the volume at that parent directory
+rather than the pre-18 `/var/lib/postgresql/data` path.
+
+`POSTGRES_PASSWORD` initializes a new volume; changing the environment variable
+does not rotate the role password inside an existing database. Rotate it with an
+explicit privileged SQL operation or secret-management workflow. Use a distinct
+`POSTGRES_VOLUME_NAME` for isolated qualification runs instead of silently
+reusing production-like data.
+
+Host-side SDK and benchmark processes share one connection contract:
+
+```bash
+export SEOCHO_POSTGRES_DSN='postgresql://seocho:<password>@127.0.0.1:55432/seocho_memory'
+```
+
+Production deployments should supply the DSN from a secret manager, use TLS,
+manage migrations as a deployment step, and set resource/WAL/checkpoint limits
+from measured workload data. The local Compose profile is a reproducible
+single-node development and qualification surface, not an HA claim.
 
 ## 11. Keep One Ontology Contract
 
