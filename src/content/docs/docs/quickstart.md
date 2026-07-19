@@ -3,7 +3,7 @@ title: Quickstart
 description: Get SEOCHO up and running in 5 minutes.
 source_repo: tteon/seocho
 source_path: QUICKSTART.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 33656624a9e8c20b6c4bc00f3c9ea648862d907b
 ---
 
 > *Source mirrored from `seocho/QUICKSTART.md`*
@@ -13,9 +13,9 @@ This is the shortest path to a working ontology-aligned graph memory.
 
 You will:
 
-1. define a tiny ontology
-2. add one sentence
-3. ask a question against the graph memory
+1. create a tiny runnable SEOCHO project
+2. run offline preflight
+3. index documents, ask questions, and open the report
 
 ## 1. Install
 
@@ -36,7 +36,33 @@ export MARA_API_KEY=...
 Prefer OpenAI/DeepSeek/Kimi? Export that provider's key and swap the `llm=`
 string below (`"openai/gpt-4o"`, `"deepseek/deepseek-chat"`, `"kimi/kimi-k2.5"`).
 
-## 2. Run The Smallest Example
+## 2. Create And Run A Project
+
+```bash
+seocho new hello-seocho
+cd hello-seocho
+seocho run --dry-run
+seocho run
+```
+
+From a cloned repository, prefix CLI commands with `uv run`:
+
+```bash
+uv run seocho new hello-seocho
+cd hello-seocho
+uv run seocho run --dry-run
+uv run seocho run
+```
+
+What happened:
+
+- `schema.yaml` declared the allowed graph shape
+- `docs/` provided source notes to index
+- `seocho.run.yaml` declared the questions
+- `report.md` and `report.json` captured answers, support status, missing
+  slots, and selected graph evidence
+
+## 3. The Smallest SDK Example
 
 ```python
 from seocho import Seocho, Ontology, NodeDef, RelDef, Property
@@ -64,13 +90,13 @@ What happened:
 - `add()` extracted graph facts that fit that shape
 - `ask()` queried the graph memory and produced an ontology-grounded answer
 
-## 3. Run A Real Example
+## 4. Run A Domain Example
 
 The finance-compliance example is the fastest complete project-shaped path:
 
 ```bash
 export MARA_API_KEY=...
-uv run python examples/finance-compliance/quickstart.py --llm mara/MiniMax-M2.5
+uv run python examples/finance-compliance/quickstart.py
 ```
 
 It ships:
@@ -79,7 +105,7 @@ It ships:
 - six short mock compliance documents
 - a script that ingests them and asks cross-document questions
 
-## 4. Connect To A Runtime
+## 5. Connect To A Runtime
 
 If a SEOCHO runtime is already running:
 
@@ -109,6 +135,7 @@ Then open:
 |---|---|
 | Understand the project | [README.md](https://github.com/tteon/seocho/blob/main/README.md) |
 | Use your own ontology and files | [docs/APPLY_YOUR_DATA.md](/docs/apply_your_data/) |
+| Connect Notion, Slack, DataHub, Postgres, Neo4j/DozerDB, LangChain, or LlamaIndex | [docs/CONNECTORS.md](https://github.com/tteon/seocho/blob/main/docs/CONNECTORS.md) |
 | Learn the Python SDK | [docs/PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/) |
 | Run the full platform | [docs/RUNTIME_DEPLOYMENT.md](/docs/runtime_deployment/) |
 | See generated files and traces | [docs/FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/) |
