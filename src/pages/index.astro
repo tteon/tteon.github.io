@@ -44,7 +44,7 @@ const stack = [
             <span class="text-sm font-medium text-zinc-200">copy-paste local path</span>
             <span class="text-xs text-zinc-500">Python</span>
           </div>
-          <pre class="overflow-x-auto text-sm leading-6 text-zinc-300"><code>{`from seocho import Seocho, Ontology, NodeDef, RelDef, Property
+          <pre tabindex="0" class="overflow-x-auto text-sm leading-6 text-zinc-300"><code>{`from seocho import Seocho, Ontology, NodeDef, RelDef, Property
 
 ontology = Ontology(
     name="work",
@@ -78,14 +78,14 @@ print(client.ask("Where did Marie Curie work?"))`}</code></pre>
           <h2 class="seocho-display text-4xl font-semibold leading-tight md:text-5xl">
             Four surfaces, one contract.
           </h2>
-          <div class="mt-8 grid gap-4">
+          <dl class="mt-8 grid gap-4">
             {stack.map(([label, body]) => (
               <div class="brand-stack-copy">
-                <h3 class="text-lg font-semibold">{label}</h3>
-                <p class="mt-1 text-sm leading-6 text-[#5d594f]">{body}</p>
+                <dt class="text-lg font-semibold">{label}</dt>
+                <dd class="mt-1 text-sm leading-6 text-[#5d594f] m-0">{body}</dd>
               </div>
             ))}
-          </div>
+          </dl>
         </div>
       </div>
     </section>
