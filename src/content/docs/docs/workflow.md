@@ -3,7 +3,7 @@ title: Workflow
 description: End-to-end Operational Workflow.
 source_repo: tteon/seocho
 source_path: docs/WORKFLOW.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: fac6f941edac5e780e1d8af1384ec04b735ea1db
 ---
 
 > *Source mirrored from `seocho/docs/WORKFLOW.md`*
@@ -183,6 +183,7 @@ Primary surfaces:
   - [`/docs/`](/docs/)
   - [`/docs/runtime_deployment/`](/docs/runtime_deployment/)
   - [`/docs/apply_your_data/`](/docs/apply_your_data/)
+  - `docs/CONNECTORS.md`
   - [`/docs/python_sdk/`](/docs/python_sdk/)
   - [`/docs/tutorial/`](/docs/tutorial/)
   - [`/docs/open_source_playbook/`](/docs/open_source_playbook/)
@@ -210,6 +211,8 @@ Primary surfaces:
   - `cd website && npm run check:docs`
   - `cd website && npm run build`
   - `cd website && bash scripts/check-built-links.sh`
+- this workflow runs on every PR so it can be required by branch protection
+  without path-filter skip deadlocks
 - the same workflow also checks the live `seocho.blog` presentation contract by
   checking out `tteon/tteon.github.io`, rendering its mirrors with
   `SEOCHO_SOURCE_REPO=$GITHUB_WORKSPACE/seocho`, and running:
@@ -218,8 +221,9 @@ Primary surfaces:
   - `npm run build:ci`
   - `bash scripts/check-built-links.sh`
 - the in-repo deployment workflow is `.github/workflows/docs-site-deploy.yml`,
-  but it performs a Pages preflight and skips deployment while Pages is not
-  enabled on `tteon/seocho`
+  but it performs a Pages preflight, reruns `npm run check:docs`, rebuilds the
+  site, checks built links, and skips deployment while Pages is not enabled on
+  `tteon/seocho`
 - `.github/workflows/docs-website-sync-dispatch.yml` dispatches the
   `tteon/tteon.github.io` auto-sync workflow after docs changes land on main
   when `SEOCHO_BLOG_SYNC_TOKEN` is configured; the scheduled site-side sync is
@@ -232,8 +236,10 @@ Primary surfaces:
 
 - workflow: `.github/workflows/ci-basic.yml`
 - canonical local command: `bash scripts/ci/run_basic_ci.sh`
+- GitHub runs this gate on Python 3.10, 3.11, and 3.12
 - current scope:
-  - semantic/runtime/SDK `py_compile`
+  - tracked runtime/extraction/SDK/CI Python files via `py_compile`
+  - focused Ruff lint for CI scripts and run-spec/onboarding surfaces
   - focused semantic/runtime/SDK pytest
   - `git diff --check`
   - `bash scripts/ci/check-runtime-shell-contract.sh`
