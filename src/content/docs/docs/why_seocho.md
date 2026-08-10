@@ -3,7 +3,7 @@ title: Why SEOCHO
 description: Why SEOCHO is ontology-first and graph-native instead of generic memory-first.
 source_repo: tteon/seocho
 source_path: docs/WHY_SEOCHO.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 59d7028fa2afe6c8472504aeac787ce5602a1768
 ---
 
 > *Source mirrored from `seocho/docs/WHY_SEOCHO.md`*
