@@ -3,7 +3,7 @@ title: Release And Community Operations
 description: Release gates, Discord update policy, and open-source community operating rules.
 source_repo: tteon/seocho
 source_path: docs/RELEASE_AND_COMMUNITY_OPERATIONS.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 2ddb15a80a6a7e2c0da9e78fc0d43239201f7fff
 ---
 
 > *Source mirrored from `seocho/docs/RELEASE_AND_COMMUNITY_OPERATIONS.md`*
