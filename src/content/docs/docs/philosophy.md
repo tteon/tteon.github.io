@@ -3,7 +3,7 @@ title: Philosophy
 description: Core Design Philosophy Charter and Operating Principles.
 source_repo: tteon/seocho
 source_path: docs/PHILOSOPHY.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 3ba7a4cec49437e59c2451829ce24d43ebec05b3
 ---
 
 > *Source mirrored from `seocho/docs/PHILOSOPHY.md`*
