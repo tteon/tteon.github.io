@@ -3,7 +3,7 @@ title: Query Architecture
 description: How SEOCHO turns user questions into graph evidence and supported answers.
 source_repo: tteon/seocho
 source_path: docs/QUERY_ARCHITECTURE.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 4656e9f9668d02b203c267d6edac91948266bf8e
 ---
 
 > *Source mirrored from `seocho/docs/QUERY_ARCHITECTURE.md`*
