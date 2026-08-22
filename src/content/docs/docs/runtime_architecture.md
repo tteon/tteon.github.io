@@ -3,7 +3,7 @@ title: Runtime Architecture
 description: Runtime shell, service composition, local stack, and API boundary.
 source_repo: tteon/seocho
 source_path: docs/RUNTIME_ARCHITECTURE.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 3000070e41298cdc0c2cedb27ecc21ab99ff2e70
 ---
 
 > *Source mirrored from `seocho/docs/RUNTIME_ARCHITECTURE.md`*
