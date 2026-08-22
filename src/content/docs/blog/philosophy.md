@@ -1,12 +1,12 @@
 ---
 title: "SEOCHO Design Philosophy & Operating Principles"
-date: 2026-05-01
+date: 2026-08-21
 authors:
   - seocho
 excerpt: Extract domain rules and high-value semantics from heterogeneous data into a SHACL-like semantic layer.
 source_repo: tteon/seocho
 source_path: docs/PHILOSOPHY.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 3000070e41298cdc0c2cedb27ecc21ab99ff2e70
 ---
 
 > *Source mirrored from `seocho/docs/PHILOSOPHY.md`*
@@ -70,7 +70,7 @@ For multi-role feasibility reviews (frontend/backend/architect/software engineer
   - `extraction/semantic_query_flow.py`
 - Flow telemetry and auditability:
   - `extraction/tracing.py`
-  - JSONL trace artifacts and optional Opik profile in `docker-compose.yml`
+  - JSONL trace artifacts and optional Opik profile in `compose.yaml`
 
 ## Operating Checks
 
