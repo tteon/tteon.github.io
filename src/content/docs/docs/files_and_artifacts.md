@@ -3,7 +3,7 @@ title: Files and Artifacts
 description: Where ontology files, graph state, rule profiles, semantic artifacts, and traces live.
 source_repo: tteon/seocho
 source_path: docs/FILES_AND_ARTIFACTS.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 09f72a4569760087efe73dc3a44c9ba2f86054e1
 ---
 
 > *Source mirrored from `seocho/docs/FILES_AND_ARTIFACTS.md`*
