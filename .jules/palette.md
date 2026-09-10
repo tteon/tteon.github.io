@@ -2,3 +2,6 @@
 
 - Ensure decorative visual elements (like CSS/HTML arrows, e.g., `→`, or purely decorative SVGs inside links/buttons) use `aria-hidden="true"`.
 - Ensure links with dynamic, short, or non-descriptive text (like raw commit hashes, e.g., `#{update.hash}`) utilize descriptive `aria-label`s (e.g., `aria-label="View commit ${update.hash} on GitHub"`).
+
+- Use `tabindex="0"` on horizontally scrolling `<pre>` blocks to ensure they are accessible via keyboard navigation.
+- Use semantic list elements (`<dl>`, `<dt>`, `<dd>`) for key-value grids instead of generic `<div>`/`<span>` containers to improve screen reader context.
