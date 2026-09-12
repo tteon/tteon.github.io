@@ -3,7 +3,7 @@ title: Philosophy
 description: Core Design Philosophy Charter and Operating Principles.
 source_repo: tteon/seocho
 source_path: docs/PHILOSOPHY.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 09f72a4569760087efe73dc3a44c9ba2f86054e1
 ---
 
 > *Source mirrored from `seocho/docs/PHILOSOPHY.md`*
@@ -67,7 +67,7 @@ For multi-role feasibility reviews (frontend/backend/architect/software engineer
   - `extraction/semantic_query_flow.py`
 - Flow telemetry and auditability:
   - `extraction/tracing.py`
-  - JSONL trace artifacts and optional Opik profile in `docker-compose.yml`
+  - JSONL trace artifacts and optional Opik profile in `compose.yaml`
 
 ## Operating Checks
 
