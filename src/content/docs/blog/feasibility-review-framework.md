@@ -1,12 +1,12 @@
 ---
 title: "Feasibility Review Framework & Rubrics"
-date: 2026-02-21
+date: 2026-09-13
 authors:
   - seocho
 excerpt: Multi-role feasibility review framework and Go/No-Go rubric for graph data implementations.
 source_repo: tteon/seocho
 source_path: docs/PHILOSOPHY_FEASIBILITY_REVIEW.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 8be62646342d60156b879acc0b3e975d50a4950a
 ---
 
 > *Source mirrored from `seocho/docs/PHILOSOPHY_FEASIBILITY_REVIEW.md`*
@@ -98,7 +98,7 @@ Evaluate each dimension with `Green`, `Amber`, or `Red`.
   - baseline `/rules/assess` thresholds and publish pass criteria
 - Day 31-60:
   - close confidence/override loop with operator UX and audit export
-  - add replay-grade Opik trace dashboards for router/debate/semantic
+  - add replay-grade OTLP trace dashboards for router/debate/semantic
 - Day 61-90:
   - production hardening for index/constraint lifecycle
   - define release gate tying ADR + readiness + SLO checks
