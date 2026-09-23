@@ -3,7 +3,7 @@ title: Workflow
 description: End-to-end Operational Workflow.
 source_repo: tteon/seocho
 source_path: docs/WORKFLOW.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 8be62646342d60156b879acc0b3e975d50a4950a
 ---
 
 > *Source mirrored from `seocho/docs/WORKFLOW.md`*
@@ -18,6 +18,7 @@ that, start with [`/docs/quickstart/`](/docs/quickstart/) or [`/docs/runtime_dep
 
 | Area | What it answers | Read when |
 |---|---|---|
+| [Agent Workflow](https://github.com/tteon/seocho/blob/main/docs/AGENT_WORKFLOW.md) | task checkout, handoff and validation entrypoints | starting agent-assisted coding |
 | [Stack Baseline](#stack-baseline) | which runtime, graph, and tracing assumptions are current | starting any repo work |
 | [Operating Planes](#operating-planes) | which module owns control-plane vs data-plane behavior | choosing where to edit |
 | [End-to-End Workflow](#end-to-end-workflow) | how work moves from issue to landing | preparing a PR |
@@ -27,8 +28,8 @@ that, start with [`/docs/quickstart/`](/docs/quickstart/) or [`/docs/runtime_dep
 ## Stack Baseline
 
 - Agent runtime: OpenAI Agents SDK
-- Tracing/evaluation contract: vendor-neutral (`none|console|jsonl|opik`)
-- Preferred team observability backend: Opik
+- Tracing/evaluation contract: vendor-neutral (`none|console|jsonl|otlp`)
+- Team observability: operator-selected OTLP collector
 - Canonical neutral trace artifact: JSONL
 - Graph backend: DozerDB
 - MVP tenancy: single-tenant with `workspace_id` propagated end-to-end
@@ -129,7 +130,7 @@ Primary surfaces:
 - monitor split health surfaces (`/health/runtime`, `/health/batch`)
 - enforce runtime policy checks
 - capture traces through the configured observability backend
-- prefer `jsonl` as the portable artifact and Opik as the optional team exporter
+- prefer `jsonl` as the portable artifact and OTLP as the optional team exporter
 
 ### Semantic Path Summary
 
@@ -165,11 +166,11 @@ Primary surfaces:
 - local tracker linting may be used in maintainer workspaces, but it is not a
   public repository contract
 - current dev quality gates in `Makefile` run against `extraction-service`
-- default `make up` now rebuilds an image-backed `extraction-service` so the
+- `make up-build` rebuilds an image-backed `extraction-service` so the
   running runtime matches a known source snapshot
 - use `make up-live` or `make dev-up` only when you explicitly want bind-mounted
   edits from `extraction/`, `runtime/`, and `seocho/` reflected immediately
-- keep graph procedure privileges scoped (`apoc.*,n10s.*`) in `docker-compose.yml`
+- keep graph procedure privileges scoped (`apoc.*,n10s.*`) in `compose.yaml`
 - default local compose stack is `neo4j + extraction-service + evaluation-interface`
 - when decomposing large files, prefer the internal seam classes documented in
   `docs/INTERNAL_CLASS_DESIGN.md` before introducing new top-level services
@@ -183,6 +184,7 @@ Primary surfaces:
   - [`/docs/`](/docs/)
   - [`/docs/runtime_deployment/`](/docs/runtime_deployment/)
   - [`/docs/apply_your_data/`](/docs/apply_your_data/)
+  - `docs/CONNECTORS.md`
   - [`/docs/python_sdk/`](/docs/python_sdk/)
   - [`/docs/tutorial/`](/docs/tutorial/)
   - [`/docs/open_source_playbook/`](/docs/open_source_playbook/)
@@ -210,6 +212,8 @@ Primary surfaces:
   - `cd website && npm run check:docs`
   - `cd website && npm run build`
   - `cd website && bash scripts/check-built-links.sh`
+- this workflow runs on every PR so it can be required by branch protection
+  without path-filter skip deadlocks
 - the same workflow also checks the live `seocho.blog` presentation contract by
   checking out `tteon/tteon.github.io`, rendering its mirrors with
   `SEOCHO_SOURCE_REPO=$GITHUB_WORKSPACE/seocho`, and running:
@@ -218,8 +222,9 @@ Primary surfaces:
   - `npm run build:ci`
   - `bash scripts/check-built-links.sh`
 - the in-repo deployment workflow is `.github/workflows/docs-site-deploy.yml`,
-  but it performs a Pages preflight and skips deployment while Pages is not
-  enabled on `tteon/seocho`
+  but it performs a Pages preflight, reruns `npm run check:docs`, rebuilds the
+  site, checks built links, and skips deployment while Pages is not enabled on
+  `tteon/seocho`
 - `.github/workflows/docs-website-sync-dispatch.yml` dispatches the
   `tteon/tteon.github.io` auto-sync workflow after docs changes land on main
   when `SEOCHO_BLOG_SYNC_TOKEN` is configured; the scheduled site-side sync is
@@ -232,12 +237,15 @@ Primary surfaces:
 
 - workflow: `.github/workflows/ci-basic.yml`
 - canonical local command: `bash scripts/ci/run_basic_ci.sh`
+- GitHub runs this gate on Python 3.10, 3.11, and 3.12
 - current scope:
-  - semantic/runtime/SDK `py_compile`
+  - tracked runtime/extraction/SDK/CI Python files via `py_compile`
+  - focused Ruff lint for CI scripts and run-spec/onboarding surfaces
   - focused semantic/runtime/SDK pytest
   - `git diff --check`
   - `bash scripts/ci/check-runtime-shell-contract.sh`
   - `bash scripts/ci/check-module-ownership-contract.sh`
+  - `python3 scripts/ci/check-import-boundaries.py`
   - `scripts/pm/lint-agent-docs.sh`
 
 Runtime migration slices should follow `docs/RUNTIME_PACKAGE_MIGRATION.md` and
@@ -300,3 +308,7 @@ the runtime shell validation contract in `scripts/ci/check-runtime-shell-contrac
 - schedule follow-up issues for unresolved risks
 - keep release readiness and open-source community operations aligned with
   [`/docs/release_and_community_operations/`](/docs/release_and_community_operations/)
+
+For an isolated, locked development environment, use
+[EXPERIMENT_PLATFORM.md](https://github.com/tteon/seocho/blob/main/docs/EXPERIMENT_PLATFORM.md): `make platform-setup`,
+`make platform-check`, then `make platform-ci`.

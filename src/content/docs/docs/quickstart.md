@@ -3,7 +3,7 @@ title: Quickstart
 description: Get SEOCHO up and running in 5 minutes.
 source_repo: tteon/seocho
 source_path: QUICKSTART.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 8be62646342d60156b879acc0b3e975d50a4950a
 ---
 
 > *Source mirrored from `seocho/QUICKSTART.md`*
@@ -13,9 +13,9 @@ This is the shortest path to a working ontology-aligned graph memory.
 
 You will:
 
-1. define a tiny ontology
-2. add one sentence
-3. ask a question against the graph memory
+1. create a tiny runnable SEOCHO project
+2. run offline preflight
+3. index documents, ask questions, and open the report
 
 ## 1. Install
 
@@ -23,9 +23,11 @@ You will:
 uv pip install "seocho[local]"
 ```
 
-`seocho[local]` includes the local SDK engine, agent dependencies, and the
-embedded LadybugDB graph path. You do not need to run a server for this first
-example.
+`seocho[local]` includes the local SDK engine, agent dependencies, and graph
+clients. This run requires a DozerDB/Neo4j Bolt endpoint; use the
+[deployment guide](/docs/runtime_deployment/) to start one. Configure `graph`
+URI/credentials and an existing target `database` in the generated run spec.
+Offline `--dry-run` does not verify that database connectivity.
 
 Set your provider key. SEOCHO recommends MARA:
 
@@ -36,7 +38,43 @@ export MARA_API_KEY=...
 Prefer OpenAI/DeepSeek/Kimi? Export that provider's key and swap the `llm=`
 string below (`"openai/gpt-4o"`, `"deepseek/deepseek-chat"`, `"kimi/kimi-k2.5"`).
 
-## 2. Run The Smallest Example
+The Z.AI global API preset uses `ZAI_API_KEY` and `llm="zai/glm-5.1"`.
+This selects its general chat-completion endpoint; it does not configure a
+Coding Plan endpoint or an embedding model.
+Local CLI commands also accept `--provider zai --model glm-5.1`. When no model
+is set on the command line or in project config, the selected provider supplies
+its default model.
+
+## 2. Create And Run A Project
+
+```bash
+seocho new hello-seocho
+cd hello-seocho
+seocho run --dry-run
+seocho run
+```
+
+From a cloned repository, prefix CLI commands with `uv run`:
+
+```bash
+uv run seocho new hello-seocho
+cd hello-seocho
+uv run seocho run --dry-run
+uv run seocho run
+```
+
+What happened:
+
+- `schema.yaml` declared the allowed graph shape
+- `docs/` provided source notes to index
+- `seocho.run.yaml` declared the questions
+- `report.md` and `report.json` captured answers, support status, missing
+  slots, and selected graph evidence
+
+For private datasets, failure diagnostics, and saved-run comparisons, see
+[Experiment Platform](https://github.com/tteon/seocho/blob/main/docs/EXPERIMENT_PLATFORM.md).
+
+## 3. The Smallest SDK Example
 
 ```python
 from seocho import Seocho, Ontology, NodeDef, RelDef, Property
@@ -52,7 +90,7 @@ ontology = Ontology(
     },
 )
 
-client = Seocho.local(ontology, llm="mara/MiniMax-M2.5")
+client = Seocho.local(ontology, graph="bolt://localhost:7687", llm="mara/MiniMax-M2.7")
 client.add("Marie Curie worked at the University of Paris.")
 
 print(client.ask("Where did Marie Curie work?"))
@@ -64,13 +102,13 @@ What happened:
 - `add()` extracted graph facts that fit that shape
 - `ask()` queried the graph memory and produced an ontology-grounded answer
 
-## 3. Run A Real Example
+## 4. Run A Domain Example
 
 The finance-compliance example is the fastest complete project-shaped path:
 
 ```bash
 export MARA_API_KEY=...
-uv run python examples/finance-compliance/quickstart.py --llm mara/MiniMax-M2.5
+uv run python examples/finance-compliance/quickstart.py
 ```
 
 It ships:
@@ -79,7 +117,7 @@ It ships:
 - six short mock compliance documents
 - a script that ingests them and asks cross-document questions
 
-## 4. Connect To A Runtime
+## 5. Connect To A Runtime
 
 If a SEOCHO runtime is already running:
 
@@ -109,6 +147,7 @@ Then open:
 |---|---|
 | Understand the project | [README.md](https://github.com/tteon/seocho/blob/main/README.md) |
 | Use your own ontology and files | [docs/APPLY_YOUR_DATA.md](/docs/apply_your_data/) |
+| Connect Notion, Slack, DataHub, Postgres, Neo4j/DozerDB, LangChain, or LlamaIndex | [docs/CONNECTORS.md](https://github.com/tteon/seocho/blob/main/docs/CONNECTORS.md) |
 | Learn the Python SDK | [docs/PYTHON_INTERFACE_QUICKSTART.md](/docs/python_sdk/) |
 | Run the full platform | [docs/RUNTIME_DEPLOYMENT.md](/docs/runtime_deployment/) |
 | See generated files and traces | [docs/FILES_AND_ARTIFACTS.md](/docs/files_and_artifacts/) |
