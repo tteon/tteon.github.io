@@ -3,7 +3,7 @@ title: First Run Tutorial
 description: End-to-end tutorial to start services, verify APIs, and run agent chat.
 source_repo: tteon/seocho
 source_path: docs/TUTORIAL_FIRST_RUN.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 8be62646342d60156b879acc0b3e975d50a4950a
 ---
 
 > *Source mirrored from `seocho/docs/TUTORIAL_FIRST_RUN.md`*
@@ -23,7 +23,7 @@ It is the manual verification path for developers who want to understand the run
 | 3 | internal runtime path works | `/platform/ingest/raw`, `/run_agent_semantic` |
 | 4 | governance APIs work | `/rules/*`, `/semantic/artifacts/*` |
 | 5 | scripted demos still run | `examples/*` |
-| 6 | traces can be exported | Opik or JSONL tracing |
+| 6 | traces can be exported | OTLP or JSONL tracing |
 
 Stop after section 2 if you only need product smoke evidence. Continue into
 sections 3-4 when you are debugging runtime internals or governance behavior.
@@ -239,13 +239,15 @@ curl -sS -X POST http://localhost:8001/semantic/artifacts/<ARTIFACT_ID>/approve 
 If you want repeatable staged demos instead of manual calls, continue with
 [BEGINNER_PIPELINES_DEMO.md](https://github.com/tteon/seocho/blob/main/docs/BEGINNER_PIPELINES_DEMO.md).
 
-## 6. Optional: Opik
+## 6. Optional: OTLP
 
 ```bash
-make opik-up
+make observability-up
 ```
 
-Open `http://localhost:5173`.
+Open Grafana at `http://localhost:3000`. Configure tracing using the
+[observability example](https://github.com/tteon/seocho/blob/main/examples/observability/README.md); starting the stack
+alone does not enable an exporter in an existing SDK process.
 
 ## 7. Troubleshooting
 
