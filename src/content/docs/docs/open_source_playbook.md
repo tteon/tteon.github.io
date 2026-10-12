@@ -3,7 +3,7 @@ title: Open Source Playbook
 description: Extension guide for ontology, data, agent, and runtime integration.
 source_repo: tteon/seocho
 source_path: docs/OPEN_SOURCE_PLAYBOOK.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 8be62646342d60156b879acc0b3e975d50a4950a
 ---
 
 > *Source mirrored from `seocho/docs/OPEN_SOURCE_PLAYBOOK.md`*
@@ -49,7 +49,7 @@ By the end of onboarding, a contributor should be able to:
 - read in order: `README.md` -> `CLAUDE.md` -> [`/docs/workflow/`](/docs/workflow/) -> `docs/ISSUE_TASK_SYSTEM.md` -> `docs/decisions/DECISION_LOG.md`
 - validate stack assumptions:
   - OpenAI Agents SDK
-  - vendor-neutral tracing/evaluation with Opik as the preferred team backend
+  - vendor-neutral tracing/evaluation with OTLP as the preferred team backend
   - DozerDB backend
   - single-tenant with `workspace_id` propagation
   - Owlready2 only in offline ontology path

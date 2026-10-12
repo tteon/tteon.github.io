@@ -3,7 +3,7 @@ title: Python SDK
 description: Developer-first guide to ingest data and query SEOCHO through the Python SDK.
 source_repo: tteon/seocho
 source_path: docs/PYTHON_INTERFACE_QUICKSTART.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: 8be62646342d60156b879acc0b3e975d50a4950a
 ---
 
 > *Source mirrored from `seocho/docs/PYTHON_INTERFACE_QUICKSTART.md`*
@@ -79,7 +79,7 @@ Important:
 - `uv pip install seocho` is enough for remote HTTP client mode.
 - `uv pip install "seocho[local]"` is the simplest published-package path for `Seocho.local(...)`.
 - `Seocho.local(ontology)` defaults to embedded LadybugDB and MARA
-  (`mara/MiniMax-M2.5`), so a Neo4j/DozerDB server is optional for hello world;
+  (`mara/MiniMax-M2.7`), so a Neo4j/DozerDB server is optional for hello world;
   export `MARA_API_KEY` or pass another `llm="provider/model"`.
 - pass `graph="bolt://..."` or `Neo4jGraphStore(...)` when you want the production DozerDB/Neo4j path.
 - `uv sync --extra dev` (then `uv run …`) is the right path when you are editing the repo itself.
@@ -569,6 +569,13 @@ qwen_llm = QwenBackend(model="<model-id>")
 
 Provider env vars follow the preset names: `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`,
 `MOONSHOT_API_KEY`, `XAI_API_KEY`, `DASHSCOPE_API_KEY`, and `MARA_API_KEY`.
+
+For the Z.AI global API, use `create_llm_backend(provider="zai")` with
+`ZAI_API_KEY`, or `Seocho(..., llm="zai/glm-5.1")`. The preset defaults to
+`https://api.z.ai/api/paas/v4/`; `model` and `base_url` remain overridable.
+The [provider's HTTP API documentation](https://docs.z.ai/guides/develop/http/introduction)
+describes the endpoint. Embeddings require a separate backend. Preset wiring
+is covered by offline tests; these tests do not establish live API compatibility.
 
 For semantic search, choose an in-memory or persistent vector backend:
 
