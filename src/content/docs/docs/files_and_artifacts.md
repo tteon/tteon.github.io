@@ -3,7 +3,7 @@ title: Files and Artifacts
 description: Where ontology files, graph state, rule profiles, semantic artifacts, and traces live.
 source_repo: tteon/seocho
 source_path: docs/FILES_AND_ARTIFACTS.md
-source_commit: c28cbb0f54f42cc7e700466aa1afac4c9d169e25
+source_commit: f9e3738d04bde1cc9d5a76d5d2991eb550ace463
 ---
 
 > *Source mirrored from `seocho/docs/FILES_AND_ARTIFACTS.md`*
@@ -184,7 +184,7 @@ tail -n 20 traces/seocho-runtime.jsonl
 Recommended interpretation:
 
 - `jsonl` is the neutral, portable trace artifact
-- Opik is optional and can be hosted or self-hosted
+- OTLP export is optional; the collector and storage backend are operator-selected
 
 ## 7. Examples And Sample Data
 
