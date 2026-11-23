@@ -1,0 +1,115 @@
+---
+title: "The Dense Compression Trap: Why Graph Representations Trail Raw Text (0.018 vs 0.286 Recall) and How Verbalization Rescues 3.4×"
+date: 2026-09-02
+category: "Ontology & GraphRAG Construction"
+host: "Local & Hosted Inference (gpt-oss-120b / DeepSeek-V3.1 / MiniMax-M2.7)"
+hypothesis: "Compressing source passages into compact RDF triples or LPG graphs retains sufficient answer evidence for financial QA, while explicit ontology schemas standardize cross-model construction."
+falsification: "If compressed graph views lose crucial answer sufficiency versus raw text, or ontology schemas reduce valid parse coverage and cross-model agreement, compact schema-constrained construction is refuted."
+verdict: "Refuted"
+keyMetric: "Answer IDF recall: Text 0.286 vs LPG 0.064 vs RDF 0.018 (n=2,542) · Verbalize +3.4× · Onto parse 85.0%→79.2%"
+takeaways:
+  - "Across 2,542 paired FinDER questions (7,626 LLM-as-Judge rows), dense RDF (24.2 tokens) achieves higher token density (30.84 vs 3.95 units/100 tok) but collapses answer sufficiency to 2.07/5 and IDF recall to 0.018 (vs 4.32/5 and 0.286 for 370-token text)."
+  - "Expanding 1-hop triples (rdf_hop, 66.7 tok) barely moves recall (0.0183 → 0.0236), whereas verbalizing the exact same 7.39 triples into natural sentences (rdf_verb, 48.3 tok) lifts recall 3.4× (0.0624) and pushes precision to 0.2980 (above LPG's 0.1723)—proving serialization format, not missing triples, caused much of the loss."
+  - "Enforcing ontology schemas during construction backfires: prompt tokens jump 4.38× (LoG2026 sota_construction_v2), empty graphs double (15.0% → 29.2%), parse rate falls on MiniMax (85% → 50%), and cross-model naming agreement drops from 0.375 to 0.193 (Finding 1.4, n=16)."
+soWhat: "Never feed raw SPARQL triples or bare LPG nodes into a GraphRAG reader alone; linearize selected triples into clean prose or keep the source chunk attached (keepraw), and restrict heavy construction ontologies to targeted properties rather than bloated prompt taxonomies."
+related:
+  - label: "Companion Evaluation Trap: Cross-Judge Swap & Stacked Tool Interference (ICML)"
+    href: "/experiments/2026-04-27-icml-factorial-and-judge-swap/"
+  - label: "Where Ontologies Win: Temporal Cutoff (100%) & Token Efficiency (-81%)"
+    href: "/experiments/2026-08-02-temporal-grounding-and-ecommerce-ontology/"
+beadsId: "yw-agn.2"
+repoUrl: "https://github.com/tteon/seocho"
+environment:
+  machine: "Local analysis + MARA/OpenAI API endpoints"
+  runtime: "gnnllm_lab modality pipeline + LoG2026 construction audit + icml2026 compression profiler"
+  dataset: "FinDER_KG_Merged (n=2,542 Qs × 5 modes), ICML compression (n=1,081), LoG sota_construction_v2 (n=40 Med+Novel) & Finding 1.4 (n=16)"
+  repeats: "7,626 LLM-as-Judge scores (gpt-oss-120b) + 5,000 permutation resamples + 240 construction calls"
+figures:
+  - src: "/figures/modality-paradox-and-construction.png"
+    alt: "Left: Answer IDF recall and precision across Text, LPG, RDF, RDF-Hop, and RDF-Verb (n=2,542). Right: Parse rate, org extraction, and agreement collapse under ontology constraints."
+    caption: "Figure 1. Left: Compressing 370.5-token text into 24.2-token RDF slashes IDF recall from 0.286 to 0.018; expanding triples (rdf_hop) stalls at 0.024 while verbalizing them (rdf_verb) recovers 3.4× recall and peaks precision at 0.298. Right: Ontology schemas reduce MiniMax parse rates (0.85 → 0.50), gpt-oss organization extraction (0.93 → 0.60), and inter-model agreement (0.38 → 0.19)."
+tags: ["graphrag", "rdf", "lpg", "verbalization", "finder", "ontology-construction"]
+summary: "Synthesizing gnnllm_lab (n=2,542), ICML compression audits (n=1,081), and LoG2026 construction audits: how triple serialization starves LLM readers, why verbalization helps 3.4×, and why rigid schemas hurt construction extraction."
+---
+
+import Figure from '../../components/Figure.astro';
+import Diagram from '../../components/Diagram.astro';
+
+## 1. Motivation: The Compression Illusion in GraphRAG
+
+Knowledge graph pipelines are often justified on compression: why feed `370` tokens of messy 10-K prose when 7 structured triples (`24` tokens) capture the "essential facts"? To test whether structural compression preserves real answerability—and whether giving extractors an ontology schema improves graph consistency—we synthesize four datasets spanning `gnnllm_lab` (`n=2,542`), `icml2026` (`n=1,081`), `LoG2026-ready`, and `seocho-design/ama`.
+
+## 2. Hypothesis, Falsification & Experimental Mechanism
+
+We tested whether dense graph compression preserves answer sufficiency (`Refuted` on raw RDF/LPG and unconstrained construction taxonomies; verbalization partially rescues recall `3.4×`).
+
+<Diagram title="Three Failure Points: Construction Tax, Divergence, and Dense Serialization Loss" caption="Even before retrieval begins, ontology constraints blow up extraction prompts (4.38× tokens) and lower inter-model agreement (0.375 → 0.193). At read time, stripping prose morphology crushes RDF lexical overlap unless triples are verbalized back into fluent sentences.">
+  <svg viewBox="0 0 760 184" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pipeline losses across extraction, normalization, and reader serialization">
+    <rect x="14" y="20" width="220" height="142" rx="10" stroke="var(--svg-red)" stroke-width="1.6" fill="var(--svg-red)" fill-opacity="0.06"/>
+    <text x="124" y="46" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="11.5" font-weight="bold">Stage 1: Extraction Tax</text>
+    <text x="124" y="72" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">Static schema prompt: 4.38× tokens</text>
+    <text x="124" y="92" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">Empty graphs: 15.0% → 29.2%</text>
+    <text x="124" y="112" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10.5">Org extract: 85.6% → 70.1%</text>
+    <text x="124" y="138" text-anchor="middle" fill="var(--svg-red)" font-family="sans-serif" font-size="10">MiniMax parse drops 85% → 50%</text>
+
+    <path d="M236 91 L266 91" stroke="currentColor" stroke-width="1.6"/>
+    <rect x="268" y="20" width="224" height="142" rx="10" stroke="var(--svg-amber)" stroke-width="1.6" fill="var(--svg-amber-stroke)" fill-opacity="0.07"/>
+    <text x="380" y="46" text-anchor="middle" fill="var(--svg-amber)" font-family="monospace" font-size="11.5" font-weight="bold">Stage 2: Granularity Split</text>
+    <text x="380" y="72" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">More classes = more ways to slice</text>
+    <text x="380" y="92" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10.5">Agree: 0.375 (A) → 0.193 (C)</text>
+    <text x="380" y="112" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">1,334 → 1,672 fact names (+25%)</text>
+    <text x="380" y="138" text-anchor="middle" fill="var(--svg-amber)" font-family="sans-serif" font-size="10">Facts diverge across extractors</text>
+
+    <path d="M494 91 L524 91" stroke="currentColor" stroke-width="1.6"/>
+    <rect x="526" y="20" width="220" height="142" rx="10" stroke="var(--svg-blue)" stroke-width="1.6" fill="var(--svg-blue)" fill-opacity="0.07"/>
+    <text x="636" y="46" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="11.5" font-weight="bold">Stage 3: Reader Rescue</text>
+    <text x="636" y="72" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">Raw RDF (24 tok): recall 0.018</text>
+    <text x="636" y="92" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">Hop expansion (67 tok): 0.024</text>
+    <text x="636" y="112" text-anchor="middle" fill="var(--svg-green)" font-family="monospace" font-size="10.5">Verbalized RDF: 0.062 (3.4×)</text>
+    <text x="636" y="138" text-anchor="middle" fill="var(--svg-blue)" font-family="sans-serif" font-size="10">Precision peaks at 0.298 vs LPG 0.172</text>
+  </svg>
+</Diagram>
+
+## 3. Environment & Verification Cohorts
+
+- **`gnnllm_lab` Modality Evaluation (`20260222_195922` & `20260301_073147`)**: Paired evaluation over `2,542` FinDER questions comparing `text`, `lpg`, `rdf`, `rdf_hop` (multi-hop triple expansion), and `rdf_verb` (natural-language verbalization). Includes `7,626` `openai/gpt-oss-120b` judge ratings (`5,000` permutation resamples) on `text/lpg/rdf`.
+- **`icml2026` Compression Audits**: `n=1,081` retention/density measurement plus `n=10` GPT-4o qualitative sufficiency audit (`compression_llm_judge.json`).
+- **`LoG2026-ready` Construction & Agreement**: Finding 1.4 (`16` cases × `3` models × `4` schema conditions + `5,000`-draw bootstrap intervals) and `sota_construction_v2` (`20` Medical + `20` Novel GraphRAG-Bench items × `3` models × `G` vs `O` = `240` calls).
+
+## 4. Visual Evidence & Quantitative Results
+
+<Figure
+  src="/figures/modality-paradox-and-construction.png"
+  alt="Modality recall/precision trade-off across 2,542 FinDER questions and ontology construction regressions."
+  caption="Figure 1. Left: Text retains 0.286 IDF recall (n=2,542) while raw RDF drops to 0.018; verbalizing the exact same 7.39 RDF triples raises recall 3.4× (0.0624) and achieves top precision (0.298). Right: Enforcing construction ontologies lowers MiniMax parse rate (0.85 → 0.50), cuts gpt-oss organization extraction (0.93 → 0.60), and reduces inter-model fact agreement (0.375 → 0.193)."
+/>
+
+### Modality Trade-off on FinDER (`n = 2,542`)
+
+| Context Mode | Mean Tokens | Info Units / 100 tok | Answer IDF Recall | Answer IDF Precision | LLM-as-Judge Overall (`1–5`) | Judge Sufficiency (`1–5`) | Judge Conciseness (`1–5`) |
+|---|---|---|---|---|---|---|---|
+| `text` | `370.5` | `3.95` | **`0.2861`** | `0.2435` | **`3.948`** | **`4.325`** | `2.654` |
+| `lpg` | `96.5` | `7.30` | `0.0637` | `0.1723` | `2.789` | `2.335` | **`3.215`** |
+| `rdf` | `24.2` | `30.84` | `0.0183` | `0.0919` | `2.486` | `2.069` | `3.137` |
+| `rdf_hop` | `66.7` | `31.27` | `0.0236` | `0.0610` | *(not judged)* | — | — |
+| `rdf_verb` | `48.3` | `16.26` | `0.0624` (`3.4×` RDF) | **`0.2980`** | *(not judged)* | — | — |
+
+### Construction Tax & Schema Disagreement (`LoG2026-ready` & `icml2026`)
+
+| Audit Suite | Unconstrained / Baseline | Ontology-Constrained | Measured Consequence |
+|---|---|---|---|
+| **Source Sufficiency (`icml` `n=10`)** | Text `0.940` | Graph `0.290` (`LPG 0.33, RDF 0.04`) | `61.1×` mean per-Q compression drops key numbers (`EBIT`) |
+| **Finding 1.4 Agreement (`n=16` × 3)** | Cond A (No Schema): `0.375` `[0.290, 0.456]` | Cond C (FIBO 70 classes): `0.193` `[0.115, 0.261]` | Unique names grew `1,334 → 1,672` (`+25%`), fragmenting extraction |
+| **`sota_construction_v2` (`n=240`)** | `G` (`36,120` in tok): `85.0%` parse, `15.0%` empty | `O` (`158,080` in tok): `79.2%` parse, `29.2%` empty | `4.38×` token cost; Org extraction falls `85.6% → 70.1%` |
+| **AMA Null-Link Guidance (`n=30` × 2)** | `none`: `90.6%` (RDF) / `97.3%` (LPG) null links | `static`: **`2.6%` / `4.8%`** null links | Guidance fixes unlinked URIs (`0.47→0.62`), yet `52–53%` stay custom `ama:` |
+
+## 5. Mechanism Breakdown: Why Verbalization Succeeds Where Hop Expansion Fails
+
+1. **Vocabulary mismatch, not missing node count, kills raw RDF**: Across `2,138 / 2,542` (`84.11%`) FinDER questions where RDF actually contained *more* or equal extracted elements than LPG, LPG still outperformed RDF on answer alignment `83.16%` to `5.66%`. Adding neighboring hops (`rdf_hop`: `7.39 → 21.23` units, `24 → 67` tokens) diluted precision (`0.092 → 0.061`) while barely nudging recall (`0.018 → 0.024`). Verbalizing the original `7.39` triples (`rdf_verb`, `48.3` tokens) restored grammatical relations and tokens, jumping IDF recall `3.4×` to match LPG (`0.0624` vs `0.0637`) with the highest precision (`0.2980`) of any mode.
+2. **Why `text` beats all compressed graphs on FinDER**: Qualitative inspection (`compression_llm_judge.json`) reveals that financial QA routinely depends on exact numeric tables (`$1,557,813K` vs `$1,160,403K` EBIT across 2021–2023) and explicit causal phrasing (`"due to higher sales"`) that triple extractors drop across `icml`'s `n=1,081` audit (averaging `211.6` text tokens vs `9.0` graph facts = `23.5×` corpus ratio, `61.1×` mean per-question compression ratio).
+3. **Why rigid construction ontologies increase empty graphs**: In `LoG2026` Finding 1.4 (`16` cases) and `sota_construction_v2`, injecting 70+ taxonomy classes gives smaller or safety-tuned models (`MiniMax-M2.7` parse dropping `85% → 50%` on Medical) too many ways to split facts or exceed schema constraints, turning clean spans into empty graphs (`15% → 29.2%`). Similarly, in `LoG2026` `rebuttal/path_query_control_v2` (`n=120`), corrupting graph edges collapsed complex path exactness `1.000 → 0.000`, proving structure matters downstream *only* when extraction survives intact and stays grounded.
+
+## 6. Scope Limits & Next Experiment
+
+- **Missing LLM-as-Judge on `rdf_verb`**: The `2026-03-01` `rdf_hop`/`rdf_verb` comparison scored lexical IDF overlap rather than full LLM-as-Judge sufficiency; running `gpt-oss-120b` judge scoring on `rdf_verb` is queued in Beads `yw-pow.7`.
+- **Paused 420-case full retrieval**: `LoG2026-ready/finder_graphrag_sota_v1/full` (`420` cases) was paused after worker overlap wrote `5,849` graph calls (`yw-pow.6`), leaving bounded `rebuttal100` (`n=100`, `passage_tfidf R@5 0.530` vs `hipporag 0.390` vs `gr_pcst 0.320`) as the cleanest comparable retrieval baseline.

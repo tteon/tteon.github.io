@@ -3,6 +3,7 @@ interface Props {
   slug: string;
   title: string;
   date: Date;
+  category?: string;
   host: string;
   verdict: 'Supported' | 'Refuted' | 'Mixed' | 'Inconclusive';
   keyMetric: string;
@@ -16,6 +17,7 @@ const {
   slug,
   title,
   date,
+  category = 'Ontology & GraphRAG Construction',
   host,
   verdict,
   keyMetric,
@@ -40,6 +42,7 @@ const leadLine = takeaways[0] || summary;
 <a
   href={`/experiments/${slug}/`}
   data-verdict={verdict}
+  data-category={category}
   data-host={host}
   class="exp-card group block py-6 border-b border-stone-200/90 dark:border-zinc-800/80 hover:bg-stone-100/50 dark:hover:bg-zinc-900/35 -mx-3 px-3 rounded-xl transition-colors"
 >
@@ -48,7 +51,9 @@ const leadLine = takeaways[0] || summary;
       <div class="flex flex-wrap items-center gap-2 font-mono text-xs text-stone-500 dark:text-zinc-400 mb-2">
         <span>{dateStr}</span>
         <span>·</span>
-        <span>{host}</span>
+        <span class="rounded bg-stone-100 dark:bg-zinc-800 px-2 py-0.5 text-[11px] text-stone-700 dark:text-zinc-300">
+          {category}
+        </span>
         <span class={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${verdictStyle[verdict]}`}>
           {verdict}
         </span>
@@ -68,7 +73,8 @@ const leadLine = takeaways[0] || summary;
 
       {tags.length > 0 && (
         <div class="mt-2.5 flex flex-wrap gap-2">
-          {tags.slice(0, 5).map((t) => (
+          <span class="font-mono text-[11px] text-stone-500 dark:text-zinc-400">{host}</span>
+          {tags.slice(0, 4).map((t) => (
             <span class="font-mono text-[11px] text-stone-400 dark:text-zinc-500">#{t}</span>
           ))}
         </div>

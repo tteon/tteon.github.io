@@ -1,0 +1,120 @@
+---
+title: "The Hidden Cost of Stacking Graph Tools: Cross-Judge Collapse (0.97 → 0.49), Tool Interference (p=0.040), and Planner Failure (0.277 vs 0.659)"
+date: 2026-04-27
+category: "Ontology & GraphRAG Construction"
+host: "Multi-Model Evaluation Suite (GPT-4o / Kimi-K2.5 / DeepSeek-R1)"
+hypothesis: "Combining hybrid graph+text retrieval, dynamic query routing, and Graph-CoT/GFM agents yields monotonic improvements over a strong single-pass text baseline."
+falsification: "If stacked policies (a+b+c) lose significantly against simpler hybrid retrieval or text floors under an independent judge, or multi-step PlannerAgents collapse against single-call pipelines, blindly stacking agentic GraphRAG layers is refuted."
+verdict: "Refuted"
+keyMetric: "Self-judge illusion 0.97 → 0.49 · Robust a+b+c 0.743 < hybrid 0.850 (p=0.040) · KGC Planner 0.277 vs Single 0.659"
+takeaways:
+  - "Re-scoring identical Kimi-K2.5 outputs (n=10) with an independent GPT-4o judge collapses apparent scores across every graph arm—turning hybrid_all's 0.970 'near-perfect' rating into 0.490 (−0.480) and dropping Graph CoT+GFM from 0.920 to 0.420."
+  - "Across 2³ factorial runs and multi-seed GPT-4o audits (n=30 robust, n=72 8-category), stacking all three interventions (a+b+c) significantly underperforms hybrid retrieval alone on GPT-4o (0.743 vs 0.850, p=0.040) and trails even the pure text floor on 8 categories (0.544 vs 0.607)."
+  - "Auditing the KGC 2026 suite (exp1..8, n=200 except exp3_router n=40) exposes two sharp failure warnings: an interactive PlannerAgent collapses accuracy (−0.382 vs single_call: 0.277 vs 0.659), and omitted exp3_router suffered a branch bug where 'rdf_first' and 'both' ran identical combined code."
+soWhat: "Never evaluate GraphRAG agents solely with a same-family self-judge or ship an interactive multi-step planner without measuring a clean single-call hybrid floor first; use targeted hybrid retrieval for compositional queries (0.850 vs 0.625) instead of stacking redundant routers and gates."
+related:
+  - label: "Root Modality Bottleneck: Why Dense Triples Lose to Text (n=2,542)"
+    href: "/experiments/2026-09-02-modality-paradox-and-construction-tax/"
+  - label: "Full MARA Factorial Confirmation: Single Agent Beats Multi-Agent Handoffs (n=1,260)"
+    href: "/experiments/2026-09-03-mara-single-vs-multiagent-and-repair/"
+beadsId: "yw-agn.4"
+repoUrl: "https://github.com/tteon/seocho"
+environment:
+  machine: "Local evaluation runner (`~/lab/icml2026`) calling OpenAI & DeepSeek/Kimi APIs"
+  runtime: "Dual-representation FinDER GraphRAG harness + KGC presentation runner (`exp1..8`)"
+  dataset: "FinDER random/graph_rich slices, Compositional (n=20), 8-Cat pooled (n=72), ReAct vs CoT+GFM (n=152), KGC (n=200)"
+  repeats: "3 seeds (42, 7, 123) on robust (n=30), 8-cat (n=72), and ReAct (n=120/152)"
+figures:
+  - src: "/figures/icml-factorial-and-judge-swap.png"
+    alt: "Left: Kimi self-judge vs GPT-4o independent judge score drop across 4 policies. Right: Multi-seed tool interference (Robust, 8-Cat), ReAct vs CoT+GFM, and KGC PlannerAgent collapse."
+    caption: "Figure 1. Left: Swapping evaluator from Kimi self-judge to GPT-4o on identical outputs exposes a −0.30 to −0.50 inflation bias on random FinDER slices (n=10). Right: While CoT+GFM doubles graph-only ReAct baselines (0.576 vs 0.301, n=152), stacking all interventions (a+b+c) degrades GPT-4o below Hybrid/Null, and KGC's interactive PlannerAgent collapses from 0.659 to 0.277 (n=200)."
+tags: ["icml", "factorial-design", "judge-bias", "graphrag", "planner-failure"]
+summary: "Auditing the entire icml2026 factorial and KGC 2026 presentation suite: self-judge leniency collapse (−0.48), destructive tool interference (p=0.040), PlannerAgent failure (0.277 vs 0.659), plus recovering two omitted runs (factorial_kimi_rand and buggy exp3_router)."
+---
+
+import Figure from '../../components/Figure.astro';
+import Diagram from '../../components/Diagram.astro';
+
+## 1. Motivation: Why Naive Agentic GraphRAG Evaluations Look Better Than They Are
+
+Early `n=10` pilots in `icml2026` produced suspiciously high `0.92–0.97` accuracy whenever a Kimi-K2.5 generator was evaluated by Kimi-K2.5 on hybrid or routed graph policies. Before trusting those numbers, we ran cross-judge swaps, full `2³` factorial ablations (`a` = Hybrid text+graph, `b` = Router, `c` = CoT+GFM), graph-only ReAct comparisons, and an 8-experiment KGC 2026 suite (`n=200`/arm). **Separating genuine compositional structure gains from judge leniency and planner thrashing became the core lesson of the repo.**
+
+## 2. Hypothesis, Falsification & Experimental Mechanism
+
+We tested whether stacking hybrid retrieval (`a`), dynamic routing (`b`), and Graph-CoT/GFM (`c`) outperforms single-pass hybrid/text baselines under an independent judge; `Refuted` because same-family self-judges inflated scores (`+0.30..+0.50`) and stacking `a+b+c` significantly degraded `GPT-4o` accuracy (`p=0.040`).
+
+<Diagram title="Four Failure Mechanisms Found Across icml2026 & KGC Presentation Suites" caption="Evaluating identical traces across judges exposed up to −0.50 M1 collapse. Across factorials, compositional questions benefited from Hybrid (+0.225), but adding routers and multi-step CoT gates induced interference and planner collapse.">
+  <svg viewBox="0 0 760 178" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Four ICML evaluation and interference lessons">
+    <rect x="14" y="18" width="174" height="140" rx="8" stroke="var(--svg-red)" stroke-width="1.6" fill="var(--svg-red)" fill-opacity="0.06"/>
+    <text x="101" y="42" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="11" font-weight="bold">1. Self-Judge Bias</text>
+    <text x="101" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10">Kimi→GPT-4o (n=10)</text>
+    <text x="101" y="88" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="10.5">0.97 → 0.49 (Hybrid)</text>
+    <text x="101" y="108" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="10.5">0.92 → 0.42 (CoT)</text>
+    <text x="101" y="136" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="9.5">Verbose graph text fooled judge</text>
+
+    <rect x="200" y="18" width="174" height="140" rx="8" stroke="var(--svg-amber)" stroke-width="1.6" fill="var(--svg-amber-stroke)" fill-opacity="0.07"/>
+    <text x="287" y="42" text-anchor="middle" fill="var(--svg-amber)" font-family="monospace" font-size="11" font-weight="bold">2. Tool Interference</text>
+    <text x="287" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10">GPT-4o Robust (n=30)</text>
+    <text x="287" y="88" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10.5">a (Hybrid): 0.850</text>
+    <text x="287" y="108" text-anchor="middle" fill="var(--svg-amber)" font-family="monospace" font-size="10.5">a+b+c (Full): 0.743</text>
+    <text x="287" y="136" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="9.5">Wilcoxon p=0.040 degradation</text>
+
+    <rect x="386" y="18" width="174" height="140" rx="8" stroke="var(--svg-red)" stroke-width="1.6" fill="var(--svg-red)" fill-opacity="0.06"/>
+    <text x="473" y="42" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="11" font-weight="bold">3. Planner Collapse</text>
+    <text x="473" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10">KGC exp5 (n=200)</text>
+    <text x="473" y="88" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10.5">single_call: 0.659</text>
+    <text x="473" y="108" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="10.5">PlannerAgent: 0.277</text>
+    <text x="473" y="136" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="9.5">+ exp3_router branch bug</text>
+
+    <rect x="572" y="18" width="174" height="140" rx="8" stroke="var(--svg-blue)" stroke-width="1.6" fill="var(--svg-blue)" fill-opacity="0.07"/>
+    <text x="659" y="42" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="11" font-weight="bold">4. Valid Niche Wins</text>
+    <text x="659" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10">Where Graph Helps</text>
+    <text x="659" y="88" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="10.5">Composit. (a): 0.850</text>
+    <text x="659" y="108" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="10.5">vs ReAct: 0.576 vs 0.30</text>
+    <text x="659" y="136" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="9.5">Explicit CoT > blind ReAct</text>
+  </svg>
+</Diagram>
+
+## 3. Environment & Verification Audits
+
+Every metric below comes from immutable JSONL logs under `~/lab/icml2026/experiments/results/`:
+- **Judge Swap (`2026-04-17`)**: Identical responses (`n=10` `random` + `n=10` `graph_rich`) re-graded cleanly with `GPT-4o` replacing `Kimi-K2.5`.
+- **`2³` Factorials (`2026-04-18..22`)**: Factors `a` (Hybrid), `b` (Router), `c` (CoT+GFM) across GPT-4o & Kimi-K2.5 random/rich (`n=10`), compositional (`n=20`), Robust 3-seed (`n=30`), and 8-Category 3-seed (`n=72`). **Recovery note**: `factorial_kimi-k2.5_rand_20260419_132554.jsonl` completed cleanly (`a=0.920`, `c=0.910`, `a+b+c=0.870`) yet was missing from the paper's draft Table 2; we include it in full below.
+- **ReAct (`n=152` GPT-4o / `n=24` Kimi) & KGC `exp1..8` (`n=200` each except `exp3_router` `n=40`)**.
+
+## 4. Visual Evidence & Quantitative Results
+
+<Figure
+  src="/figures/icml-factorial-and-judge-swap.png"
+  alt="Self-judge swap score collapse alongside Robust, 8-Category, Graph-Only ReAct, and KGC Planner comparisons."
+  caption="Figure 1. Left: Re-scoring identical Kimi-K2.5 predictions with GPT-4o reverses hybrid/agent leads (−0.30 to −0.50 on random slices). Right: Stacking a+b+c degrades GPT-4o below focused Hybrid/Text floors across both Robust (n=30, p=0.040) and 8-Cat (n=72), while KGC PlannerAgent drops −0.382 behind single_call (n=200)."
+/>
+
+### Factorial (`a`=Hybrid, `b`=Router, `c`=CoT+GFM) Across Slices
+
+| Cohort & Judge | `null` (Text) | `a` (Hybrid) | `b` | `c` | `a+b` | `a+b+c` (Full) | Key Takeaway |
+|---|---|---|---|---|---|---|---|
+| **Compositional (`GPT-4o`, `n=20`)** | `0.625` | **`0.850`** | `0.730` | `0.645` | `0.750` | `0.690` | Cleanest win: Hybrid `+0.225` over `null` |
+| **8-Cat Pooled (`GPT-4o`, `n=72`)** | `0.607` | **`0.611`** | `0.581` | `0.576` | `0.533` | `0.544` | Text baseline beats full stack (`−0.063`) |
+| **Kimi Rand (Omitted from Paper `n=10`)** | `0.840` | **`0.920`** | `0.770` | `0.910` | `0.870` | `0.870` | `a` and `c` strong solo; stacking hurts |
+| **Robust 3-Seed (`GPT-4o`, `n=30`)** | `0.847` | **`0.850`** | *(routed `0.820`)* | — | — | `0.743` (`p=0.040`) | Adding router+CoT cuts GPT-4o `-0.107` |
+| **Robust 3-Seed (`Kimi-K2.5`, `n=30`)** | `0.817` | `0.890` (`p=0.033`) | *(routed **`0.920`**)* | — | — | `0.830` | Model-dependent: Kimi gains, GPT-4o drops |
+
+### KGC `exp1..8` (`n = 200`/arm) & Omitted Code Defect
+
+| KGC Experiment | Baseline / Simple Arm | Intervention / Complex Arm | Observed Outcome |
+|---|---|---|---|
+| **`exp1_ontology` (`n=200`)** | `none`: `0.645` | `minimal`: **`0.683`** / `rich`: `0.661` | Concise schemas outperform bloated ones |
+| **`exp5_policy_compare` (`n=200`)** | `single_call`: **`0.659`** | `planner` (`PlannerAgent`): **`0.277`** | Multi-step planner collapses `-0.382` |
+| **`exp8_text_baseline` (`n=200`)** | `text_only`: `0.650` | `graph_only`: `0.292` / `both`: **`0.687`** | Graph-only halves score; hybrid adds `+0.037` |
+| **`exp3_router` (Omitted, `n=40`)** | `no_router`: `0.295` (`17.8s`) | `with_router`: `0.260` (`14.7s`) | **Code bug**: `rdf_first` & `both` shared branch |
+
+## 5. Mechanism Breakdown: Why Complex Pipelines Lose
+
+- **Judge leniency traps verbose answers**: On the `random` FinDER slice (`n=10`), Kimi-K2.5 self-judged `hybrid_all` (`0.97`) and `graph_cot_gfm` (`0.92`) far higher than `text_only` (`0.88`). Re-grading those *exact strings* with `GPT-4o` revealed `text_only` actually topped every policy (`0.580 > 0.490 > 0.450 > 0.420`), because verbose structured graph dumps fooled same-family judges when exact financial values were missing (`48.6%` of random-slice answer atoms existed in neither retrieved text nor graph per `phase_a_posthoc.md`).
+- **True Graph-only agent value vs CoT thrashing**: When raw prose is completely withheld (`react_baseline`), Graph CoT+GFM clearly beats unconstrained ReAct (`0.5757` vs `0.2395–0.3013` over `n=152` GPT-4o runs and `0.700` vs `0.096–0.258` on `n=24` Kimi). Yet when good text is already present, extra ambiguity gates (`amb_ablation`, `n=15`: `keyword_only 0.373` vs `hybrid gate 0.293`) and multi-step `PlannerAgent` routing (`0.277 vs 0.659`) add broken tool sequences and drop answer coverage. Even temporal entity resolution (`temporal_er_gpt-4o`, `n=60`) trailed the text floor (`0.750` vs `0.820`).
+
+## 6. Scope Limits & Remediation Items
+
+- **Biased `v1` history kept separate**: An earlier `n=5,659` scoring run (`results_v1_biased`) assigned `0.000` structural quality to RDF due to unnormalized dangling references; fixing normalization restored `0.6695`.
+- **Tracked cleanup (`yw-pow.5`)**: Fixing `exp3_router.py` lines 11–14 (`apply_route` branch parity bug) and adding the omitted `factorial_kimi-k2.5_rand` row (`a=0.920`) are tracked cleanly in Beads `yw-pow.5`.

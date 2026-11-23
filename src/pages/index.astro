@@ -2,9 +2,15 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ExperimentCard from '../components/ExperimentCard.astro';
 import { getCollection } from 'astro:content';
+import { EXPERIMENT_CATEGORIES } from '../content.config';
 
 const experiments = (await getCollection('experiments'))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const catSummary = EXPERIMENT_CATEGORIES.map((name) => ({
+  name,
+  count: experiments.filter((e) => e.data.category === name).length,
+}));
 
 const writings = (await getCollection('writing'))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
@@ -38,7 +44,7 @@ const systems = [
   },
   {
     name: 'KV-Cache & BDI Agents',
-    desc: 'Multi-agent BDI RDF orchestration, Beads tracking, and vLLM/CXL traces.',
+    desc: 'Multi-agent BDI RDF orchestration, Beads tracking, vLLM traces, and analytical CXL/RDMA notes.',
     href: '/experiments/2026-11-24-bdi-agent-ontology-beads-synergy/',
     external: false,
     tag: 'BDI · Beads · Serving',
@@ -71,18 +77,38 @@ const systems = [
   </section>
 
   <section class="py-10 border-b border-stone-200 dark:border-zinc-800/80">
-    <div class="flex items-baseline justify-between mb-2">
-      <h2 class="text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Experiment Log</h2>
-      <a href="/experiments/" class="font-mono text-xs text-blue-800 dark:text-cyan-400 hover:underline">Filter by verdict →</a>
+    <div class="flex flex-wrap items-baseline justify-between gap-2 mb-2">
+      <h2 class="text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Experiment Log by Category</h2>
+      <div class="flex items-center gap-4 font-mono text-xs">
+        <a href="/archive/" class="text-stone-600 dark:text-zinc-300 hover:underline">Full Local Catalog &amp; Backlog →</a>
+        <a href="/experiments/" class="text-blue-800 dark:text-cyan-400 hover:underline">Filter by category / verdict →</a>
+      </div>
     </div>
     <p class="text-sm text-stone-500 dark:text-zinc-400 mb-4">
       Measured runs grounded in preserved manifests, paired statistics, and honest failure boundaries.
     </p>
+    <div class="flex flex-wrap gap-2 mb-5">
+      {catSummary.map((c) => (
+        <a
+          href={`/experiments/?category=${encodeURIComponent(c.name)}`}
+          class="rounded-lg border border-stone-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/40 px-2.5 py-1 font-mono text-xs text-stone-700 dark:text-zinc-300 hover:border-blue-600 dark:hover:border-cyan-400 transition-colors"
+        >
+          {c.name} <span class="text-stone-400">({c.count})</span>
+        </a>
+      ))}
+    </div>
     <div>
-      {experiments.map((exp) => (
+      {experiments.slice(0, 6).map((exp) => (
         <ExperimentCard slug={exp.id} {...exp.data} />
       ))}
     </div>
+    {experiments.length > 6 && (
+      <div class="pt-5">
+        <a href="/experiments/" class="font-mono text-xs text-blue-800 dark:text-cyan-400 hover:underline">
+          View all {experiments.length} published experiment logs →
+        </a>
+      </div>
+    )}
   </section>
 
   <section class="py-10 border-b border-stone-200 dark:border-zinc-800/80">

@@ -2,36 +2,66 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ExperimentCard from '../../components/ExperimentCard.astro';
 import { getCollection } from 'astro:content';
+import { EXPERIMENT_CATEGORIES } from '../../content.config';
 
 const experiments = (await getCollection('experiments'))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
 const verdicts = ['All', 'Supported', 'Refuted', 'Mixed', 'Inconclusive'];
+const catCounts = Object.fromEntries(
+  EXPERIMENT_CATEGORIES.map((c) => [c, experiments.filter((e) => e.data.category === c).length])
+);
 ---
 
-<BaseLayout title="Experiment Log — Yitae Jeong" description="Hypothesis-driven systems and GraphRAG experiment logs with raw artifact verification.">
-  <div class="mb-7 max-w-2xl">
-    <p class="font-mono text-xs text-blue-800 dark:text-cyan-400 mb-2">LAB JOURNAL / REPRODUCIBLE EVIDENCE</p>
+<BaseLayout title="Experiment Log — Yitae Jeong" description="Hypothesis-driven systems and GraphRAG experiment logs grouped across five research categories.">
+  <div class="mb-7 max-w-3xl">
+    <p class="font-mono text-xs text-blue-800 dark:text-cyan-400 mb-2">LAB JOURNAL / CATEGORIZED SYNTHESIS</p>
     <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-stone-950 dark:text-white mb-2">Experiment Log</h1>
-    <p class="text-sm sm:text-base text-stone-600 dark:text-zinc-400 leading-relaxed">
-      Each post pairs pre-registered falsification criteria, raw artifacts, and publication figures with practical takeaways. Execution failures are always marked Inconclusive.
+    <p class="text-sm sm:text-base text-stone-600 dark:text-zinc-400 leading-relaxed mb-3">
+      Consolidated empirical studies from ~30 local lab workspaces grouped into five categories. Missed, aborted, buggy, and AUP-restricted runs are tracked explicitly in the{' '}
+      <a href="/archive/" class="text-blue-800 dark:text-cyan-400 underline underline-offset-4">Complete Catalog &amp; Beads Backlog →</a>
     </p>
   </div>
 
-  <div class="flex flex-wrap gap-2 mb-4" id="verdict-filters">
-    {verdicts.map((v, idx) => (
+  <div class="space-y-3 mb-5">
+    <div class="flex flex-wrap gap-1.5" id="category-filters" role="group" aria-label="Filter by research category">
       <button
         type="button"
-        data-filter={v}
-        class={`filter-btn rounded-full border px-3 py-1 font-mono text-xs transition-colors ${
-          idx === 0
-            ? 'border-blue-700 bg-blue-700/10 text-blue-800 dark:border-cyan-500 dark:bg-cyan-500/15 dark:text-cyan-300'
-            : 'border-stone-300 dark:border-zinc-700 text-stone-600 dark:text-zinc-400 hover:border-stone-500'
-        }`}
+        data-cat="All"
+        class="cat-btn rounded-lg border px-2.5 py-1 font-mono text-xs transition-colors border-blue-700 bg-blue-700/10 text-blue-800 dark:border-cyan-500 dark:bg-cyan-500/15 dark:text-cyan-300"
       >
-        {v}
+        All Categories ({experiments.length})
       </button>
-    ))}
+      {EXPERIMENT_CATEGORIES.map((cat) => (
+        <button
+          type="button"
+          data-cat={cat}
+          class="cat-btn rounded-lg border px-2.5 py-1 font-mono text-xs transition-colors border-stone-300 dark:border-zinc-700 text-stone-600 dark:text-zinc-400 hover:border-stone-500"
+        >
+          {cat} ({catCounts[cat] || 0})
+        </button>
+      ))}
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2" id="verdict-filters" role="group" aria-label="Filter by verdict">
+      <span class="font-mono text-[11px] uppercase tracking-wider text-stone-400 mr-1">Verdict:</span>
+      {verdicts.map((v, idx) => (
+        <button
+          type="button"
+          data-filter={v}
+          class={`filter-btn rounded-full border px-2.5 py-0.5 font-mono text-xs transition-colors ${
+            idx === 0
+              ? 'border-blue-700 bg-blue-700/10 text-blue-800 dark:border-cyan-500 dark:bg-cyan-500/15 dark:text-cyan-300'
+              : 'border-stone-300 dark:border-zinc-700 text-stone-600 dark:text-zinc-400 hover:border-stone-500'
+          }`}
+        >
+          {v}
+        </button>
+      ))}
+      <span id="exp-count" class="ml-auto font-mono text-xs text-stone-500 dark:text-zinc-400">
+        Showing {experiments.length} / {experiments.length}
+      </span>
+    </div>
   </div>
 
   <div id="exp-list" class="max-w-4xl">
@@ -41,20 +71,59 @@ const verdicts = ['All', 'Supported', 'Refuted', 'Mixed', 'Inconclusive'];
   </div>
 
   <script is:inline>
-    const buttons = document.querySelectorAll('.filter-btn');
+    const catBtns = document.querySelectorAll('.cat-btn');
+    const verdictBtns = document.querySelectorAll('.filter-btn');
     const cards = document.querySelectorAll('.exp-card');
-    buttons.forEach((btn) => {
+    const countEl = document.getElementById('exp-count');
+
+    let activeCat = 'All';
+    let activeVerdict = 'All';
+
+    const validCats = new Set(Array.from(catBtns, (b) => b.getAttribute('data-cat')).filter(Boolean));
+    const validVerdicts = new Set(Array.from(verdictBtns, (b) => b.getAttribute('data-filter')).filter(Boolean));
+    const params = new URLSearchParams(window.location.search);
+    const paramCat = params.get('category');
+    if (paramCat && validCats.has(paramCat)) activeCat = paramCat;
+    const paramVerdict = params.get('verdict');
+    if (paramVerdict && validVerdicts.has(paramVerdict)) activeVerdict = paramVerdict;
+
+    const inactiveCat = 'cat-btn rounded-lg border px-2.5 py-1 font-mono text-xs transition-colors border-stone-300 dark:border-zinc-700 text-stone-600 dark:text-zinc-400 hover:border-stone-500';
+    const activeCatCls = 'cat-btn rounded-lg border px-2.5 py-1 font-mono text-xs transition-colors border-blue-700 bg-blue-700/10 text-blue-800 dark:border-cyan-500 dark:bg-cyan-500/15 dark:text-cyan-300';
+    const inactiveVer = 'filter-btn rounded-full border px-2.5 py-0.5 font-mono text-xs transition-colors border-stone-300 dark:border-zinc-700 text-stone-600 dark:text-zinc-400 hover:border-stone-500';
+    const activeVer = 'filter-btn rounded-full border px-2.5 py-0.5 font-mono text-xs transition-colors border-blue-700 bg-blue-700/10 text-blue-800 dark:border-cyan-500 dark:bg-cyan-500/15 dark:text-cyan-300';
+
+    function renderFilter() {
+      let shown = 0;
+      cards.forEach((card) => {
+        const c = card.getAttribute('data-category');
+        const v = card.getAttribute('data-verdict');
+        const match = (activeCat === 'All' || c === activeCat) && (activeVerdict === 'All' || v === activeVerdict);
+        card.style.display = match ? 'block' : 'none';
+        if (match) shown += 1;
+      });
+      catBtns.forEach((b) => {
+        b.className = b.getAttribute('data-cat') === activeCat ? activeCatCls : inactiveCat;
+      });
+      verdictBtns.forEach((b) => {
+        b.className = b.getAttribute('data-filter') === activeVerdict ? activeVer : inactiveVer;
+      });
+      if (countEl) countEl.textContent = `Showing ${shown} / ${cards.length}`;
+    }
+
+    catBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
-        const target = btn.getAttribute('data-filter');
-        buttons.forEach((b) => {
-          b.className = 'filter-btn rounded-full border px-3 py-1 font-mono text-xs transition-colors border-stone-300 dark:border-zinc-700 text-stone-600 dark:text-zinc-400 hover:border-stone-500';
-        });
-        btn.className = 'filter-btn rounded-full border px-3 py-1 font-mono text-xs transition-colors border-blue-700 bg-blue-700/10 text-blue-800 dark:border-cyan-500 dark:bg-cyan-500/15 dark:text-cyan-300';
-        cards.forEach((card) => {
-          const v = card.getAttribute('data-verdict');
-          card.style.display = target === 'All' || v === target ? 'block' : 'none';
-        });
+        activeCat = btn.getAttribute('data-cat') || 'All';
+        renderFilter();
       });
     });
+
+    verdictBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        activeVerdict = btn.getAttribute('data-filter') || 'All';
+        renderFilter();
+      });
+    });
+
+    renderFilter();
   </script>
 </BaseLayout>

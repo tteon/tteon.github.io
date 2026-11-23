@@ -1,0 +1,110 @@
+---
+title: "Benchmark Failure Postmortem: Cosine Anisotropy (0.9412 Median), Unregistered Tools (0/12 QAT), and 146 Silent Cron 'Successes'"
+date: 2026-09-27
+category: "Verification, Code Graphs & Postmortems"
+host: "Kaggle 4×L4 · Local Cron · Neo4j / CodeGraph Audits"
+hypothesis: "Audit failures across local research pipelines are driven by identifiable harness, schema-registration, embedding, and logging bugs rather than intrinsic limits of LLMs or knowledge graphs."
+falsification: "If failed Kaggle 4×L4 QAT runs (0/12), Dev-10 unused graph tools (0/8), and DataLab daily pipelines show valid execution telemetry without config mismatches or silent error masking, failures reflect model/task difficulty rather than harness bugs."
+verdict: "Supported"
+keyMetric: "httpx median cos = 0.9412 · Kaggle QAT = 0/12 (32K overflow + missing tool) · DataLab 146/197 empty logged 'success'"
+takeaways:
+  - "Across 273,430 off-diagonal embedding pairs in kaggle-codegraph's httpx snapshot, raw vector similarity had a 0.9412 median (p95 = 0.9976), causing unrelated queries like 'SSE' to score cosine 1.000 against arbitrary symbols like 'Item'."
+  - "All 12 Kaggle 4×L4 QAT evaluation cells resolved 0/12 issues exclusively from harness bugs: a 32,768-token context overflow (32,769 > 32,768 when max_tokens stayed at 16K/4K), an unregistered 'search_similar_code' tool error crashing 8/8 graph/ontology runs, while earlier Dev-10 Arm C made 0/8 graph tool calls."
+  - "Auditing 197 production cron files in ~/lab/datalab surfaced a textbook silent failure: 197/197 runs wrote top-level status='success' even though 145/197 threw steps.neo4j_error (1 on 2026-02-08 plus 144/147 from 2026-04-16 onward) and 146/197 extracted 0 entities from gemini-cli (66 earlier gaps plus 80/80 consecutive runs since 2026-07-31)."
+soWhat: "Before blaming a model for 0% benchmark accuracy or trusting cron health dashboards, audit raw off-diagonal embedding distributions, assert tool-name registries against the runtime sandbox, fail cron status cleanly whenever DB writes or entity counts are zero, and track retracted/aborted jobs transparently in Beads."
+related:
+  - label: "Cryptographic Artifact Verification Pattern: 713/713 SHA-256 FinBench Audit"
+    href: "/experiments/2026-11-18-finbench-offline-verification/"
+  - label: "Complete Local Experiment Catalog & Remediation Backlog (yw-pow)"
+    href: "/archive/"
+beadsId: "yw-agn.8"
+repoUrl: "https://github.com/tteon/kaggle-codegraph"
+environment:
+  machine: "Kaggle 4× NVIDIA L4 (vLLM 0.19.1, gemma-4-31b-it-qat-w4a16) + Local cron host"
+  runtime: "swegemma 0.2.7 + OpenAI Agents SDK + datalab Python/Neo4j/gemini-cli pipeline"
+  dataset: "129 Kaggle codegraph tasks (367,985 nodes, 452,588 edges); 197 DataLab daily pipeline runs (2026-02..11)"
+  repeats: "8 evaluable Dev-10 tasks; 12 QAT cells; 197 daily cron captures"
+figures:
+  - src: "/figures/postmortem-anisotropy-and-silent-failures.png"
+    alt: "Left: CodeGraph httpx cosine similarity quantiles (median 0.941, p95 0.998). Right: DataLab 197 status='success' vs 145 Neo4j failures, 146 empty extractions, 0/12 QAT fixes, and 0/8 Dev-10 graph tool uses."
+    caption: "Figure 1. Left: Off-diagonal cosine similarity across 273,430 symbol pairs in httpx clusters near 0.941 (min 0.264, p95 0.998), drowning vector retrieval. Right: Raw artifact counts expose silent failures—197/197 DataLab logs claim 'success' despite 145 DB failures and 146 zero-entity runs, while QAT fails 12/12 on config/tool errors."
+tags: ["postmortem", "code-graph", "embedding-anisotropy", "harness-bugs", "observability"]
+summary: "Forensic postmortem across missed and collapsed local runs: severe code-graph vector anisotropy (0.9412), Dev-10 zero tool invocation, Kaggle QAT 0/12 sandbox crashes, DataLab's 146 silent cron failures, and withdrawn lab artifacts (OLMoE 2×, timeout=15)."
+---
+
+import Figure from '../../components/Figure.astro';
+import Diagram from '../../components/Diagram.astro';
+
+## 1. Motivation: Auditing What Actually Broke Instead of Discarding Failed Runs
+
+Not every experiment ends in a publishable win. Across our workspace, several promising benchmarks (`kaggle-codegraph`, `datalab`, `kdd2026-tutorial`, and early `seocho` runs) ended in `0%` scores, stalled loops, or quietly empty daily reports. Rather than silently deleting failed directories—or letting broken pipelines poison summary tables—we audited the raw trace files to separate **genuine negative findings** from **fixable engineering defects**.
+
+## 2. Hypothesis, Falsification & Experimental Mechanism
+
+We hypothesized (`Supported` at the forensic audit level) that every zero-score or stalled local benchmark stemmed from concrete harness/embedding/logging defects rather than unreadable tasks; falsified if raw logs showed clean execution and tool registration.
+
+<Diagram title="Four Root Causes Behind Collapsed or Invalidated Local Benchmarks" caption="Every failure traced back to concrete code or telemetry bugs rather than unreadable benchmarks: (1) uncalibrated vector spaces compressing all pairs >0.94 cosine; (2) unregistered tool names and 32K+1 context overflows; (3) swallowed Neo4j/CLI errors; (4) non-inert instrumentation and Cypher parameter typos.">
+  <svg viewBox="0 0 760 182" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Four harness postmortem root causes">
+    <rect x="14" y="18" width="174" height="144" rx="8" stroke="var(--svg-red)" stroke-width="1.6" fill="var(--svg-red)" fill-opacity="0.06"/>
+    <text x="101" y="42" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="11" font-weight="bold">1. Vector Anisotropy</text>
+    <text x="101" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10">273,430 httpx pairs</text>
+    <text x="101" y="88" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="10.5">Median cos: 0.9412</text>
+    <text x="101" y="108" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10">"SSE" → "Item" = 1.000</text>
+    <text x="101" y="136" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="9.5">Case-sensitive 'CALLS' bug</text>
+
+    <rect x="200" y="18" width="174" height="144" rx="8" stroke="var(--svg-amber)" stroke-width="1.6" fill="var(--svg-amber-stroke)" fill-opacity="0.07"/>
+    <text x="287" y="42" text-anchor="middle" fill="var(--svg-amber)" font-family="monospace" font-size="11" font-weight="bold">2. QAT 0/12 Crashes</text>
+    <text x="287" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10">vLLM max_ctx = 32,768</text>
+    <text x="287" y="88" text-anchor="middle" fill="var(--svg-amber)" font-family="monospace" font-size="10.5">28,673 + 4,096 = 32,769</text>
+    <text x="287" y="108" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10">Missing 'search_similar_code'</text>
+    <text x="287" y="136" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="9.5">Dev-10 Arm C called 0/8</text>
+
+    <rect x="386" y="18" width="174" height="144" rx="8" stroke="var(--svg-red)" stroke-width="1.6" fill="var(--svg-red)" fill-opacity="0.06"/>
+    <text x="473" y="42" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="11" font-weight="bold">3. DataLab Cron Trap</text>
+    <text x="473" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10">197/197: status="success"</text>
+    <text x="473" y="88" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="10.5">145/197 Neo4j errors</text>
+    <text x="473" y="108" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="10.5">146/197 0 entities</text>
+    <text x="473" y="136" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="9.5">Broken since Apr/Jul 2026</text>
+
+    <rect x="572" y="18" width="174" height="144" rx="8" stroke="var(--svg-blue)" stroke-width="1.6" fill="var(--svg-blue)" fill-opacity="0.07"/>
+    <text x="659" y="42" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="11" font-weight="bold">4. Retractions &amp; Stalls</text>
+    <text x="659" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10">seocho-02t: OLMoE retracted</text>
+    <text x="659" y="88" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10">timeout=15 param bug</text>
+    <text x="659" y="108" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10">KDD 21b8b76c stalled 10/270</text>
+    <text x="659" y="136" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="9.5">All logged cleanly in yw-pow</text>
+  </svg>
+</Diagram>
+
+## 3. Inspected Workspaces & Ground-Truth Audit Scope
+
+- **`kaggle-codegraph` (`2026-09-26..27`)**: `129` competition tasks (`FastAPI: 67, Rich: 48, Requests: 13, HTTPX: 1`), `367,985` nodes, `452,588` edges, plus `Dev-10`, `context-push-v2`, `docplus-v1/v2`, and Kaggle `4×L4` downloads (`qat-notebook-v1`, `description-ontology-qat-v1`).
+- **`datalab` Daily Cron (`2026-02-08..11-23`)**: `197` daily pipeline logs (`results/daily/pipeline_*.json`) plus financial KG evaluation JSONs (`n=3` hardcoded queries in `evaluator.py`).
+- **Additional Active Retractions & Stalls**: `openup/seocho` (`seocho-02t`), `seocho-room/seocho` (`seocho-e0ew`, `seocho-dp9x`, `expanded-20260911`), and `kdd2026-tutorial` (`21b8b76c` + stale `result_manifest.json`).
+
+## 4. Visual Evidence & Quantitative Findings
+
+<Figure
+  src="/figures/postmortem-anisotropy-and-silent-failures.png"
+  alt="CodeGraph cosine similarity quantiles and silent failure counts across DataLab cron, Kaggle QAT, and Dev-10."
+  caption="Figure 1. Left: Off-diagonal cosine similarity across 273,430 symbol pairs in httpx has a 0.9412 median, collapsing naive vector retrieval. Right: Auditing raw run JSONs exposes 145 Neo4j write errors and 146 empty LLM extractions inside 197 DataLab logs marked 'success', plus 12/12 QAT harness crashes and 0/8 Dev-10 graph calls."
+/>
+
+| Workspace & Experiment | Reported / Top-Level Symptom | True Root Cause Verified in Raw Artifacts | Status & Remediation Bead |
+|---|---|---|---|
+| **`kaggle-codegraph` Data Audit** | `"SSE"` hits `Item` at `cosine = 1.000` | Embedding anisotropy (`median=0.9412`); `100%` edges labeled `"calls"` (`482/1,618` declaration containment); `"CALLS"` uppercase fails | Documented in `yw-agn.8`; replace raw cosine top-K |
+| **`kaggle-codegraph` `dev10-ablation-v1`** | Arm B = `4/8`, Arm C (+Graph) = `4/8` | Arm C executed **`0/8` graph tool calls**; `2/10` controls (`requests_6629/7328`) non-discriminating | Do not cite as Graph evaluation |
+| **`kaggle-codegraph` `docplus-v1/v2`** | `v1` `1/3`, `v2` `fastapi_15588` fails (`2.29×` tok) | `v1` returned `0` field docs; `v2` fixed exposure (`18` items) then exhausted `35` calls fighting `edit_file` errors | Keep owner expansion; fix edit loop |
+| **`kaggle-codegraph` `4×L4 QAT` (`v1` & `desc`)** | **`0/12`** valid fixes (`patch_bytes=0`) | `32,768` context cap exceeded (`28,673 + 4,096 = 32,769`); `8/8` graph/onto cells threw `Tool 'search_similar_code' not found` | **`yw-pow.1`** (`open`) |
+| **`datalab` Daily News→KG (`197` logs)** | `197/197` JSONs say **`"status": "success"`** | **`145/197`** hit `DatabaseNotFound`/`AuthRateLimit` (`1` on `02-08`, `144/147` from `04-16`); **`146/197`** empty extractions (`80/80` since `07-31`) | **`yw-pow.2`** (`open`) |
+| **`kdd2026` `21b8b76c` & Manifest** | `270`-case run incomplete | Stalled in `running` at `10/270`; `result_manifest.json` `primary_proposal_result` points to stale `4d1d217e` instead of `2f8ea4d3` | **`yw-pow.5`** (`open`) |
+| **`seocho` `02t / dp9x / e0ew`** | Apparent `2×` OLMoE routing effect & GRBench `0`s | Instrumentation artifact `2×` effect (`02t` **retracted**); `session.run(..., timeout=15)` was Cypher param, not tx timeout; workspace colon/hyphen mismatch zeroed `raw16k-v6` | **`yw-pow.6`** (`blocked` / retracted) |
+
+## 5. Mechanism Breakdown: Why Silent Failures Persist Unless Checked at Raw Artifact Level
+
+1. **Top-level status lies when sub-steps swallow exceptions**: Look at `datalab`'s latest November log (`pipeline_20261123_*.json`): `"status": "success"`, `"steps": {"total_docs": 20, "llm_extractions": 20, "neo4j_error": "{neo4j_code: Neo.ClientError.Security.AuthenticationRateLimit}"}`, alongside `extractions` containing `0` entities across `146` total runs (`66` early gaps in `02-08..07-22` after June–`07-30` extracts, followed by `80/80` consecutive zero-entity runs since `2026-07-31`). Without an assertion failing `status` whenever `neo4j_error` is non-null or `sum(len(e.entities)) == 0`, cron monitoring stays falsely green across months.
+2. **Unregistered tools & reserve math kill offline GPU batch jobs cleanly (`0/12`)**: In `description-ontology-qat-v1`, reserving `4,096` output tokens atop `28,673` input tokens (`32,769`) crossed vLLM's exact `32,768` context ceiling on line 1, while requesting `search_similar_code` aborted the agent inside the Kaggle sandbox before emitting a single line of code. Running a 1-task preflight sandbox smoke check against the *exact* container manifest (`32,768` cap & tool list) catches both failures locally in seconds.
+
+## 6. Scope Limits, Verdict Boundaries & Remediation Backlog
+
+- **Audit verdict vs underlying task verdict**: This post carries verdict `Supported` solely for the *forensic diagnosis hypothesis* (raw trace inspection confirmed explicit engineering/harness failures behind every collapsed score); the underlying crashed or retracted runs themselves remain unrescued (`Inconclusive` / retracted) and are never counted as negative capability results.
+- **Public tracking via Beads (`yw-pow`)**: None of the failed or retracted experiments above are quietly deleted or reframed as partial wins; all seven actionable remediation bundles remain open/blocked under Beads epic **`yw-pow`** and displayed publicly on our [Complete Catalog & Backlog](/archive/) page.

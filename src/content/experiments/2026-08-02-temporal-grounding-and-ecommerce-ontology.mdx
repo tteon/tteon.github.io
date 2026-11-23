@@ -1,0 +1,110 @@
+---
+title: "Where Structured Ontologies Actually Win: Post-Cutoff Temporal Rescues (5.9% → 100%), −81% E-Commerce Tokens, and Answerability Traps"
+date: 2026-08-02
+category: "Ontology & GraphRAG Construction"
+host: "Local Harness + MARA Cloud (MiniMax-M2.5 / kimi-k3)"
+hypothesis: "While broad free-text ontology prompts often bloat general QA, bounded domain schemas excel at two concrete bottlenecks—post-cutoff temporal facts and dense attribute disambiguation—provided retrieval preserves real DB records instead of relying on prose fallbacks."
+falsification: "If grounded retrieval fails to eliminate post-cutoff hallucinations, structured schemas fail to beat raw marketplace text / naive RAG by >= 70% token reduction, or role-decomposed multi-agent pipelines beat a single typed agent cleanly, the bounded-ontology thesis is revised."
+verdict: "Mixed"
+keyMetric: "FY2025 post-cutoff accuracy: 5.9% → 100% (34/34) · SOL tokens −81.4% (98% acc, 0% hallu) · Real Opik answerability 0.30 (vs 0.80 proxy)"
+takeaways:
+  - "On 34 FY2025 SEC filings published after MiniMax-M2.5's parametric cutoff (sec-temporal, n=102 total), closed-book accuracy collapses to 5.9% (2/34) with confident prior-year guessing, whereas ontology-grounded retrieval + chunk fallback hits 100.0% (102/102, zero wrong-year errors)."
+  - "Diagnosing why Opik AnswerPath initially reported 0.80 E2E answerability caught a classic measurement mirage: checking actual DB result sets revealed only 3/10 (0.30) queries returned ≥1 graph record—the other 5 succeeded only via LLM priors or pass-through text, while answer-shape formatting (answershape_wide) raised F1 from 0.146 to 0.629."
+  - "In SOL e-commerce benchmarks (kimi-k3, n=200/exp), compact JSON-LD ontologies cut prompt tokens 81.4% (2,313 → 431) and eliminated hallucinations (9% → 0%; vs Naive RAG 11% → 0%), yet splitting into a 4-role multi-agent chain collapsed free-text pass rates from 90% → 50% and multiplied typed JSON tokens 3.79×–4.23× without beating a unified agent."
+soWhat: "Deploy structured ontologies for high-churn temporal facts and disambiguated product/domain attributes—always keeping chunk fallback active (`keepraw`) and measuring real DB record hits instead of answer-string proxies—and keep the execution path inside one strongly typed agent unless strict separation is mandatory."
+related:
+  - label: "Companion GraphRAG Compression Study: Text vs LPG vs Verbalized RDF"
+    href: "/experiments/2026-09-02-modality-paradox-and-construction-tax/"
+  - label: "Cross-Model Multi-Agent Collapse Across 1,260 MARA FinBench Runs"
+    href: "/experiments/2026-09-03-mara-single-vs-multiagent-and-repair/"
+beadsId: "yw-agn.3"
+repoUrl: "https://github.com/tteon/seocho"
+environment:
+  machine: "Local worktrees (wt-h1-sdk, openup/seocho-onto-eng, ~/lab/sol)"
+  runtime: "MiniMax-M2.5 on MARA + kimi-k3 via OpenAI Agents SDK + DozerDB/Neo4j"
+  dataset: "SEC EDGAR FY2025 (n=102, 34 stale); FinDER Opik subset (n=10); GraphRAG-Bench (n=25..50); SOL catalog (20 products × 5 queries)"
+  repeats: "102 paired temporal queries; 200 calls each (SOL Exp 1 & 3); 10×3×2 multi-agent runs (SOL Exp 2)"
+figures:
+  - src: "/figures/temporal-and-ecommerce-ontology.png"
+    alt: "Left: SEC closed-book vs grounded accuracy (post-cutoff 5.9% to 100%) alongside Opik 0.80 proxy vs 0.30 real DB answerability. Right: SOL Exp 1, Exp 3, and Exp 2 accuracy comparison."
+    caption: "Figure 1. Left: Grounded Graph+Chunk retrieval turns stale FY2025 parametric failure (2/34) into 34/34 accuracy, while real record auditing catches Opik's 0.80 proxy illusion (only 0.30 true DB hits). Right: Structured JSON-LD beats both raw HTML/text (91% → 98%, −81.4% tokens) and naive bigram RAG (88% → 100%), while 4-role decomposition regresses or bloats cost."
+tags: ["temporal-rag", "sec-edgar", "ontology", "e-commerce", "answerability", "keepraw"]
+summary: "Where bounded ontologies consistently pay off—overcoming stale LLM parametric priors (5.9% → 100%) and compressing e-commerce attributes (−81.4% tokens, 0% hallucination)—paired with clean falsifications of proxy answerability and naive 4-agent splitting."
+---
+
+import Figure from '../../components/Figure.astro';
+import Diagram from '../../components/Diagram.astro';
+
+## 1. Motivation: Separating Genuine Ontology Utility From Proxy Illusions
+
+If unconstrained schema injection often hurts general Text2SQL ([Auto-Ontology Tier 3 regression](/experiments/2026-11-15-auto-ontology-postgres-vs-neo4j/)) and hurts generic construction (`LoG2026` Finding 1.4), **where do explicit ontologies genuinely earn their keep?** Auditing three independent local workspaces (`wt-h1-sdk`, `openup/seocho-onto-eng`, and `sol`) identifies two high-leverage regimes alongside two classic illusions:
+
+1. **Temporal Prior Resistance (`sec-temporal`, `n=102`)**: Overcoming pretraining cutoff hallucinations on fresh FY2025 SEC 10-K numbers.
+2. **Attribute Disambiguation (`sol` Exp 1 & 3, `n=200` each)**: Compressing noisy marketplace specs cleanly without hallucinated MOQ or benchmark figures—while checking if multi-agent decomposition helps (`sol` Exp 2).
+3. **The Measurement Mirage (`opik-answerpath` & `gbench-keepraw`)**: Detecting when "graph accuracy" actually came from answer-text fallbacks rather than graph queries returning records.
+
+## 2. Hypothesis, Falsification & Experimental Mechanism
+
+We hypothesized that bounded domain schemas excel at post-cutoff temporal facts and dense attribute disambiguation once chunk fallbacks prevent empty-graph failures (`Mixed`: Exp 1 cuts prompts `−81.4%` past the `70%` target, whereas Exp 3 vs compact bigram RAG trims `−64.6%` (`1,244 → 440` tokens), just under `70%`, and `opik` reveals `0.30` true DB hit rate behind a `0.80` proxy).
+
+<Diagram title="Why Text-Based Proxies Hide Empty Graph Retrieval (and How Answer-Shape + Chunk Fallback Rescue)" caption="In opik-answerpath (n=10), 7 of 10 Cypher queries returned 0 records due to schema mismatch—yet prose answers scored 0.80 by guessing or reading attached chunks. Adding explicit answerability gating and AnswerShape contracts raises strict F1 from 0.146 to 0.629.">
+  <svg viewBox="0 0 760 174" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Opik AnswerPath proxy leak vs grounded path">
+    <rect x="14" y="20" width="222" height="132" rx="10" stroke="var(--svg-red)" stroke-width="1.6" fill="var(--svg-red)" fill-opacity="0.06"/>
+    <text x="125" y="46" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="11.5" font-weight="bold">7 / 10 Empty Cypher Queries</text>
+    <text x="125" y="72" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">Entities exist (65 nodes total)</text>
+    <text x="125" y="92" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">Cypher targets unpopulated edges</text>
+    <text x="125" y="114" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="10.5">Real DB Record Rate: 0.30</text>
+    <text x="125" y="136" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="10">Masked as 0.80 by text proxy!</text>
+
+    <path d="M238 86 L268 86" stroke="currentColor" stroke-width="1.6"/>
+    <rect x="270" y="20" width="222" height="132" rx="10" stroke="var(--svg-amber)" stroke-width="1.6" fill="var(--svg-amber-stroke)" fill-opacity="0.07"/>
+    <text x="381" y="46" text-anchor="middle" fill="var(--svg-amber)" font-family="monospace" font-size="11.5" font-weight="bold">Chunk Fallback + Answer Gate</text>
+    <text x="381" y="72" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">Native Chunk fallback: 6/10 hits</text>
+    <text x="381" y="92" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">gbench-keepraw (Novel): 0.19 → 0.50</text>
+    <text x="381" y="114" text-anchor="middle" fill="var(--svg-amber)" font-family="monospace" font-size="10.5">Abstention gate: 0/8 silent wrong</text>
+    <text x="381" y="136" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="10">Closed-book vector leaked 3/8</text>
+
+    <path d="M494 86 L524 86" stroke="currentColor" stroke-width="1.6"/>
+    <rect x="526" y="20" width="220" height="132" rx="10" stroke="var(--svg-green)" stroke-width="1.6" fill="var(--svg-green-fill)" fill-opacity="0.12"/>
+    <text x="636" y="46" text-anchor="middle" fill="var(--svg-green)" font-family="monospace" font-size="11.5" font-weight="bold">Typed Contract + Temporal</text>
+    <text x="636" y="72" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">AnswerShape wide F1: 0.146 → 0.629</text>
+    <text x="636" y="92" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">Numeric lookup F1: 0.261 → 1.000</text>
+    <text x="636" y="114" text-anchor="middle" fill="var(--svg-green)" font-family="monospace" font-size="10.5">FY2025 SEC facts: 5.9% → 100%</text>
+    <text x="636" y="136" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="10">102/102 zero wrong-year errors</text>
+  </svg>
+</Diagram>
+
+## 3. Environment & Verification Hygiene
+
+- **`wt-h1-sdk/docs/experiments/sec-temporal/`**: `102` EDGAR facts (`68` fresh, `34` FY2025 post-cutoff) evaluated on `MiniMax-M2.5` (`MARA`) with Neo4j + `chunk_fallback=1`.
+- **`wt-h1-sdk` / `openup/seocho-onto-eng` (`opik-answerpath` & `gbench-keepraw`)**: `n=10` FinDER AnswerPath inspection, `answerability_gate` (`n=16`: `8` covered + `8` uncovered), and `GraphRAG-Bench` Novel/Med (`n=25` each) checking ADR-0104 serializer retention (`seocho` vs `seocho_keepraw` vs `graphiti_episodes` vs `vector`).
+- **`sol` E-Commerce Suite (`exp1`, `exp2`, `exp3`)**: `kimi-k3` (`temp=1`, OpenAI Agents SDK) on `20` products × `5` query types (`moq`, `weight`, `factory`, `benchmark`, `recommend`) + `exp2` `10`-product pipeline. *(Important exclusion: hardcoded mock TypeScript engines `empiricalOntologyExperiment.ts` and `run_real_empirical_benchmark.js` in `sol/` generate fake random numbers and are completely excluded.)*
+
+## 4. Visual Evidence & Quantitative Results
+
+<Figure
+  src="/figures/temporal-and-ecommerce-ontology.png"
+  alt="SEC temporal post-cutoff grounding and Opik real answerability alongside SOL Exp 1-3 e-commerce accuracy."
+  caption="Figure 1. Left: Grounding reverses MiniMax-M2.5's 5.9% (2/34) FY2025 closed-book collapse to 100.0% (34/34), while inspecting DB result counts exposes Opik's 0.80 answer-proxy score as only 0.30 true graph retrieval. Right: Compact JSON-LD cuts SOL prompt tokens 81.4% with 0% hallucination (Exp 1 & 3), while splitting into 4 free-text agents drops pass rate 90% → 50% (Exp 2)."
+/>
+
+| Experiment / Slice | Baseline Condition | Grounded / Ontology Condition | Verified Result |
+|---|---|---|---|
+| **SEC Temporal All (`n=102`)** | Closed-book: `41.2%` (`42/102`) | Grounded + chunk fallback: **`100.0%`** (`102/102`) | Zero wrong-year errors |
+| **SEC Stale FY2025 Cutoff (`n=34`)** | Closed-book: `5.9%` (`2/34`) | Grounded + chunk fallback: **`100.0%`** (`34/34`) | Fixed cutoff refusals & FY2024 priors |
+| **Opik Answerability (`n=10`)** | Prose answer proxy: `0.80` | Real DB `>=1` record: **`0.30`** (`3/10`) | Chunk fallback hit `6/10` (`0.60`) |
+| **Opik AnswerShape (`n=10`)** | Unshaped: `0.0` exact / `0.146` F1 | `answershape_wide`: **`0.60`** exact / **`0.629`** F1 | `numeric_lookup` F1 `0.261 → 1.000` |
+| **GraphRAG-Bench Novel (`n=25`)** | Base `seocho`: `0.191` AC | `seocho_keepraw`: **`0.495`** AC (`vector 0.403`) | Proves chunk attachment drives ADR-0104 |
+| **SOL Exp 1 (`n=200` calls)** | Raw text (`2,313` tok/Q, `91%`, `9%` hallu) | JSON-LD (`431` tok/Q, **`98%`**, **`0%`** hallu) | `−81.4%` prompt tokens, `−40.1%` cost |
+| **SOL Exp 3 (`n=200` calls)** | Naive Bigram RAG (`1,244` tok, `88%`, `11%` hallu) | JSON-LD (`440` tok, **`100%`**, **`0%`** hallu) | `2.83×` fewer tokens (`−57.1%` cost) |
+| **SOL Exp 2 Multi-Agent (`n=10`)** | Unified Agent (`90%`, `1` call, `$0.283`) | 4 Free-Text: `50%` (`$0.487`) / 4 JSON `n=9`: `88.9%` | Typed JSON saves accuracy vs free text, `3.79–4.23×` tokens |
+
+## 5. Mechanism Breakdown: Why Bounded Attribute Maps & Chunks Coexist
+
+1. **Concrete FY2025 prior failure (`sec-temporal` & Opik `65`-node subgraph)**: Without grounded context, `MiniMax-M2.5` explicitly refused or substituted FY2024 figures on Apple (`"FY2025 ... has not yet been completed ... reported $391.04 billion"` vs true `$416,161 million`) and Nvidia (`$96.7B` vs true `$215,938M`). Notably, inside the grounded log itself—mirroring our `65`-node Opik subgraph where only `3/10` (`0.30`) Cypher queries matched populated edges—structured Cypher returned empty results on several FY2025 revenue queries, meaning **`chunk_fallback=1` (vector chunks attached via Document nodes) rescued the `34/34` score** just as `keepraw` did on Novel (`0.191 → 0.495`). Meanwhile in the `n=16` answerability gate, strict abstention yielded `0/8` silent wrong answers on uncovered queries whereas closed-book vector retrieval leaked `3/8` hallucinations.
+2. **Distinguishing genuine ontology cleanup from baseline disparity (`sol`)**: In `sol` Exp 1 (`−81.4%` tokens vs raw HTML/text listings), raw product pages mixed distractor benchmark noise with factory quotes, causing `35%` hallucination on `benchmark` queries (`65%` acc → `100%` under normalized JSON-LD, verified across `30` full trace audits in `audit_exp1_verify.jsonl`); against compact 500-char bigram RAG (Exp 3), JSON-LD eliminated `11%` hallucination cleanly (`100%` vs `88%`) and cut tokens `−64.6%` (`1,244 → 440`, slightly short of the `≥ 70%` Exp 1 benchmark bar). Meanwhile, Exp 2 suffered an artifact hygiene bug we surfaced during audit: a partial `RUN_ONLY=C` overwrite dropped product `P09` in `exp2_results.json` (`n=9` vs `docs/EXPERIMENTS.md`'s Run 1 `n=10` `90%` / `4.23×` tokens), though both runs confirm multi-agent decomposition never beat unified `A`'s `90%`.
+
+## 6. Scope Limits & Next Experiment
+
+- **Toy vs production scale (`sol` & `opik`)**: SOL used synthetic marketplace fixtures averaging `2.3K` prompt tokens rather than real `48K+`-character 1688 DOM captures, and Exp 3 compared only against simple 500-char bigram RAG rather than dense hybrid retrieval + reranking.
+- **Unaligned Answer-Path synonym trade-off**: In `opik-answerpath/grounding_embedding_isolated.txt`, synonym grounding tied baseline `4/5 vs 4/5`, fixing `location` while breaking `leadership`. Keeping raw chunks linked directly to canonical entity keys (`keepraw` + strict answerability refusal `0/8` silent wrong) remains the safest production pattern.

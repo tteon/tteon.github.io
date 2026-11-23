@@ -1,6 +1,7 @@
 ---
 title: "Parallel Runtime Cuts a Global 3-Hop Query 4.11× on Aura — and Does Nothing for Lookups"
 date: 2026-11-14
+category: "Graph Runtime & Storage"
 host: "Neo4j Aura"
 hypothesis: "Routing heavy global 3-hop analytics and supernode fan-out queries to Pipelined/Parallel runtimes significantly lowers wall latency over Slotted, while point lookups remain network-RTT bound."
 falsification: "If Parallel fails to outperform Slotted on global 3-hop traversals (W4) or produces inconsistent result digests across runtimes, runtime-aware routing is refuted."

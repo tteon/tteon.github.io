@@ -1,0 +1,109 @@
+---
+title: "Single-Agent Direct Execution Beats Multi-Agent Handoffs Across 1,260 MARA FinBench Runs — and Auto-Repair Pays Negative ROI"
+date: 2026-09-03
+category: "Agent Interfaces & Coordination"
+host: "MARA Cloud API + Local DozerDB/Neo4j"
+hypothesis: "Splitting Text2Cypher FinBench execution across specialized planner/worker/verifier agents with typed JSON handoffs and automatic query repair improves accuracy and token efficiency across scales (SF1 → SF100)."
+falsification: "If direct single-agent execution beats typed/envelope multi-agent decomposition across models, auto-repair spends extra tokens/calls without net correct answers, or high-effort DeepSeek models invert engineered gains, naive multi-agent splitting is refuted."
+verdict: "Refuted"
+keyMetric: "Stage C (n=1,260): Direct beats Multi across all 7 model-effort cells · Repair: +8 calls / +289 hits / −1 answer"
+takeaways:
+  - "Across 1,260 Stage C FinBench episodes spanning gpt-oss-120b (low/med/high), DeepSeek-V3.1/V3.2, gemma-4-31B, and MiniMax-M2.7, single direct execution outperformed typed and envelope multi-agent handoffs in every single configuration (e.g. gpt-oss-high 51/60 vs 27/60; DeepSeek-V3.2 45/60 vs 15/60)."
+  - "Across 18 paired repair-authority cells, granting an automatic query repair loop spent +8 model calls, +9,795 prompt tokens, and +289 DB hits per suite for a net −1 correct answer (negative ROI)—largely because strict verifiers rejected valid answers (RQ2 false negatives: 30/30 on gpt-oss-low)."
+  - "Scale factor amplification hits unevenly (RQ1, 494 pairs): well-anchored customer inflow scans stay 1.02× (47 → 48 DB hits from SF1 to SF100), whereas UBO chains and guarantee paths explode 95.68× and 99.7×."
+soWhat: "Give one capable tool-calling agent typed DB schemas, disclosure flags, and strict row/budget caps rather than chaining extra planner/handoff/repair subagents on top of every query; test every interface tweak against high-reasoning models (`DeepSeek-V3.2` reversed `76.9%` naive vs `69.2%` engineered)."
+related:
+  - label: "When Multi-Agent Coordination IS Needed: BDI RDF + Beads Conflict Arbitration"
+    href: "/experiments/2026-11-24-bdi-agent-ontology-beads-synergy/"
+  - label: "ICML Companion: Interactive PlannerAgent Collapse (0.277 vs 0.659)"
+    href: "/experiments/2026-04-27-icml-factorial-and-judge-swap/"
+beadsId: "yw-agn.5"
+repoUrl: "https://github.com/tteon/seocho"
+environment:
+  machine: "MARA Cloud Inference API + Local DuckDB-generated DozerDB (SF1: 4K nodes; SF100: 360K nodes / 2.59M edges)"
+  runtime: "AIsummit26 Stage B/C suite + AIEngineerNY26 FinBench E1–E4 harness + Neo4j OTel Tempo tracing"
+  dataset: "10 FinBench AML/KYC/UBO/Payment queries at SF1, SF10, SF100"
+  repeats: "1,260 Stage C episodes (7 model-effort cells × 3 arms × 2 SF × 10 Q × 3 rep) + 234 E1 + 104 E2 + 52 E4 episodes"
+figures:
+  - src: "/figures/mara-single-vs-multiagent.png"
+    alt: "Left: Stage C Direct vs Multi-Typed vs Multi-Envelope correct counts across 6 displayed model-effort cells (of 7 total across n=1,260). Right: AIEngineerNY26 E1/E2/E4 gpt-oss gains vs DeepSeek-V3.2 reversal."
+    caption: "Figure 1. Left: Direct single-agent execution beats multi-agent handoff topologies in every Stage C configuration across 6 plotted model-effort groups (7 total cells incl. gpt-oss low in table below; max 60 per bar; MiniMax-M2.7 used 1,200/4,000 token budget). Right: Whole-stack interface engineering helps gpt-oss-120b (82.9% → 92.3%, zero silent truncations) yet inverts on DeepSeek-V3.2 (76.9% naive vs 69.2% engineered)."
+tags: ["multi-agent", "finbench", "mara", "repair-loop", "interface-engineering"]
+summary: "Synthesizing AIsummit26 Stage C (n=1,260), RQ1/RQ2, 18-cell repair-loop negative ROI, and AIEngineerNY26 E1–E4: proving why one well-tooled agent beats handoff chains and when heavy contracts backfire on reasoning models."
+---
+
+import Figure from '../../components/Figure.astro';
+import Diagram from '../../components/Diagram.astro';
+
+## 1. Motivation & Open Question
+
+Multi-agent designs look modular on architecture diagrams: separate a Planner, a Cypher Writer, and a Repair Verifier, pass JSON contracts between them, and let an automatic retry loop catch DB errors. To test whether modularity survives live FinBench AML/KYC workloads at SF1–SF100 scales (`4,083` → `360,483` nodes), we executed pre-registered multi-model sweeps across `AIsummit26` (`1,260` episodes + `494` RQ1 pairs + `18` repair cells) and `AIEngineerNY26` (`390` episodes).
+
+## 2. Hypothesis, Falsification & Experimental Mechanism
+
+We hypothesized that splitting Text2Cypher FinBench execution across specialized agents with auto-repair loops improves accuracy; `Refuted` because handoff serialization taxes, length stops, and verifier false negatives caused single-agent direct execution to dominate across all 7 Stage C configurations.
+
+<Diagram title="Why Single Direct Execution + Guardrails Beats Chained Handoffs + Blind Auto-Repair" caption="In Stage C, splitting one query into multi_typed or multi_envelope handoffs introduced schema-serialization failures (32 StructuredOutputErrors on MiniMax; 95% tokens spent in reasoning), while overly strict verifiers rejected valid answers and triggered costly DB retry loops.">
+  <svg viewBox="0 0 760 186" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Single direct agent vs multi-agent handoff and auto-repair loop">
+    <rect x="14" y="18" width="336" height="148" rx="10" stroke="var(--svg-blue)" stroke-width="1.8" fill="var(--svg-blue)" fill-opacity="0.06"/>
+    <text x="182" y="42" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="11.5" font-weight="bold">Direct Single Agent + Stack Disclosure</text>
+    <text x="182" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">1 agent · direct schema + row caps</text>
+    <text x="182" y="90" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="10.5">Stage C: 45–51/60 (gpt-oss / V3.2 / M2.7)</text>
+    <text x="182" y="114" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">AIE E1 gpt-oss: 92.3% (0 silent truncations)</text>
+    <text x="182" y="140" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="10">Flat ~4.1–4.3s p50 across SF1 → SF100</text>
+
+    <rect x="378" y="18" width="368" height="148" rx="10" stroke="var(--svg-red)" stroke-width="1.6" fill="var(--svg-red)" fill-opacity="0.06"/>
+    <text x="562" y="42" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="11.5" font-weight="bold">Multi-Agent Handoffs + Blind Auto-Repair</text>
+    <text x="562" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">Extra hops amplify length stops &amp; JSON errors</text>
+    <text x="562" y="90" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="10.5">Stage C Multi: 15–36/60 (always trails Direct)</text>
+    <text x="562" y="114" text-anchor="middle" fill="var(--svg-amber)" font-family="monospace" font-size="10.5">Repair ROI: +8 calls, +9.8K tok, −1 correct</text>
+    <text x="562" y="140" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="10">Strict verifiers triggered false rejections</text>
+  </svg>
+</Diagram>
+
+## 3. Environment & Protocol Hygiene
+
+- **`AIsummit26` Stage C (`2026-09-03`)**: DuckDB FinBench generator (`finbenchsf1v2`: `4,083` nodes, `27,454` edges; `finbenchsf100v2`: `360,483` nodes, `2,587,163` edges). Seven model-effort configurations × `3` arms (`direct_single`, `multi_typed`, `multi_envelope`) × `2` scales (`SF1, SF100`) × `10` queries × `3` repeats = **`1,260` valid episodes** (`0` HTTP 429s, OTel Tempo traces validated). Note: `AIsummit26-q92` (High-Hub SF regime) remains unexecuted and is tracked in Beads `yw-pow.4`, while earlier `invalid_*` HTTP-429 directories were strictly excluded.
+- **`AIEngineerNY26` E1–E4 (`2026-08-08`)**: DozerDB `5.26.3` (`finbenchl1/l10/l100`) comparing `naive` (label schema, JSON, undiscounted truncation) vs `engineered` (ontology schema, CSV, disclosure, row cap `50`).
+
+## 4. Visual Evidence & Quantitative Results
+
+<Figure
+  src="/figures/mara-single-vs-multiagent.png"
+  alt="Stage C Direct vs Multi-Typed/Envelope across 6 displayed model-effort configurations and AIE E1/E2/E4 accuracy comparisons."
+  caption="Figure 1. Left: Direct single-agent execution beats both typed and envelope handoff architectures across all 1,260 Stage C MARA runs (6 of 7 cells plotted; gpt-oss low in table below). Right: Structured interface engineering improves gpt-oss-120b in E1 (92.3% vs 82.9%) and holds flat across fleet concurrency (E3), yet reverses on DeepSeek-V3.2 (76.9% naive vs 69.2% engineered)."
+/>
+
+### Stage C (`n=1,260`): Direct vs Multi-Agent Handoff & Verifier False Negatives
+
+| Model & Token Budget | `direct_single` (/60) | `multi_typed` (/60) | `multi_envelope` (/60) | Verifier False Negatives | Key Failure Pattern |
+|---|---|---|---|---|---|
+| `gpt-oss-120b` (`low`, `500/1000`) | **`48`** | `15` | `15` | `30 / 30` | `low` reasoning + handoff fails schema |
+| `gpt-oss-120b` (`medium`, `500/1000`) | **`48`** | `33` | `33` | `42 / 66` | Verifier rejects valid candidate paths |
+| `gpt-oss-120b` (`high`, `500/1000`) | **`51`** | `27` | `27` | `15 / 54` | `length_stops` (`21` at SF100 multi) |
+| `DeepSeek-V3.1` (`500/1000`) | **`33`** | `24` | `24` | `12 / 48` | `24` multi-agent handoff errors |
+| `DeepSeek-V3.2` (`500/1000`) | **`45`** | `15` | `15` | `12 / 30` | Direct triples multi (`45 vs 15`) |
+| `gemma-4-31B-it` (`500/1000`) | **`42`** | `36` | `36` | `21 / 72` | All `18` errs: missing workspace scope |
+| `MiniMax-M2.7` (`1200/4000` adj.) | **`45`** | `21` | `22` | `18 / 43` | `95%` reasoning share; `32` schema errors |
+
+### Scale Sensitivity (RQ1), Repair ROI, & Interface Regimes (`AIE E1–E4`)
+
+| Experiment / Metric | Baseline / Scale 1 | Comparison / Scale 100 | Quantitative Finding |
+|---|---|---|---|
+| **RQ1 Anchored Lookups (`customer_inflow`)** | `47` DB hits (`SF1`) | `48` DB hits (`SF100`) | **`1.02×` growth** — anchored scans scale O(1) |
+| **RQ1 Chain Traversal (`guarantee_chain`)** | `9,720` DB hits (`SF1`) | `969,065` DB hits (`SF100`) | **`99.7×` growth** (UBO `2,514 → 240,532`, `95.68×`) |
+| **Repair Authority (`18` paired cells)** | No repair | Auto-repair enabled | **`+8` calls, `+9,795` in tok, `+289` hits → `−1` answer** |
+| **AIE E1 (`gpt-oss agg`, `n=234`)** | Naive `82.9%` (`9` silent trunc, p50 `9.45s`) | Engineered **`92.3%`** (`0` silent, **`4.34s`**) | Flat latency vs `2.6×` naive slowdown |
+| **AIE E2 (`rows` ban agg, `n=104`)** | Naive `25.0%` (`34` silent trunc) | Engineered `34.6%` (`12` silent, `22.4K` tok) | Both collapse (`<35%`), token crossover refuted |
+| **AIE E4 (`DeepSeek-V3.2 agg`, `n=52`)** | Naive **`76.9%`** (`p50 ~29s`) | Engineered `69.2%` (`p50 48–52s`, `2` silent) | **Model reversal**: heavy CSV/guardrails slowed V3.2 |
+
+## 5. Mechanism Breakdown: Why Handoffs, Auto-Repair & Heavy Contracts Invert
+
+1. **Reasoning budget vs multi-agent envelope splitting**: In Stage B effort sweeps (`N=180`), boosting `gpt-oss-120b` from `low → high` left `direct` flat (`16/20`), inflated completion tokens `4.8×` (`63,553 → 306,734`), and caused `26` length-limit stops at `high` inside multi-agent envelopes.
+2. **Verifier false negatives turn auto-repair negative-ROI**: Across `RQ2`, verifiers frequently flagged valid `Direct`/`Multi` queries as incomplete (`12–42` false negatives per arm), pushing a repair agent to issue additional DB queries without improving accuracy (`−1` net correct across `18` paired cells).
+3. **Why DeepSeek-V3.2 reversed in E4 & E2b**: Requiring strict CSV row caps + ontology guardrails helped `gpt-oss-120b` cleanly (`0` silent truncations vs `9`), yet `DeepSeek-V3.2` spent `48–52` seconds per episode over-thinking compliance (`2` silent truncations), whereas `custom JSON` beat `CSV` in E2b (`2/6` in `11.4s` / `1,825` out tok vs `1/6` in `38.1s` / `9,525` out tok).
+
+## 6. Scope Limits & Open Beads Work
+
+- **Missing High-Hub FinBench regime**: `AIsummit26` Protocol Stage C's high-hub supernode anchor-band block (`AIsummit26-q92`) was left unexecuted (`yw-pow.4`), and earlier `observability` live tests (`seocho-observability-20261011`) exposed `0/24` `DeepSeek-V3.2` completions (all `24/24` adaptive runs crashed; `131/360` total errors).
+- **Ontology Mapping Pilot v1 (`AIsummit26-uqa`, `n=24`)**: Improved gold match `4/12 → 8/12` on `gemma-4-31B-it` but remained `Inconclusive` after breaching the pre-registered `1.5×` prompt token cap (`2.21×`).

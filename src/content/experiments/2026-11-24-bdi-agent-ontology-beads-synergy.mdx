@@ -1,6 +1,7 @@
 ---
 title: "Preventing Multi-Agent Task Corruption with Per-Agent BDI Ontologies and Beads"
 date: 2026-11-24
+category: "Agent Interfaces & Coordination"
 host: "Local Sandbox (Codex + Claude + Dolt Beads)"
 hypothesis: "Modeling per-agent Beliefs, Desires, Intentions, and WorldState provenance as named RDF graphs coupled to Beads (bd) catches ungrounded/stale mutations via SPARQL and converts cross-agent disagreement into actionable issue blockers at minimal latency overhead."
 falsification: "If SPARQL gates miss injected ungrounded, expired, or hash-drifted beliefs, fail to block conflicting live Codex/Claude proposals in Beads, or double-claiming bypasses arbitration, the BDI+Beads coordination architecture fails."

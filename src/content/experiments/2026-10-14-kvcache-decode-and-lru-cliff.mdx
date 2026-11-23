@@ -1,0 +1,108 @@
+---
+title: "Why Decode Dominates (82–93%) While Unbounded Prefix Caches Trigger a 99.75% LRU Cliff"
+date: 2026-10-14
+category: "LLM Serving & KV-Cache"
+host: "NVIDIA H200 / B200 / RTX 3070 + MARA Cloud + KCC Trace Replay"
+hypothesis: "Across multi-turn graph-agent serving pipelines, prefix KV caching and Rust graph-KV co-scheduling substantially reduce end-to-end tail latency across offered request rates."
+falsification: "If prefix hit rates collapse near capacity cliffs or fail to appear in hosted APIs, co-scheduling policies fail Holm significance gates because DB lookups are sub-millisecond compared to LLM validator/decode latency, or constrained decoding halves token throughput, client/scheduler complexity alone cannot cure serving tail latency."
+verdict: "Mixed"
+keyMetric: "H200 14.8× TTFT → 0.2% @ 99.75% LRU cliff · Decode 82–93% of wall · GraphKV B0/B1/B2 p=0.625 (Holm fail)"
+takeaways:
+  - "Prefix caching gives real TTFT speedups when prefixes stay resident (H200 gpt-oss-120b: 2.44× at 1.8K tokens up to 14.76× at 54.5K [2.31s → 0.16s]; RTX 3070 LMCache: 7.4× CPU fetch), yet hits a catastrophic LRU cliff at 99.75% KV capacity (0.2% hit rate, 1.83s TTFT)—matching our KCC trace finding where 59.4% infinite reuse drops to 16.2% under 16 GiB LRU."
+  - "Do not assume hosted APIs expose prefix caching: across 2K–16K MARA stable-vs-bust tests (cache-effect-*.json, 4 models), all runs logged 0 cache telemetry tokens and zero consistent TTFT speedup; likewise, B200 Graph-KV co-scheduling (n=1,200) failed the Holm gate (p=0.625/0.875) because Neo4j took <0.9 ms while validator+LLM took 900–4,900 ms."
+  - "Across colocated AgenticOS sessions (lab-s11..s25c) and 2,542/36-cluster replays, decode accounts for 82.2–92.5% of agent wall time (DB share 1.3–2.8%), prefix-cache OFF adds ~19% wall penalty (8.62 → 10.30s), and grammar constraints double TPOT (26.66 → 49.4 ms), while LLMServingSim proxy runs show 4-GPU DP2×TP2 splits reducing prefix locality (88.4% → 86.4%, simulated)."
+soWhat: "Size KV cache headroom with at least 15–20% slack below LRU eviction cliffs, measure decode vs validator share before optimizing sub-millisecond DB scheduling, prefer lightweight prompt schemas over heavyweight token grammars when throughput matters, and keep high-reuse sessions affinity-pinned rather than spray-routed across DP replicas."
+related:
+  - label: "Edge Systems Audits: 2-Node UCX Multi-Rail RMA & CUDA SD Verifier"
+    href: "/experiments/2026-07-15-rdma-ucx-rails-and-sd-audit/"
+  - label: "Graph-CoT Read-Path Attribution: 0.47% DB Stall Share"
+    href: "/experiments/2026-11-14-aura-nonprofile-dp-and-pyoxigraph/"
+beadsId: "yw-agn.6"
+repoUrl: "https://github.com/tteon/seocho"
+environment:
+  machine: "NVIDIA H200 / Shared B200 (Qwen3-14B vLLM 0.29.0) / RTX 3070 (Qwen2.5-1.5B LMCache 0.5.4) / MARA Cloud / ASTRA-Sim"
+  runtime: "vLLM 0.29.0 + SGLang 0.5.21 + LMCache 0.5.4 + Rust GraphKV scheduler + LLMServingSim"
+  dataset: "Qwen Trace A (43,058 reqs) & Trace B (172,800 reqs); HotpotQA+SQuAD (n=1,200); GRBench colocated (n=90); TauBench proxy traces"
+  repeats: "n=5 paired runs/arm (B0/B1/B2, 1,200 req); 320 E0 H2D trials; n=48–96 colocated sessions"
+figures:
+  - src: "/figures/kvcache-decode-and-lru-cliff.png"
+    alt: "Left: H200 gpt-oss-120b prefix TTFT speedup from 1.8K to 54.5K tokens vs collapse at 99.75% LRU pressure. Right: GraphKV B0/B1/B2 latency breakdown showing graph lookup under 0.7 ms vs 4.8 s validator+LLM stages."
+    caption: "Figure 1. Left: H200 prefix caching delivers up to 14.76× TTFT speedup at 54.5K tokens before crashing to 0.2% hit rate (1.83s) once resident blocks reach 99.75% capacity. Right: Across 1,200 B200 requests, Neo4j takes ~0.65 ms while validator+LLM latency dominates (~4.8 s), explaining Holm gate failure (p=0.625)."
+tags: ["kv-cache", "vllm", "lmcache", "decode-bottleneck", "co-scheduling", "prefix-caching"]
+summary: "Synthesizing H200/RTX3070 KV offload, KCC 43K-req trace capacity curves, MARA closed-API negative probes, B200 GraphKV co-scheduling (1,200 reqs + 320 E0 trials), AgenticOS lab-s11..25 decode attribution, and LLMServingSim DP2 locality loss."
+---
+
+import Figure from '../../components/Figure.astro';
+import Diagram from '../../components/Diagram.astro';
+
+## 1. Motivation: The KV-Cache vs End-to-End Agent Reality Gap
+
+Every LLM serving deck shows `10×–15×` TTFT wins from KV prefix caching. Yet when we built multi-turn GraphRAG agents across local GPUs (`H200`, `B200`, `RTX 3070`), production trace replays (`KCC 43K`), and hosted APIs (`MARA`), three hard bottlenecks repeatedly blunted those headline speedups: **LRU working-set eviction cliffs**, **decode/validator wall dominance (`82–93%`)**, and **cross-replica prefix fragmentation**.
+
+## 2. Hypothesis, Falsification & Experimental Mechanism
+
+We tested whether prefix caching and Graph-KV co-scheduling materially lower tail latency under multi-turn GraphRAG load (`Mixed`: massive prefill gains vanish at LRU cliffs and fail Holm gates under validator/decode walls).
+
+<Diagram title="From Prefix Reuse Fantasy to Multi-Turn Decode & Eviction Reality" caption="Across four testbeds: (1) evictions at 99.75% KV capacity erase 14.8× TTFT wins instantaneously; (2) DP2 sharding and non-pinned routing drop simulated hit rates; (3) sub-millisecond Neo4j queries (<0.9 ms) are masked by 1–4 s validator/decode stages.">
+  <svg viewBox="0 0 760 184" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three KV cache and decode serving bottlenecks">
+    <rect x="14" y="18" width="228" height="148" rx="10" stroke="var(--svg-red)" stroke-width="1.6" fill="var(--svg-red)" fill-opacity="0.06"/>
+    <text x="128" y="42" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="11.5" font-weight="bold">1. Working-Set Cliff</text>
+    <text x="128" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">KCC 43K trace: 59.4% → 16.2%</text>
+    <text x="128" y="88" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10.5">H200 @ 99.75%: 0.2% hit</text>
+    <text x="128" y="110" text-anchor="middle" fill="var(--svg-red)" font-family="sans-serif" font-size="10">LMCache 600GB hung >10m</text>
+    <text x="128" y="138" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="9.5">55.8K noise tokens evict 2K vLLM</text>
+
+    <rect x="266" y="18" width="228" height="148" rx="10" stroke="var(--svg-amber)" stroke-width="1.6" fill="var(--svg-amber-stroke)" fill-opacity="0.07"/>
+    <text x="380" y="42" text-anchor="middle" fill="var(--svg-amber)" font-family="monospace" font-size="11.5" font-weight="bold">2. Decode / Grammar Tax</text>
+    <text x="380" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">Decode: 82.2–92.5% of agent wall</text>
+    <text x="380" y="88" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10.5">Grammar TPOT: 26.7 → 49.4 ms</text>
+    <text x="380" y="110" text-anchor="middle" fill="var(--svg-amber)" font-family="sans-serif" font-size="10">AgenticOS BF16 4.52s → FP8 3.10s</text>
+    <text x="380" y="138" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="9.5">Prefix OFF adds ~19% (8.62→10.30s)</text>
+
+    <rect x="518" y="18" width="228" height="148" rx="10" stroke="var(--svg-blue)" stroke-width="1.6" fill="var(--svg-blue)" fill-opacity="0.07"/>
+    <text x="632" y="42" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="11.5" font-weight="bold">3. Scheduling Limits</text>
+    <text x="632" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">Graph DB: 0.61–0.87 ms median</text>
+    <text x="632" y="88" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10.5">Val+LLM: 900–4,900 ms (p=0.625)</text>
+    <text x="632" y="110" text-anchor="middle" fill="var(--svg-blue)" font-family="sans-serif" font-size="10">E0 H2D contention: 1.000× ratio</text>
+    <text x="632" y="138" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="9.5">Sim proxy DP2: 88.4%→86.4%</text>
+  </svg>
+</Diagram>
+
+## 3. Multi-Testbed Environment Summary
+
+- **Trace & Capacity Analysis (`kcc2026-tutorial`, `lmcache_contributor`, `AIsummit26`)**:
+  - `qwen_traceA_blksz_16`: `43,058` requests (`100.38M` input / `18.54M` output tokens; `53.58%` singleton blocks; `2.00 MiB`/block), replayed from `0.031 → 16.0 GiB` LRU. Also verified `lmcache_contributor` proxy reuse rates across `openai_agents` (`54.9%` prefix / `81.0%` substring), `mem0` (`27.4% / 47.4%`, `1,876` Neo4j queries), and `graphiti` (`43.0% / 80.4%`, `p95 = 217.6` ms Neo4j) with explicit caveat that those numbers are `o200k_base` trace proxies rather than live inference measurements.
+  - `H200` `gpt-oss-120b` prefix sweep (`1.8K → 54.5K` tokens) + `RTX 3070` `Qwen2.5-1.5B` LMCache `0.5.4`.
+- **Hosted & Serverless Checks (`mara`, `kcc2026-tutorial`)**: MARA `2K–16K` paired `stable` vs `bust` TTFT probes (`N=10` at 2K, `N=6` C=4 at 4K/8K/16K); TensorMesh `Qwen3.6-27B-FP8` `N=6` AIPerf (`0.25 rps`). *(Note earlier TensorMesh runs suffered `4/6–5/6` HTTP 429 failures, tracked honestly in lessons-learned.)*
+- **Co-Scheduling & Precision (`graphkv-cosched`, `seocho-room`, `LLMServingSim`)**: B200 `real-matrix-v2` (`1,200` HTTP 200 reqs across B0/B1/B2), `real-robustness` (`800` reqs cutting token budget `8192 → 4096`), `E0` CUPTI-verified CPU-to-GPU KV restore (`320` trials), `AgenticOS lab-s11..25b`, and ASTRA-Sim DP2×TP2 simulations.
+
+## 4. Visual Evidence & Quantitative Synthesis
+
+<Figure
+  src="/figures/kvcache-decode-and-lru-cliff.png"
+  alt="H200 prefix cache speedup and capacity cliff alongside GraphKV co-scheduling stage decomposition."
+  caption="Figure 1. Left: H200 prefix caching shrinks cold 2.31 s prefill at 54.5K tokens to 0.16 s (14.76×), until filling 99.75% of KV blocks collapses hits to 0.2% (1.83 s). Right: In GraphKV B200 co-scheduling (n=200 reqs/arm at r=16 inside the 1,200-req suite), Neo4j lookups average under 0.7 ms while validator+dispatch (~3.5 s) and LLM responses (~1.1 s) govern tail latency."
+/>
+
+| Study & System | Baseline / Uncached | Treatment / Constrained | Quantitative Finding & Caveat |
+|---|---|---|---|
+| **KCC Trace LRU (`n=43,058` reqs)** | Infinite cache: `59.40%` block hits | `16 GiB` (`8,192`-blk) LRU: **`16.15%`** | `53.58%` singleton blocks erode finite LRU hit rates |
+| **H200 Prefix Sweep (`gpt-oss-120b`)** | Cold `54.5K` TTFT: `2.314` s | Warm `54.5K`: **`0.157` s (`14.76×`)** | At `99.75%` full (`1.631M / 1.635M` tok) -> **`0.2%` hits (`1.83s`)** |
+| **RTX 3070 LMCache `0.5.4` (`Qwen-1.5B`)** | Absent fetch: `0.693` s | Evicted CPU fetch: **`0.094` s (`7.4×`)** | `layerwise=True` crashed (`EngineDeadError`); H200 600G hung |
+| **MARA Prefix Sweep (`2K–16K` paired)** | Unique `bust` prompt | Identical `stable` prompt | `0` cache telemetry samples; M2.7 bimodal routing `147 vs 428ms` |
+| **Graph-Agent Prefix (`vLLM` vs `SGLang`)** | Cache `OFF` (`52.3K` tok) | Cache `ON`: **`92.95%` / `93.33%`** reuse | Under `55.8K`-tok pressure, cached tokens drop `2000 → 0 / 3` |
+| **GraphKV Policy (`n=1,200`, B200)** | B0 FIFO p95 `8,489.7` ms (`r=16`) | B2 Deadline p95 `7,869.5` ms (`+6.0%` paired med / `-7.3%` cell) | Failed Holm (`p=0.625`); `budget 4096` drops F1 `0.717 → 0.574` |
+| **GraphKV `E0` H2D Contention (`n=320`)** | Sequential restore alone | Joint Graph + 125–251 MB H2D | Median H2D ratio **`0.998–1.002×`** (`no bottleneck` at small KG) |
+| **AgenticOS (`lab-s19/s21` & B200 FP8)** | Prefix OFF `10.30s`; BF16 `4.52s` | Prefix ON **`8.62s`**; FP8 **`3.10s`** | Grammar cuts scope errors (`46→50/90`) but TPOT `26.7 → 49.4 ms` |
+| **LLMServingSim (`Qwen3-30B` proxy)** | 1× RTXPRO6000 (`88.42%` prefix) | 4× DP2×TP2 (`86.35%` prefix) | Cross-DP splits cut reuse; E2E p50 `11.0s → 12.8s` at `1 rps` |
+
+## 5. Mechanism Breakdown: Why Caching Wins Pre-Fill Yet Fails to Rescue Tail E2E
+
+1. **Non-linear LRU thrashing at saturation**: Prefix caching assumes hot blocks stay ahead of eviction. On `H200`, adding just `0.25%` headroom strain (`1,631,304` vs `1,635,338` KV capacity) turned `54.5K` `14.8×` speedups into near-zero (`0.2%`) reuse (`1.83 s` TTFT). On `B200` vLLM (`32K` KV), injecting a single `55,801`-token request evicted `100%` of the resident `2,000`-token prefix (`2,000 → 0`).
+2. **Decode + validator serialization overwhelms graph DB latency**: In `real-stage-summary.json`, graph execution takes under `0.9` ms (`0.61–0.87` ms), whereas intent validation + dispatch takes `816–3,885` ms and decoding takes `78–1,122` ms. Even cleanly ordering queue entries (`B1/B2`) cannot clear the pre-registered Holm threshold (`p=0.625`) when external validator waits and serial autoregressive decode absorb `>99%` of request lifetime—and cutting evidence token budgets from `8,192` to `4,096` to speed decode immediately drops `answer_f1` from `0.717` to `0.574` and spikes partial truncations `7.5% → 42.5%`.
+3. **Closed vs local API observability**: Hosted MARA probes returned empty `prompt_tokens_details={}` (`cache_usage={}`) from `2K` to `16K`, proving simulated reuse rates (`86.35%` hit in `LLMServingSim`) do not automatically translate across black-box API load balancers unless session affinity is explicit.
+
+## 6. Scope Limits & Blocked Hardware Work (`yw-pow.3`)
+
+- **Blocked KV offload & prefetch API paths (`yw-pow.3`)**: `graphkv-cosched` policies `B3/B4/B5` remain `RESULT_PENDING` because vLLM lacks an external per-prefix GPU-prefetch hook; the `400`-case real QA matrix failed on Python `socket EPERM`; H200 `600 GB` LMCache offload hung >10 min; and RTX 3070 `layerwise=True` crashed on request #1.
+- **Simulation proxies**: `LLMServingSim` substituted `Qwen3-30B-A3B` hardware LUTs for `gpt-oss` and `MiniMax` workloads due to unprofiled alternating/M2 layers.

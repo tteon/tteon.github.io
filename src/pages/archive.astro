@@ -1,0 +1,176 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { EXPERIMENT_CATEGORIES } from '../content.config';
+
+const experiments = (await getCollection('experiments'))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const backlogItems = [
+  {
+    beadsId: 'yw-pow.1',
+    category: 'Verification, Code Graphs & Postmortems',
+    repo: 'kaggle-codegraph',
+    status: 'open',
+    issue: 'QAT 32K context overflow (32,769 > 32,768) & unregistered search_similar_code tool (0/12 valid fixes); TPU probe queued',
+    next: 'Truncate prompt reserve below 32K, drop or register search_similar_code, and re-run 4×L4 QAT harness.',
+  },
+  {
+    beadsId: 'yw-pow.2',
+    category: 'Verification, Code Graphs & Postmortems',
+    repo: 'datalab',
+    status: 'open',
+    issue: '145/197 Neo4j failures (1 on 2026-02-08 plus 144/147 from 2026-04-16 onward) and 146/197 empty LLM extractions (incl. 80/80 since 2026-07-31) silently logging status="success"',
+    next: 'Fail cron status cleanly on neo4j_error or zero entities and run full extraction evaluation (--full).',
+  },
+  {
+    beadsId: 'yw-pow.3',
+    category: 'LLM Serving & KV-Cache',
+    repo: 'mlsys/graphkv-cosched & AIsummit26',
+    status: 'blocked',
+    issue: '400-eval QA blocked on sandbox EPERM; B3/B4/B5 blocked by absent per-prefix GPU prefetch API; H200 LMCache 600GB hung >10m & RTX 3070 layerwise crashed',
+    next: 'Wait for engine external prefix-prefetch hook before benchmarking H2D contention on live KV offload.',
+  },
+  {
+    beadsId: 'yw-pow.4',
+    category: 'Agent Interfaces & Coordination',
+    repo: 'AIsummit26 & seocho-observability',
+    status: 'open',
+    issue: 'AIsummit26 High-Hub band (AIsummit26-q92) not yet executed; DeepSeek-V3.2 finished 0/24 (all 24 adaptive runs crashed) on observability live suite',
+    next: 'Isolate validation-error schema drops from provider HTTP 429 limits before re-running high-hub FinBench.',
+  },
+  {
+    beadsId: 'yw-pow.5',
+    category: 'Ontology & GraphRAG Construction',
+    repo: 'kdd2026-tutorial & icml2026',
+    status: 'open',
+    issue: '270-sample robustness run (21b8b76c) stalled at 10/270; result_manifest primary pointer points to stale 4d1d217e; KGC exp3_router branch collision',
+    next: 'Update primary pointer to 2f8ea4d3, fix exp3_router apply_route branches, and complete 270-case run.',
+  },
+  {
+    beadsId: 'yw-pow.6',
+    category: 'Graph Runtime & Storage',
+    repo: 'LoG2026-ready, openup/seocho & auto-ontology-bench',
+    status: 'blocked',
+    issue: 'LoG full 420 paused after worker overlap; OLMoE routing (seocho-02t) retracted 2× artifact; Neo4j Enterprise tuning/scale runs held private per AUP',
+    next: 'Keep Enterprise scale numbers behind AUP boundary; rerun OLMoE routing only with inert instrumentation.',
+  },
+  {
+    beadsId: 'yw-pow.7',
+    category: 'LLM Serving & KV-Cache',
+    repo: 'btc, aie, auto-ontology-eval, gnnllm_lab, thought/260414',
+    status: 'open',
+    issue: 'Unrun harnesses (btc mixed load, aie email threading, auto-ontology-eval, kdd2026-cup empty artifacts); rdf_verb lacks LLM judge; CXL comparisons analytical only',
+    next: 'Run CXL hardware memory-expander microbenchmark and LLM-judge scoring over gnnllm_lab rdf_verb.',
+  },
+];
+
+const infraRepos = [
+  { repo: 'vllm019', role: 'Pure uv CPython 3.12 runtime virtualenv' },
+  { repo: 'kvcache_lab', role: 'Daily GitHub PR / YouTube / KV digest Discord & Teams bot' },
+  { repo: 'graph_lab', role: 'Automated arXiv & industry blog RSS digest collector' },
+  { repo: 'gdbms_lab', role: 'Clean upstream checkouts (GraphScope, Neo4j, RedisGraph, TuringDB)' },
+  { repo: 'opik', role: 'Clean upstream comet-ml/opik checkout (zero local benchmark runs)' },
+  { repo: 'mis', role: 'Personal document utilities (zero benchmark files)' },
+];
+---
+
+<BaseLayout title="Complete Local Experiment Archive & Beads Backlog — Yitae Jeong" description="Full inventory of local lab workspaces across five research categories, separating verified published findings from incomplete, retracted, and AUP-restricted runs.">
+  <div class="mb-8 max-w-3xl">
+    <p class="font-mono text-xs text-blue-800 dark:text-cyan-400 mb-2">MASTER LEDGER · BEADS EPIC yw-agn + yw-pow</p>
+    <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-stone-950 dark:text-white mb-3">
+      Complete Local Experiment Catalog &amp; Remediation Backlog
+    </h1>
+    <p class="text-sm sm:text-base text-stone-600 dark:text-zinc-400 leading-relaxed">
+      Every local experiment workspace inspected on disk is mapped below into five research categories. Completed studies with verified artifacts are published with full statistics and failure analysis; incomplete, buggy, retracted, or Enterprise-AUP-restricted experiments are tracked openly under Beads epic <code class="font-mono text-xs">yw-pow</code> rather than omitted silently.
+    </p>
+  </div>
+
+  <section class="mb-12">
+    <h2 class="text-xl font-semibold text-stone-950 dark:text-white mb-4">1. Published Synthesis Posts by Category ({experiments.length})</h2>
+    <div class="space-y-8">
+      {EXPERIMENT_CATEGORIES.map((cat) => {
+        const items = experiments.filter((e) => e.data.category === cat);
+        return (
+          <div>
+            <div class="flex items-center justify-between border-b border-stone-200 dark:border-zinc-800 pb-2 mb-3">
+              <h3 class="text-base sm:text-lg font-semibold text-stone-900 dark:text-zinc-100">{cat}</h3>
+              <a href={`/experiments/?category=${encodeURIComponent(cat)}`} class="font-mono text-xs text-blue-800 dark:text-cyan-400 hover:underline">
+                Filter view ({items.length}) →
+              </a>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs sm:text-sm border-collapse">
+                <thead>
+                  <tr class="border-b border-stone-200 dark:border-zinc-800 font-mono text-[11px] uppercase text-stone-500 dark:text-zinc-400">
+                    <th class="py-2 pr-3">Post</th>
+                    <th class="py-2 pr-3">Verdict</th>
+                    <th class="py-2 pr-3">Beads</th>
+                    <th class="py-2">Headline Metric</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-stone-200/70 dark:divide-zinc-800/70">
+                  {items.map((item) => (
+                    <tr>
+                      <td class="py-2.5 pr-3 font-medium">
+                        <a href={`/experiments/${item.id}/`} class="text-blue-800 dark:text-cyan-400 hover:underline">
+                          {item.data.title}
+                        </a>
+                      </td>
+                      <td class="py-2.5 pr-3 font-mono text-xs whitespace-nowrap">{item.data.verdict}</td>
+                      <td class="py-2.5 pr-3 font-mono text-xs text-stone-500 whitespace-nowrap">{item.data.beadsId || '—'}</td>
+                      <td class="py-2.5 text-stone-600 dark:text-zinc-400">{item.data.keyMetric}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </section>
+
+  <section class="mb-12">
+    <h2 class="text-xl font-semibold text-stone-950 dark:text-white mb-2">2. Missed, Blocked, Retracted &amp; AUP-Private Backlog (Beads: yw-pow)</h2>
+    <p class="text-sm text-stone-600 dark:text-zinc-400 mb-4">
+      Auditing every local repository surfaced unexecuted scaffolds, crashed GPU runs, retracted artifacts, and Neo4j Enterprise benchmarks withheld under AUP rules.
+    </p>
+    <div class="overflow-x-auto rounded-xl border border-stone-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/30 p-3">
+      <table class="w-full text-left text-xs sm:text-sm border-collapse">
+        <thead>
+          <tr class="border-b border-stone-200 dark:border-zinc-800 font-mono text-[11px] uppercase text-stone-500 dark:text-zinc-400">
+            <th class="py-2 pr-3">Beads</th>
+            <th class="py-2 pr-3">Status</th>
+            <th class="py-2 pr-3">Workspace</th>
+            <th class="py-2 pr-3">Observed Gap / Blocker</th>
+            <th class="py-2">Next Planned Fix</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-stone-200/70 dark:divide-zinc-800/70">
+          {backlogItems.map((b) => (
+            <tr>
+              <td class="py-2.5 pr-3 font-mono text-xs whitespace-nowrap text-blue-800 dark:text-cyan-400">{b.beadsId}</td>
+              <td class="py-2.5 pr-3 font-mono text-xs whitespace-nowrap">{b.status}</td>
+              <td class="py-2.5 pr-3 font-mono text-xs whitespace-nowrap">{b.repo}</td>
+              <td class="py-2.5 pr-3 text-stone-700 dark:text-zinc-300">{b.issue}</td>
+              <td class="py-2.5 text-stone-600 dark:text-zinc-400">{b.next}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold text-stone-950 dark:text-white mb-3">3. Non-Experiment Utility &amp; Upstream Checkouts Inspected</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {infraRepos.map((r) => (
+        <div class="rounded-lg border border-stone-200 dark:border-zinc-800 px-3.5 py-2.5 text-xs">
+          <div class="font-mono font-semibold text-stone-900 dark:text-zinc-100">{r.repo}</div>
+          <div class="text-stone-600 dark:text-zinc-400 mt-0.5">{r.role}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

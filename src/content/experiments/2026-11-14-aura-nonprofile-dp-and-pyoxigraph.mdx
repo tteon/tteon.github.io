@@ -1,0 +1,135 @@
+---
+title: "What PROFILE Hides: True 2.46× Parallel Speedup, 16× Query Rewrites (+122 Paths), and 0.47% Graph-CoT DB Stalls"
+date: 2026-11-14
+category: "Graph Runtime & Storage"
+host: "Neo4j Aura Pro + Local Rust/Python Harnesses"
+hypothesis: "Removing PROFILE instrumentation reveals smaller true Parallel runtime gains than PROFILE-inflated benchmarks suggest, while schema constraints, hop pre-aggregation, and embedded RDF storage outperform runtime switching cleanly—until walk-vs-trail self-loop semantics diverge."
+falsification: "If removing PROFILE fails to narrow the W4 Parallel speedup gap, query rewrites fail to alter hit counts/hashes cleanly, or Graph-CoT DB stalls exceed 5% of agent turn wall time, query/runtime attribution shifts back toward driver tuning."
+verdict: "Mixed"
+keyMetric: "Non-PROFILE server W4: 2.46× (vs 5.38× PROFILE server) · DP rewrite 16.2× (+122 walks) · Graph-CoT DB stall 0.47%"
+takeaways:
+  - "Neo4j PROFILE instrumentation inflated single-threaded Slotted W4 server time from 1,226.5 ms to 2,186 ms (5.38× apparent server speedup vs 406 ms Parallel; 4.11× client wall in our earlier post); 10 randomized non-PROFILE rounds show the true server Parallel speedup is 2.46× (1,226.5 → 498.0 ms)."
+  - "Rewriting W4 with hop-by-hop pre-aggregation cuts Slotted latency 16.2× (1,244 → 77 ms) and DB hits 22.5× (6.14M → 0.27M), but exposes a critical semantic divergence: 8 self-loops yield 1,792,000 walk paths instead of 1,791,878 default Cypher trail paths (+122)."
+  - "Across local storage and read-path checks (mfg_ontology_bench + graphcot_readpath, n=270), PyOxigraph runs 1.6×–127× faster on single queries (0.03–1.88 ms vs 1.73–5.53 ms), while DB execution accounts for only ~0.47% of Graph-CoT agent wall time (stall_share_wall [0.44%–0.50%]; p50 2.79 ms DB tool vs 1,151.7 ms LLM turn)."
+soWhat: "Before swapping Neo4j execution runtimes or blaming graph DB speed, benchmark without PROFILE, add existence/type constraints plus pre-aggregation (verifying trail vs walk parity on self-loops), and profile LLM turn share before optimizing sub-3 ms DB queries."
+related:
+  - label: "Earlier Aura Benchmark: 4.11× Client Wall Gain Under PROFILE"
+    href: "/experiments/2026-11-14-neo4j-aura-runtime-routing/"
+  - label: "Architecture Note: Federated Queries & Rust Bolt Middleware"
+    href: "/writing/2026-11-12-neo4j-runtime-and-rust-bolt-routing/"
+beadsId: "yw-agn.1"
+repoUrl: "https://github.com/tteon/seocho"
+environment:
+  machine: "Neo4j AuraDB Pro managed instance (4 workers, 544 MiB page cache) & local workstation (i7-11700)"
+  runtime: "Neo4j 5.27-aura Enterprise (Cypher 5/25) + PyOxigraph + Graph-CoT Read-Path v2"
+  dataset: "Aura lab (5K nodes, 40K edges, 8 self-loops); MFG FMEA (1,362 quads / L1580); Healthcare Graph-CoT (n=270 Qs)"
+  repeats: "180 non-PROFILE randomized timing runs + 10-case constraint/DP study + n=270 Graph-CoT & n=32 LLM loadtest"
+figures:
+  - src: "/figures/aura-study-profile-and-rewrite.png"
+    alt: "Left: W4 server time comparing PROFILE artifact inflation vs 10-round non-PROFILE execution. Right: DP pre-aggregation speedup 16.2x with +122 self-loop path divergence."
+    caption: "Figure 1. Left: Removing PROFILE drops Slotted W4 server time from 2,186 ms to 1,226.5 ms (10 randomized rounds), narrowing true Parallel speedup to 2.46×. Right: Hop-by-hop pre-aggregation outperforms Parallel runtime by 5–16× while shifting semantics from Cypher trail (1,791,878 paths) to walk (1,792,000)."
+  - src: "/figures/mfg-pyoxigraph-vs-neo4j.png"
+    alt: "Left: PyOxigraph SPARQL vs Neo4j Cypher across 5 FMEA scenarios. Right: Log-scale Graph-CoT DB tool latency (2.79 ms) vs LLM turn time (1,151.7 ms)."
+    caption: "Figure 2. Left: Single-query persistency latencies on 1,362 FMEA quads (both 100% P/R). Right: End-to-end agent time breakdown across Graph-CoT (n=270) and MFG loadtest (n=32), showing DB execution represents ~0.47% of Graph-CoT wall time."
+tags: ["neo4j", "cypher25", "pyoxigraph", "graph-cot", "query-optimization"]
+summary: "Synthesizing four unpublished storage and runtime studies: PROFILE instrumentation distortion on Aura, constraint/DP query rewrites exposing trail-vs-walk bugs, PyOxigraph vs Neo4j concurrency saturation, and Graph-CoT's 0.47% DB stall share."
+---
+
+import Figure from '../../components/Figure.astro';
+import Diagram from '../../components/Diagram.astro';
+
+## 1. Motivation & System Bottleneck
+
+Our earlier [Aura runtime study](/experiments/2026-11-14-neo4j-aura-runtime-routing/) used `PROFILE` queries and reported a `4.11×` speedup on heavy global 3-hop analytics (`W4`). Yet three practical questions remained unanswered in follow-up scripts left locally across `~/lab/aura-runtime/study/` and `~/lab/seocho-rust/`:
+
+1. How much of Slotted's `2.3 s` latency came from `PROFILE` row-counting hooks rather than actual query execution?
+2. Can schema constraints and query rewrites beat runtime hints altogether—and are they semantically identical?
+3. When a full Graph-CoT or tool-calling agent queries an external graph DB (`Neo4j`) versus an embedded RDF store (`PyOxigraph`), does database execution even matter compared to LLM turn time?
+
+## 2. Hypothesis, Falsification & Experimental Architecture
+
+Across `aura-runtime/study/` (`timing.csv`, `optimize.json`, `monitor.json`) and `seocho-rust` (`mfg_ontology_bench`, `graphcot_readpath`), we isolated query instrumentation, schema constraints, and storage-vs-LLM attribution:
+
+<Diagram title="Runtime Telemetry & Semantic Equivalence Pitfalls Across Storage Engines" caption="Three traps surfaced across unpublished storage studies: (1) PROFILE counters distort single-lane runtimes while Parallel workers under-report transaction pageHits as 0; (2) DP pre-aggregation converts Cypher trails into walks over self-loops; (3) sub-3 ms DB queries vanish beneath ~1.15 s LLM turns.">
+  <svg viewBox="0 0 760 198" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three empirical storage and runtime bottlenecks">
+    <rect x="14" y="16" width="228" height="164" rx="10" stroke="var(--svg-red)" stroke-width="1.6" fill="var(--svg-red)" fill-opacity="0.06"/>
+    <text x="128" y="42" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="11.5" font-weight="bold">1. Telemetry Distortion</text>
+    <text x="128" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">PROFILE inflates Slotted</text>
+    <text x="128" y="86" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10.5">2,186 → 1,226.5 ms</text>
+    <text x="128" y="114" text-anchor="middle" fill="currentColor" opacity="0.8" font-family="sans-serif" font-size="10">Parallel tx polling shows</text>
+    <text x="128" y="132" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="10.5">pageHits = 0 (blindspot)</text>
+    <text x="128" y="158" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="9.5">Heap: Slotted 58M · Par 4.5M · Pipe 2M</text>
+
+    <rect x="266" y="16" width="228" height="164" rx="10" stroke="var(--svg-amber)" stroke-width="1.6" fill="var(--svg-amber-stroke)" fill-opacity="0.07"/>
+    <text x="380" y="42" text-anchor="middle" fill="var(--svg-amber)" font-family="monospace" font-size="11.5" font-weight="bold">2. Trail vs Walk Drift</text>
+    <text x="380" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">3-Hop DP pre-aggregation</text>
+    <text x="380" y="86" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10.5">1,244 → 77 ms (16.2×)</text>
+    <text x="380" y="114" text-anchor="middle" fill="currentColor" opacity="0.8" font-family="sans-serif" font-size="10">8 self-loops add +122 walks</text>
+    <text x="380" y="132" text-anchor="middle" fill="var(--svg-amber)" font-family="monospace" font-size="10">1,791,878 vs 1,792,000</text>
+    <text x="380" y="158" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="10">CYPHER 25 REPEATABLE matches</text>
+
+    <rect x="518" y="16" width="228" height="164" rx="10" stroke="var(--svg-blue)" stroke-width="1.6" fill="var(--svg-blue)" fill-opacity="0.07"/>
+    <text x="632" y="42" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="11.5" font-weight="bold">3. Agent E2E Reality</text>
+    <text x="632" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">PyOxigraph: 0.03–1.88 ms</text>
+    <text x="632" y="86" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">Neo4j: 1.73–5.53 ms</text>
+    <text x="632" y="114" text-anchor="middle" fill="currentColor" opacity="0.8" font-family="sans-serif" font-size="10">Graph-CoT (n=270)</text>
+    <text x="632" y="132" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="10.5">DB stall: 0.47% of wall</text>
+    <text x="632" y="158" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="10">LLM turn p50 = 1,151.7 ms</text>
+  </svg>
+</Diagram>
+
+## 3. Environment & Reproducibility Protocol
+
+- **Aura Enterprise Study (`aura-runtime/study/`)**: AuraDB Pro managed instance (Neo4j `5.27-aura` Enterprise, `4` workers, `544 MiB` page cache), `5,000` nodes / `40,000` edges + `5,000`-edge hub (`8` self-loops). Ran `timing_bench.py` (`10` randomized rounds × 6 workloads × 3 runtimes = `180` non-PROFILE runs), `optimize_lab.py` (`7` property/type/key constraints + `5` constraint-sensitive plans + W4 DP rewrite), and `monitor_lab.py` (`50 ms` `SHOW TRANSACTIONS` poll + lock termination).
+- **Manufacturing FMEA (`seocho-rust/experiments/mfg_ontology_bench/`)**: `1,362` quads in PyOxigraph vs Neo4j across 5 FMEA scenarios (6 read queries + 2 writes), closed-loop concurrency `c=1..64` on `L1580`, plus `32`-question `gpt-oss-120b` tool-agent loadtest.
+- **Graph-CoT Read-Path (`seocho-rust/experiments/graphcot_readpath/`)**: Healthcare KG (`n=270` questions, `2,046` tool calls incl. `1,529` DB calls). *(Note: Neo4j Enterprise scale extensions in `auto-ontology-bench` remain excluded per Neo4j AUP and cataloged openly under Beads `yw-pow.6`.)*
+
+## 4. Visual Evidence & Quantitative Results
+
+<Figure
+  src="/figures/aura-study-profile-and-rewrite.png"
+  alt="W4 server execution comparison with and without PROFILE alongside DP pre-aggregation speedup."
+  caption="Figure 1. Left: Removing PROFILE lowers Slotted W4 server time from 2,186 ms to 1,226.5 ms (n=10 rounds), shrinking Parallel's true speedup to 2.46×. Right: Hop-by-hop pre-aggregation cuts Slotted W4 16.2× (1,244 → 77 ms) while adding +122 walk paths across 8 self-loops."
+/>
+
+| Experiment / Optimization | Before | After / Variant | Key Delta |
+|---|---|---|---|
+| **Aura W4 Non-PROFILE (`n=10` server med)** | Slotted `1,226.5` ms `[1,158–1,378]` | Pipelined `901.0` ms / Parallel `498.0` ms | `2.46×` server (vs `5.38×` PROFILE server / `4.11×` wall) |
+| **W4 DP Pre-Aggregation (`n=5` server med)** | Slotted `1,244` ms (`6.14M` hits) | Slotted DP `77` ms (`273K` hits) | **`16.2×` faster**, `+122` walk paths |
+| **Constraint O1 (`n.score IS NOT NULL`)** | `NodeIndexScan` (`5,001` hits, `4 ms`) | `NodeCountFromCountStore` (`1` hit, `1 ms`) | O(N) → O(1) metadata read |
+| **Constraint O3 (`()-[r]->()` `strength IS NOT NULL`)** | `RelTypeScan > Filter` (`80,001` hits, `11 ms`) | `RelationshipCountFromCountStore` (`1` hit, `1 ms`) | `80,001×` DB hit drop |
+| **Aura `SHOW TRANSACTIONS` Memory (`monitor.json`)** | Slotted heap `58 MB` (`2.12M` pageHits) | Parallel `4.5 MB` (`0` hits) / Pipe `2 MB` | `0` hits is telemetry blindspot |
+
+<Figure
+  src="/figures/mfg-pyoxigraph-vs-neo4j.png"
+  alt="PyOxigraph vs Neo4j single-query FMEA comparison and Graph-CoT DB vs LLM turn latency."
+  caption="Figure 2. Left: Embedded PyOxigraph outperforms external Neo4j across all 5 FMEA scenarios (6 read queries + 2 writes; 1.6× to 127× lower latency at 100% P/R). Right: In Graph-CoT (n=270), total DB stall_share_wall is 0.47% (CI [0.44%–0.50%]; p50 single-turn 2.79 ms DB vs 1,151.7 ms LLM turn)."
+/>
+
+| Storage / Agent Benchmark | Configuration | Throughput / Accuracy | Latency & Bottleneck Split |
+|---|---|---|---|
+| **MFG Neo4j Closed-Loop Mix M (`L1580`)** | `c=1 → c=16 → c=64` | `65.2 → 265.7 → 259.4` req/s | `7.98` CPU cores saturate by `c=16`; p99 `75.1 → 1,604.7` ms |
+| **MFG Neo4j Write Mix W (`L1580`)** | `c=1 → c=32` | `1,477.3 → 12,114.1` req/s | `dup obs` write skew at `c=32` (1/3) & `c=64` (1/2) |
+| **MFG LLM Loadtest (`n=32`, `gpt-oss-120b`)** | LPG `c=16` vs RDF `c=4` | Both `32/32` full P/R (`100.36` vs `46.34` Q/min) | LPG `93.6%` LLM vs `207.3` ms tool p50; RDF `53.6%` LLM |
+| **Graph-CoT Read-Path (`n=270`)** | Healthcare (`gpt-oss-120b`) | `50.74%` finished, `0.212` F1 (`7.58` calls/Q) | Total `stall_share_wall` **`0.47%`** (`p50` `2.79` vs `1,151.7` ms) |
+
+## 5. Mechanism Breakdown: Why Constraints & Semantics Trump Flags
+
+- **Why `PROFILE` fooled our first benchmark**: Enabling per-operator row/hit telemetry adds instrumentation work disproportionately inside `Slotted`'s row-at-a-time volcano loop (`2,186` ms vs `1,226.5` ms server time, inflating apparent server speedup to `5.38×` over `406` ms Parallel and client-wall to `4.11×` vs true non-PROFILE `2.46×`). Conversely, `Parallel` worker threads fail to update transaction-level `pageHits` in `SHOW TRANSACTIONS`, printing `0` hits during active 3-hop execution—so production alerts on `pageHits` would falsely assume zero cache reads.
+- **Why hop-by-hop pre-aggregation breaks exact equality (`1,791,878` vs `1,792,000`)**:
+
+```cypher
+MATCH (c:AuraRuntimeLabNode)-[:AURA_LAB_LINK]->(d:AuraRuntimeLabNode) WHERE d.score >= 30
+WITH c, count(*) AS n, sum(d.score) AS s
+MATCH (b:AuraRuntimeLabNode)-[:AURA_LAB_LINK]->(c) WITH b, sum(n) AS n, sum(s) AS s
+MATCH (a:AuraRuntimeLabNode)-[:AURA_LAB_LINK]->(b) WITH a.segment AS segment, sum(n) AS path_count, sum(s) AS ss
+RETURN segment, path_count, toFloat(ss)/path_count AS mean_score
+```
+
+By breaking a 3-hop `MATCH (a)-[]->(b)-[]->(c)-[]->(d)` pattern into three `WITH` clauses, each step forgets previously traversed relationship IDs. That reduces Slotted execution from `1,244` ms to `77` ms (`22.5×` fewer DB hits), **but turns Cypher's default trail semantics (edge uniqueness within one pattern) into walk semantics (edge revisits allowed across 8 self-loops)**. Running the original single pattern under `CYPHER 25 MATCH REPEATABLE ELEMENTS` reproduced `1,792,000` identically.
+- **Why DB speed barely moves multi-turn Graph-CoT**: Across `n=270` healthcare questions (`2,046` tool calls / `2,182` LLM turns), single-turn DB lookups take `2.79` ms p50 (`p99 = 27.11` ms) versus `1,151.7` ms p50 LLM turns (`412×` slower), and total accumulated DB wait across episodes (`stall_share_wall`) is just **`0.47%`** (`[0.44%–0.50%]`; server-only share `2.13%`). Removing 100% of DB latency would trim under `0.5%` of end-to-end wall time unless concurrency pushes Neo4j above its ~8-core CPU saturation knee (`265.7` req/s on `L1580`).
+
+## 6. Scope Limits & Next Experiment
+
+- **Graph scale & Enterprise boundaries**: Aura lab (`5K` nodes) fits entirely inside the `544 MiB` page cache, whereas Neo4j Enterprise multi-hundred-thousand-node scale and tuning sweeps remain withheld per Neo4j AUP restrictions (`yw-pow.6`).
+- **Write skew & unexecuted Graph-CoT arms**: Concurrent writes in `L1580` produced duplicate observations under `c >= 32` without unique merge locking, and the 8-graph local latency ladder (`sr-tlc.3`) plus Vast `gpt-oss-120b` co-location (`sr-tlc.4`) remain open in `seocho-rust/.beads`.

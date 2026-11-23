@@ -67,6 +67,8 @@
 
 .prose-custom code:not(pre code) {
   @apply rounded bg-stone-200/70 dark:bg-zinc-800 px-1.5 py-0.5 font-mono text-[0.84em] text-stone-800 dark:text-zinc-200;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .prose-custom pre {
@@ -91,4 +93,5 @@
 
 .prose-custom a {
   @apply text-blue-800 dark:text-cyan-400 underline decoration-blue-700/30 dark:decoration-cyan-500/30 underline-offset-4 hover:decoration-blue-700 dark:hover:decoration-cyan-400;
+  overflow-wrap: anywhere;
 }

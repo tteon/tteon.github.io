@@ -1,11 +1,20 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
+export const EXPERIMENT_CATEGORIES = [
+  'Graph Runtime & Storage',
+  'Ontology & GraphRAG Construction',
+  'Agent Interfaces & Coordination',
+  'LLM Serving & KV-Cache',
+  'Verification, Code Graphs & Postmortems',
+] as const;
+
 const experiments = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/experiments' }),
   schema: z.object({
     title: z.string(),
     date: z.coerce.date(),
+    category: z.enum(EXPERIMENT_CATEGORIES).default('Ontology & GraphRAG Construction'),
     host: z.string(),
     hypothesis: z.string(),
     falsification: z.string().optional(),

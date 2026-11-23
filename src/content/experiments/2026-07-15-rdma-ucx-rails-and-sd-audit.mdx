@@ -1,0 +1,107 @@
+---
+title: "Systems Edge Audits: Fixing UCX Multi-Rail RMA (13.1 → 24.4 GB/s), CUDA Tree Verifiers, and 3-Window Contract Gates"
+date: 2026-07-15
+category: "LLM Serving & KV-Cache"
+host: "2-Node ConnectX-5 RoCEv2 + NVIDIA B200 + MARA Cloud"
+hypothesis: "Default transport flags and unverified speculative/API harnesses hide silent throughput cliffs, kernel sampling biases, and multi-day model reliability variance that controlled audits cleanly expose."
+falsification: "If UCX RMA matches multi-rail tag bandwidth without configuration changes, speculative tree kernels diverge from scalar probability distributions or observer tracing slows inference by >= 5%, or single-day API checks predict multi-day function reliability, explicit low-level audits are redundant."
+verdict: "Mixed"
+keyMetric: "UCX_MAX_RMA_RAILS=4: 13.10 → 24.39 GB/s (1.86×) · CUDA SD max err 0.00495 (1.36% trace OH) · DeepSeek 0.50 multi-day fail"
+takeaways:
+  - "On a 2-node ConnectX-5 4×100GbE RoCEv2 cluster running NIXL+UCX, setting UCX_MAX_RNDV_RAILS=4 still leaves UCX_MAX_RMA_RAILS=1 by default—capping 4 MB RMA bandwidth at 13.10 GB/s until explicitly setting UCX_MAX_RMA_RAILS=4 unlocks 24.39 GB/s (1.86×)."
+  - "Small 1 KB RDMA transfers pay 59% protocol overhead (~7.5 µs prepare+post out of 12.8 µs), and kernel memory registration adds ~5.7 ms base + ~53 µs/descriptor (~53.8 ms reg + ~116.9 ms prep at 1,024 descriptors); CXL figures (~200–400 ns) in the same workspace note remain analytical extrapolations rather than hardware measurements."
+  - "Auditing B200 SGLang NGRAM kernels proved 12,288/12,288 scalar-oracle agreement (<=0.00495 max joint bin error over 786,432 draws) with 1.36% [0.56%, 2.15%] async observer overhead, while a 3-day 1,200-request MARA function gate flagged DeepSeek-V3.1 at 0.50 valid and showed p95 variance up to 12.4 s across windows on passing models."
+soWhat: "Verify UCX_MAX_RMA_RAILS=4 on multi-NIC NIXL deployments and coalesce small KV descriptors >= 256 KB before RDMA; run CUDA kernel + async overhead checks before publishing speculative speedups; and gate production models across >= 3 independent daily windows before sizing SLOs."
+related:
+  - label: "KV-Cache Capacity Cliffs & Decode Share (82–93%)"
+    href: "/experiments/2026-10-14-kvcache-decode-and-lru-cliff/"
+  - label: "Multi-Agent Architecture Readiness: BDI + Beads"
+    href: "/experiments/2026-11-24-bdi-agent-ontology-beads-synergy/"
+beadsId: "yw-agn.7"
+repoUrl: "https://github.com/tteon/mlsys"
+environment:
+  machine: "2× AMD Turin (128 cores, 2× dual-port ConnectX-5 100GbE) · Shared B200 (SGLang 0.5.21, Qwen3-14B) · MARA Cloud"
+  runtime: "UCX 1.20.x + NIXL 0.10.0 · torch 2.13.0+cu130 · Strict JSON/Function validator"
+  dataset: "DRAM-to-DRAM RDMA (1 KB–4 MB, 100 iters) · 24 Markov cells + 360 SD trace reqs · 3-window MARA function suite (1,200 reqs)"
+  repeats: "100 RDMA iters/size · 786,432 CUDA SD draws · 5 randomized B200 engine pairs · 3×100 req/model"
+figures:
+  - src: "/figures/rdma-ucx-rails-and-sd-audit.png"
+    alt: "Left: 2-node ConnectX-5 RoCEv2 bandwidth scaling (0.08 to 24.39 GB/s) and protocol overhead drop (59% to 5%). Right: 3-window MARA function contract p95 latency and pass rate across 4 models."
+    caption: "Figure 1. Left: Coalescing NIXL RDMA transfers above 256 KB slashes UCX ~7.5 µs protocol floor from 59% (1 KB) down to 5% (4 MB), while enabling UCX_MAX_RMA_RAILS=4 jumps 4 MB throughput 1.86× (13.10 → 24.39 GB/s). Right: Across 3 independent daily windows (1,200 requests), DeepSeek-V3.1 stalls at 0.50 valid while eligible models exhibit 1.1s–12.4s window p95 swings."
+tags: ["rdma", "nixl", "ucx", "speculative-decoding", "sglang", "api-contract"]
+summary: "Low-level systems instrumentation and reliability audits: fixing NIXL/UCX multi-rail RMA throttling (13.1 → 24.4 GB/s), verifying CUDA tree speculative kernels without claiming unrun speedups, and running 3-day API selection gates."
+---
+
+import Figure from '../../components/Figure.astro';
+import Diagram from '../../components/Diagram.astro';
+
+## 1. Motivation: The Gap Between Theoretical Bandwidth, Speculative Speedup, and Real Systems
+
+High-level benchmarks break down in production for mundane systems reasons: an uncalibrated transport flag caps a 400 Gbps fabric to a single NIC lane (`13.1 GB/s`), an unverified speculative decoder subtly shifts sampling probabilities, or an API model passes a 10-minute smoke test before degrading across multi-day traffic windows. Here we bundle three concrete engineering audits across our transport (`obsidian/260414`), kernel (`mlsys/graphkv-cosched`), and contract (`mara`) labs—strictly separating measured facts from unrun analytical baselines.
+
+## 2. Hypothesis, Falsification & Experimental Mechanism
+
+We hypothesized (`Mixed` across the three low-level stacks) that transport defaults, speculative kernel verifiers, and multi-day API drift harbor silent cliffs undetectable in short smoke runs; falsified if default multi-rail flags saturated 400 Gbps, SD observer tracing exceeded 5% overhead, or single-day API checks held steady across 3 days.
+
+<Diagram title="NIXL + UCX Multi-Rail Bottleneck vs Coalesced DMA Path" caption="In UCX 1.20.x, UCX_MAX_RNDV_RAILS=4 accelerates tag matching (perftest 27.1 GB/s), yet NIXL RMA paths default to UCX_MAX_RMA_RAILS=1 (13.10 GB/s) unless explicitly overridden. Meanwhile, register-per-page overhead dominates scatter transfers under 64 KB.">
+  <svg viewBox="0 0 760 176" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="UCX multi-rail RMA bottleneck and fix">
+    <rect x="14" y="18" width="340" height="138" rx="10" stroke="var(--svg-red)" stroke-width="1.6" fill="var(--svg-red)" fill-opacity="0.06"/>
+    <text x="184" y="42" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="11.5" font-weight="bold">Default Config (UCX_MAX_RMA_RAILS=1)</text>
+    <text x="184" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">UCX_MAX_RNDV_RAILS=4 ignored by ucp_put</text>
+    <text x="184" y="90" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="10.5">4 MB DMA: 13.10 GB/s (~1 NIC active)</text>
+    <text x="184" y="112" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10">1,024×1KB: ~53.8ms reg + ~117ms prep</text>
+    <text x="184" y="136" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="9.5">Single-GPU cross-NUMA filter halves to 2 NICs</text>
+
+    <path d="M356 87 L398 87" stroke="currentColor" stroke-width="1.8"/>
+    <rect x="400" y="18" width="346" height="138" rx="10" stroke="var(--svg-blue)" stroke-width="1.8" fill="var(--svg-blue)" fill-opacity="0.07"/>
+    <text x="573" y="42" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="11.5" font-weight="bold">Fixed Config (RAILS=4 + Coalesced >=1 MB)</text>
+    <text x="573" y="68" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10.5">Explicit UCX_MAX_RMA_RAILS=4 across 4×100GbE</text>
+    <text x="573" y="90" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="10.5">4 MB total: 171.9 µs · 24.39 GB/s (1.86×)</text>
+    <text x="573" y="112" text-anchor="middle" fill="var(--svg-green)" font-family="monospace" font-size="10">Protocol overhead drops 59% (1KB) → 5% (4MB)</text>
+    <text x="573" y="136" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="9.5">TP=2 accesses all 4 NICs (~200 Gbps sustained)</text>
+  </svg>
+</Diagram>
+
+## 3. Verification Testbeds
+
+- **RDMA Fabric (`260414-cxl-vs-rdma-analysis.md`)**: `2×` AMD Turin (`128` cores), `2×` dual-port ConnectX-5 (`4×100 GbE` RoCEv2), Mellanox Spectrum switch (jumbo MTU `9216`), UCX `1.20.x`, NIXL `0.10.0` (`nixl_perf_bench.py`, `100` DRAM-to-DRAM iterations). *Disclosure*: All CXL Memory Expander values (`~200–400 ns`) in the lab note are **analytical extrapolations**, not measured hardware trials (`yw-pow.7`).
+- **CUDA Speculative Verifier & Async Observer (`mlsys/graphkv-cosched`)**: Shared B200 GPU 0 running SGLang `0.5.21` / `torch 2.13.0`: `24` synthetic Markov cells × `32,768` draws (`786,432` joint draws) calling `tree_speculative_sampling_target_only`, plus `5` randomized fresh-engine `Qwen3-14B` NGRAM pairs (`360` measured reqs) comparing observer `off` vs `light`.
+- **3-Window Strict Function Contract (`mara/results/application-validation/`)**: `3` independent daily windows (`2026-07-13..15`, `N=100` req/day = `300`/model, `1,200` total) requiring valid tool calls without truncation; Traffic-overlapped `window-a-function` was explicitly excluded via `window-exclusion.json`.
+
+## 4. Visual Evidence & Quantitative Results
+
+<Figure
+  src="/figures/rdma-ucx-rails-and-sd-audit.png"
+  alt="2-Node ConnectX-5 RoCEv2 bandwidth vs protocol overhead alongside MARA 3-window strict function contract latency."
+  caption="Figure 1. Left: NIXL+UCX multi-rail RMA bandwidth climbs from 0.08 GB/s (1 KB, 59% protocol floor) to 24.39 GB/s (4 MB, 5% overhead) once UCX_MAX_RMA_RAILS=4 is set (1.86× over default 13.10 GB/s). Right: MARA 3-window gate fails DeepSeek-V3.1 (0.50 valid) while revealing large cross-day p95 shifts (1.1s → 12.4s) even among 100%-valid models."
+/>
+
+### NIXL + UCX RoCEv2 Scaling (`MAX_RMA_RAILS=4`, DRAM-to-DRAM)
+
+| Transfer Size | Latency (`µs`) | Protocol Floor Share (`~7.5 µs`) | Measured BW (`GB/s`) | Operational Implication |
+|---|---|---|---|---|
+| `1 KB` | `12.8` | **`59%`** (`1.3 µs` prep + `6.2 µs` post) | `0.08` | Latency-bound; CXL/PCIe coalescing needed |
+| `16 KB` | `11.9` | `57%` reported (`~7.5 / 11.9 = 63%`) | `1.41` | Still mostly UCX SW submission tax |
+| `64 KB` | `18.1` | `40%` | `3.63` | Inflection zone begins |
+| `256 KB` | `32.4` | `23%` | `8.08` | Wire transfer overtakes SW stack |
+| `1 MB` | `92.8` | `8%` | `11.30` | Multi-block coalescing pays off |
+| `4 MB` (`1` vs `4` rails) | `171.9` (4-rail; `~164` wire DMA) | `5%` | `13.10 →` **`24.39` (`1.86×`)** | Approaching `27.1 GB/s` UCX `tag_bw` ceiling |
+
+### Kernel Correctness, Observer Overhead, & Multi-Day API Gates
+
+| Audit Suite | Configuration / Scope | Measured Metric | Status / Interpretation |
+|---|---|---|---|
+| **CUDA Tree SD Verifier (`n=786,432`)** | 4 finite Markov chains × 3 seeds × 2 RNG | Max joint-bin err = **`0.00495`**; `12,288/12,288` scalar match | Exact match; biased neg control (`0.55` vs `1.0`) caught |
+| **SD Async Observer `off` vs `light` (`n=360`)** | 5 paired B200 `Qwen3-14B` NGRAM engines | Slowdown: **`+1.36%`** (`[0.56%, 2.15%]`); `210/210` IDs identical | Safe under `con=1`, `gpu_time=null`, warm tiny prompts |
+| **SGLang `graph-agent` SD Observer (`n=96`)** | 3 pairs (`289–295 → 283–289` tok/s) | Slowdown: **`+1.73%`** (`[1.46%, 2.25%]`, `0` drops) | Clean instrumentation tax; **not** real E2E SD speedup |
+| **MARA Function Gate (`3 days`, `n=1,200`)** | `DeepSeek-V3.1` vs `M2.5 / M2.7 / gpt-oss` | Min valid: **`0.50`** vs **`1.00 / 1.00 / 1.00`** (`0/0` trunc) | `MiniMax-M2.7` lowest worst p95 (`5.69s` vs `12.44s`/`11.58s`) |
+
+## 5. Mechanism Breakdown: Subtle Bugs Caught Only by Micro-Audits
+
+1. **Why UCX Multi-Rail silently drops half your NICs**: On Linux RoCEv2, engineers routinely verify NIC bonding with `ib_write_bw` or `ucx_perftest` (`tag_bw = 217 Gbps` = `27.1 GB/s`) after setting `UCX_MAX_RNDV_RAILS=4`. However, NIXL transfers invoke UCX's **RMA (`ucp_put_nbx`)** transport, which reads `UCX_MAX_RMA_RAILS` (default `1`)—silently throttling 4-rail hardware to `13.10 GB/s`. Additionally, `proto_multi_filter` drops cross-NUMA NICs on single-GPU ranks (`~111 Gbps` vs `~200 Gbps` on TP=2), and registering `1,024 × 1 KB` descriptors separately triggers `~53.8 ms` `ibv_reg_mr()` + `~116.9 ms` descriptor allocation (`~171 ms` for `1 MB`!).
+2. **Separating SD observer overhead from speculative speedup**: Running SGLang NGRAM over repeated identical synthetic KG schemas warmed the draft corpus abnormally cleanly (`309–340` `correct_drafts`), and prior smoke attempts `...-01..04` crashed on startup/NUMA/VRAM. Therefore `graphkv-sd-trace` validates **only** that async tracing adds `~1.36%` observer tax and kernel sampling matches scalar probability—it does *not* claim production speculative decoding gains on open workloads.
+
+## 6. Scope Limits & Follow-Up Validation (`yw-pow.7`)
+
+- **CXL hardware proof still pending (`yw-pow.7`)**: Because no physical Type-3 CXL expander ran in `260414`, all CXL crossover projections (`<64 KB` high-frequency transfers) remain analytical calculations rather than measured timings.
+- **Unmatched high-concurrency SD & OKX throughput (`wt-h1-sdk` / `btc`)**: Observer tax at `concurrency >= 16` and unrun PostgreSQL mixed-load harnesses (`~/lab/btc`) remain in `yw-pow.7` until hardware windows open.
