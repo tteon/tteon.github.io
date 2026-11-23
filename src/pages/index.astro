@@ -67,11 +67,42 @@ const systems = [
       <a href="/experiments/" class="rounded-lg bg-stone-900 text-white dark:bg-zinc-100 dark:text-zinc-950 px-4 py-2 font-medium hover:opacity-90 transition-opacity">
         Browse Experiments →
       </a>
+      <a href="/insights/" class="rounded-lg border border-blue-700/40 dark:border-cyan-500/40 bg-blue-500/5 dark:bg-cyan-500/10 px-4 py-2 text-blue-800 dark:text-cyan-300 font-medium hover:border-blue-700 transition-colors">
+        Insights &amp; Playbook
+      </a>
       <a href="/writing/" class="rounded-lg border border-stone-300 dark:border-zinc-700 px-4 py-2 text-stone-700 dark:text-zinc-300 hover:border-stone-500 transition-colors">
         Architecture Notes
       </a>
       <a href="/about/" class="rounded-lg border border-stone-300 dark:border-zinc-700 px-4 py-2 text-stone-700 dark:text-zinc-300 hover:border-stone-500 transition-colors">
         About
+      </a>
+    </div>
+  </section>
+
+  <section class="py-8 border-b border-stone-200 dark:border-zinc-800/80">
+    <div class="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+      <h2 class="text-xl font-semibold tracking-tight text-stone-950 dark:text-white">High-Signal Research Findings</h2>
+      <a href="/insights/" class="font-mono text-xs text-blue-800 dark:text-cyan-400 hover:underline">Full playbook &amp; 6 checklists →</a>
+    </div>
+    <p class="text-sm text-stone-500 dark:text-zinc-400 mb-4">
+      Counter-intuitive empirical rules mined via Codex + Claude + Antigravity deliberation that teams revisit before building GraphRAG, agent, or KV pipelines.
+    </p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs sm:text-sm">
+      <a href="/experiments/2026-11-15-auto-ontology-postgres-vs-neo4j/" class="rounded-xl border border-stone-200 dark:border-zinc-800 p-3.5 bg-white/70 dark:bg-zinc-900/35 hover:border-blue-600/40 dark:hover:border-cyan-500/40 transition-colors">
+        <p class="font-mono text-[11px] text-amber-800 dark:text-amber-300 mb-1">MYTH: FULL ONTOLOGY HELPS EVERYWHERE</p>
+        <p class="text-stone-800 dark:text-zinc-200 font-medium leading-snug">Tier 2 gains +0.725 via 42 curated metrics while Tier 3 regresses −0.225 from template &amp; entity drift.</p>
+      </a>
+      <a href="/experiments/2026-09-03-mara-single-vs-multiagent-and-repair/" class="rounded-xl border border-stone-200 dark:border-zinc-800 p-3.5 bg-white/70 dark:bg-zinc-900/35 hover:border-blue-600/40 dark:hover:border-cyan-500/40 transition-colors">
+        <p class="font-mono text-[11px] text-rose-700 dark:text-rose-300 mb-1">MYTH: MULTI-AGENT + REPAIR WINS</p>
+        <p class="text-stone-800 dark:text-zinc-200 font-medium leading-snug">Direct single-agent beat handoffs in all 7 MARA configs (n=1,260); repair paid +8 calls for −1 answer.</p>
+      </a>
+      <a href="/experiments/2026-09-02-modality-paradox-and-construction-tax/" class="rounded-xl border border-stone-200 dark:border-zinc-800 p-3.5 bg-white/70 dark:bg-zinc-900/35 hover:border-blue-600/40 dark:hover:border-cyan-500/40 transition-colors">
+        <p class="font-mono text-[11px] text-blue-800 dark:text-cyan-400 mb-1">MYTH: GRAPH TRIPLES BEAT TEXT CHUNKS</p>
+        <p class="text-stone-800 dark:text-zinc-200 font-medium leading-snug">Raw RDF dropped IDF recall to 0.018 (vs 0.286 text); flat evidence beat typed subgraphs &amp; verbalization rescued 3.4×.</p>
+      </a>
+      <a href="/experiments/2026-10-14-kvcache-decode-and-lru-cliff/" class="rounded-xl border border-stone-200 dark:border-zinc-800 p-3.5 bg-white/70 dark:bg-zinc-900/35 hover:border-blue-600/40 dark:hover:border-cyan-500/40 transition-colors">
+        <p class="font-mono text-[11px] text-emerald-700 dark:text-emerald-300 mb-1">MYTH: 15× TTFT = 15× END-TO-END</p>
+        <p class="text-stone-800 dark:text-zinc-200 font-medium leading-snug">Decode eats 82–93% of agent wall (~1.19× E2E), while 99.75% KV pressure triggers a 0.2%-hit LRU cliff.</p>
       </a>
     </div>
   </section>

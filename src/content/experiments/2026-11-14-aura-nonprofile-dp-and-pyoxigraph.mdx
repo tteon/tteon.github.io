@@ -129,7 +129,15 @@ RETURN segment, path_count, toFloat(ss)/path_count AS mean_score
 By breaking a 3-hop `MATCH (a)-[]->(b)-[]->(c)-[]->(d)` pattern into three `WITH` clauses, each step forgets previously traversed relationship IDs. That reduces Slotted execution from `1,244` ms to `77` ms (`22.5×` fewer DB hits), **but turns Cypher's default trail semantics (edge uniqueness within one pattern) into walk semantics (edge revisits allowed across 8 self-loops)**. Running the original single pattern under `CYPHER 25 MATCH REPEATABLE ELEMENTS` reproduced `1,792,000` identically.
 - **Why DB speed barely moves multi-turn Graph-CoT**: Across `n=270` healthcare questions (`2,046` tool calls / `2,182` LLM turns), single-turn DB lookups take `2.79` ms p50 (`p99 = 27.11` ms) versus `1,151.7` ms p50 LLM turns (`412×` slower), and total accumulated DB wait across episodes (`stall_share_wall`) is just **`0.47%`** (`[0.44%–0.50%]`; server-only share `2.13%`). Removing 100% of DB latency would trim under `0.5%` of end-to-end wall time unless concurrency pushes Neo4j above its ~8-core CPU saturation knee (`265.7` req/s on `L1580`).
 
-## 6. Scope Limits & Next Experiment
+## 6. Key Findings & Transferable Insights
+
+*Distilled via multi-agent deliberation (`Codex` + `Claude`):*
+
+- **Cross-session managed DB drift (`~23%`) requires interleaved timing rounds**: Parallel `W4` server execution shifted from `406 ms` (`STUDY.md` PROFILE snapshot) to `498.0 ms` in our later non-PROFILE run (`~23%` opposite-direction drift vs Slotted `2,186 → 1,226.5 ms`). **Rule:** Use `PROFILE` only for query-plan inspection, then benchmark uninstrumented runtimes interleaved in the same session.
+- **Pair Amdahl's DB-share ceiling (`0.47%`) with agent task completion (`50.74%`, `0.212` F1)**: Optimizing sub-3 ms DB queries saves under `0.5%` wall time per turn in Graph-CoT while half the agent runs fail or stall in reasoning (`1,151.7 ms`/turn)—and treat `Parallel pageHits = 0` in `SHOW TRANSACTIONS` as an instrumentation blindspot rather than cache misses.
+- **Never deploy pre-aggregation rewrites on cyclic/self-loop graphs without walk-vs-trail parity verification**: `16.2×` latency cuts that convert Cypher trail semantics (`1,791,878`) into walk semantics (`1,792,000`) silently corrupt exact distinct-path counts.
+
+## 7. Scope Limits & Next Experiment
 
 - **Graph scale & Enterprise boundaries**: Aura lab (`5K` nodes) fits entirely inside the `544 MiB` page cache, whereas Neo4j Enterprise multi-hundred-thousand-node scale and tuning sweeps remain withheld per Neo4j AUP restrictions (`yw-pow.6`).
 - **Write skew & unexecuted Graph-CoT arms**: Concurrent writes in `L1580` produced duplicate observations under `c >= 32` without unique merge locking, and the 8-graph local latency ladder (`sr-tlc.3`) plus Vast `gpt-oss-120b` co-location (`sr-tlc.4`) remain open in `seocho-rust/.beads`.

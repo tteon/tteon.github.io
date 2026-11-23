@@ -9,27 +9,27 @@ verdict: "Mixed"
 keyMetric: "Tier 2 +0.725 (p=4.74e-15) vs Tier 3 -0.225 (p=4.01e-05) on Postgres"
 takeaways:
   - "Explicit ontology context boosts computed ratio questions (Tier 2) dramatically: +0.725 on Postgres (0.17 to 0.90) and +0.525 on Neo4j (0.07 to 0.60)."
-  - "The exact same static prompt regresses Tier 3 multi-condition lookups (-0.225 Postgres, -0.125 Neo4j) by doubling prompt tokens (~2,517–2,788) and over-constraining filters into empty answers."
+  - "The exact same static prompt regresses Tier 3 multi-condition lookups (-0.225 Postgres, -0.125 Neo4j): matching concept-level templates induced per-row outputs and shifted entity linking from tickers (152 → 105) to partial name patterns (ILIKE '%TSMC%') that returned empty sets."
   - "Per-tier failure inspection corrects a naive aggregate assumption: SQL syntax errors actually concentrated in Tier 4 recursive paths (12 → 39 errors), whereas Tier 3 failed predominantly via empty/wrong result sets (empty 41 → 50, syntax = 1)."
-soWhat: "Stop injecting monolithic domain ontologies into every Text2SQL/Cypher prompt. Gate ontology definitions by query pattern: inject metric formulas for computed queries (Tier 2), strip noisy axioms on multi-condition lookups (Tier 3), and supply explicit recursive CTE syntax templates for multi-hop SQL (Tier 4)."
+soWhat: "Stop injecting monolithic domain ontologies into every Text2SQL/Cypher prompt. Gate ontology definitions selectively: supply curated metric formulas for computed queries (Tier 2), resolve canonical tickers/IDs before filtering (Tier 3), and supply explicit WITH RECURSIVE templates for multi-hop SQL (Tier 4)."
 related:
   - label: "Follow-up Coordination Test: Resolving Conflicting Ontology Promotion Claims via BDI & Beads"
     href: "/experiments/2026-11-24-bdi-agent-ontology-beads-synergy/"
 repoUrl: "https://github.com/tteon/auto-ontology-bench"
 environment:
   machine: "Local benchmark harness (~/lab/auto-ontology-bench)"
-  runtime: "Postgres + Neo4j dual-engine SQL/Cypher harness (Stage A + Stage B replay)"
-  dataset: "5 reasoning tiers × 80 paired questions per condition (Tier 5 tests unanswerable abstention)"
-  repeats: "1,600 Stage A LLM+DB requests (400/condition) + Stage B concurrency sweep (1..256)"
+  runtime: "Postgres 16 (local) + Neo4j (Stage A Text2SQL/Cypher only; DB-only Stage B withheld per Neo4j AUP)"
+  dataset: "5 reasoning tiers × 40 questions × 2 temp=0 repeats per condition (Tier 5 tests unanswerable abstention)"
+  repeats: "1,600 Stage A LLM+DB requests (400/condition across 2 repeats; Stage B DB benchmarks omitted per AUP)"
 figures:
   - src: "/figures/auto-ontology-postgres-vs-neo4j.png"
     alt: "Paired accuracy with 95% bootstrap CIs comparing without-ontology vs with-ontology across Tier 1-5 on Postgres and Neo4j."
     caption: "Figure 1. Paired Stage A accuracy across Tiers 1–5."
   - src: "/figures/auto-ontology-failure-modes.png"
-    alt: "Postgres failure taxonomy per tier (correct, empty, wrong, syntax error) alongside Stage B QPS throughput scaling."
-    caption: "Figure 2. Per-tier Postgres failure shift and Stage B DB-only throughput ceiling."
+    alt: "Left: per-tier outcome breakdown on Postgres from Tier 1 to Tier 4. Right: Stage A prompt token expansion and median LLM inference latency."
+    caption: "Figure 2. Per-tier Postgres failure shift alongside Stage A prompt token & LLM latency cost (Stage B DB-only runs withheld per Neo4j AUP)."
 tags: ["auto-ontology", "neo4j", "postgres", "benchmark", "mcnemar"]
-summary: "Paired evaluation of 1,600 requests showing why static ontology prompts produce massive Tier 2 gains alongside sharp Tier 3 regressions and Tier 4 recursive syntax errors."
+summary: "Paired Stage A evaluation (1,600 runs) plus public upstream operational findings: why static ontology injection lifts Tier 2 (+0.725 via curated SQL attributes) while regressing Tier 3 (-0.225 via template/entity shifts), and why Stage B DB benchmarks remain withheld per AUP."
 ---
 
 import Figure from '../../components/Figure.astro';
@@ -81,7 +81,7 @@ Stage A evaluated four conditions (`neo-no-onto`, `neo-onto`, `pg-no-onto`, `pg-
 
 ## 3. Environment & Statistical Protocol
 
-Both conditions ran paired evaluation on identical question repeats (`n=80` pairs/tier), scoring lenient gold-set match on Tiers 1–4 and correct abstention on Tier 5. Significance uses two-sided paired McNemar tests; bracketed ranges denote 95% bootstrap confidence intervals. Stage B separately replayed DB-only queries across concurrency 1–256 (`stageB-real`).
+Both conditions ran paired evaluation over `40` test questions × `2` temperature-0 repeats per tier (`80` pairs/tier, `1,600` Stage A requests total; gold items remain `pending-human-review`), scoring lenient gold-set match on Tiers 1–4 and correct abstention on Tier 5. Significance uses two-sided paired McNemar tests; bracketed ranges denote 95% bootstrap confidence intervals. Per Neo4j's Acceptable Use Policy (`FINDINGS.md §3`), Stage B DB-only throughput and latency sweeps are **withheld and not published**.
 
 ## 4. Visual Evidence & Quantitative Results
 
@@ -98,28 +98,37 @@ Both conditions ran paired evaluation on identical question repeats (`n=80` pair
 | `pg-no-onto` | 0.78 [0.68–0.86] | 0.17 [0.10–0.26] | 0.49 [0.38–0.60] | 0.26 [0.17–0.36] | 0.90 [0.82–0.96] | **0.52** [0.47–0.57] |
 | `pg-onto` | 0.78 [0.68–0.86] | **0.90** [0.82–0.96] | 0.26 [0.16–0.36] | 0.15 [0.07–0.24] | 0.86 [0.79–0.94] | **0.59** [0.54–0.64] |
 
-Inspecting per-tier outcome records (`records.jsonl`) reveals *where* each failure shift actually happened alongside Stage B DB-only concurrency scaling:
+Inspecting per-tier outcome records (`records.jsonl`) reveals *where* each failure shift actually happened alongside Stage A context/latency overhead:
 
 <Figure
   src="/figures/auto-ontology-failure-modes.png"
-  alt="Left: per-tier outcome breakdown on Postgres from Tier 1 to Tier 4. Right: Stage B Postgres vs Neo4j QPS concurrency scaling."
-  caption="Figure 2. Left: Per-tier Postgres failure modes (n=80/tier) proving Tier 3 lost accuracy through empty/wrong results (41 → 50 empty, 0 → 8 wrong, syntax = 1), whereas SQL syntax/execution errors spiked on Tier 4 (12 → 39). Right: Stage B DB-only ceiling where Postgres reaches 5,321.8 QPS (1.9 ms p50) vs Neo4j's 1,355.0 QPS (679 ms p99)."
+  alt="Left: per-tier outcome breakdown on Postgres from Tier 1 to Tier 4. Right: Stage A prompt token expansion and median LLM inference latency."
+  caption="Figure 2. Left: Per-tier Postgres failure modes (n=80 pairs/tier) proving Tier 3 lost accuracy through empty/wrong results (41 → 50 empty, 0 → 8 wrong, syntax = 1), whereas SQL syntax/execution errors spiked on Tier 4 (12 → 39). Right: Static ontology injection doubles prompt tokens (881 → 2,517 Neo4j; 1,357 → 2,788 Postgres) and adds +2.1–2.7s median LLM latency (Stage B DB-only benchmarks withheld per AUP)."
 />
 
-| Condition | Correct (T1–4) | Empty | Wrong Answer | Syntax + Exec Err | e2e p50 (ms) | LLM Total p50 (ms) | DB Wall p50 (ms) | Prompt Tokens |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| `neo-no-onto` | 72 / 320 | 205 | 26 | 6 + 1 | 7,567 | 7,443 | 122.1 | 881 |
-| `neo-onto` | 99 / 320 | 198 | 11 | 2 + 0 | 10,341 | 10,153 | 119.1 | 2,517 |
-| `pg-no-onto` | 136 / 320 | 136 | 34 | 13 + 0 | 5,698 | 5,697 | 1.1 | 1,357 |
-| `pg-onto` | 167 / 320 | 97 | 15 | 38 + 3 | 7,901 | 7,836 | 2.6 | 2,788 |
+| Condition | Correct (T1–4) | Empty | Wrong Answer | Syntax + Exec Err | e2e p50 (ms) | LLM Total p50 (ms) | Prompt Tokens |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `neo-no-onto` | 72 / 320 | 205 | 26 | 6 + 1 | 7,567 | 7,443 | 881 |
+| `neo-onto` | 99 / 320 | 198 | 11 | 2 + 0 | 10,341 | 10,153 | 2,517 |
+| `pg-no-onto` | 136 / 320 | 136 | 34 | 13 + 0 | 5,698 | 5,697 | 1,357 |
+| `pg-onto` | 167 / 320 | 97 | 15 | 38 + 3 | 7,901 | 7,836 | 2,788 |
 
 ## 5. Mechanism Breakdown: Why Aggregate Accuracy Masks Two Opposite Regimes
 
-1. **Ontology fixes missing derived formulas (Tier 2)**: Without derived metric definitions (`net_income` / `stockholders_equity`), the LLM invents nonexistent metric names (`wrong` answers drop from 28 to 1 on Postgres, 18 to 6 on Neo4j).
-2. **Aggregate +0.070 hides Tier 3 over-filtering and Tier 4 recursion bugs**: Tier 3 did *not* break because of syntax errors (only 1 syntax error in Tier 3). Instead, extra entity/relationship rules caused overly strict joins and name matching (`empty` grew 41 → 50, `wrong` grew 0 → 8). Syntax errors happened almost exclusively in **Tier 4**, where prompting abstract path semantics pushed the model to write self-referencing CTEs without `WITH RECURSIVE`.
-3. **LLM inference, not DB speed, dominates latency**: DB wall time accounts for under 0.05% of Postgres end-to-end latency (2.6 ms vs 7,836 ms LLM) and ~1.2% on Neo4j (119.1 ms vs 10,153 ms). Even so, doubling prompt size added ~2.2–2.8 seconds to median response latency.
+1. **Ontology fixes missing derived formulas via curated attributes (Tier 2)**: Without derived metric definitions (`net_income` / `stockholders_equity`), the LLM invents nonexistent metric names (`wrong` answers drop from 28 to 1 on Postgres, 18 to 6 on Neo4j). Crucially, `FINDINGS.md §2` notes Auto-Ontology's automatic layer compiled **0 SQL attributes** from row-stored metrics (`metric_definitions × financial_metrics`)—the `42` human-curated SQL attributes drove the Tier 2 jump.
+2. **Aggregate +0.070 hides Tier 3 template/grounding drift and Tier 4 recursion bugs**: Tier 3 did *not* break because of syntax errors (only 1 syntax error in Tier 3). Auditing `31` Postgres regressions revealed two concrete causes: matched concept-level query templates induced per-row rather than distinct outputs, and the extra context shifted entity linking away from canonical tickers (`152 → 105` queries) toward loose name filters like `ILIKE '%TSMC%'`. Syntax errors happened in **Tier 4**, where abstract path semantics pushed self-referencing CTEs without `WITH RECURSIVE`. Meanwhile, Text2Cypher trailed Text2SQL by `0.17` across both arms due to exact property lookups `{name: '...'}` (`122–146` of `~320` queries/arm at `~0%` accuracy vs `0.45–0.67` when ticker-anchored).
+3. **LLM inference, not local Postgres latency, dominates E2E cost**: Local Postgres DB time remained under `0.05%` of E2E latency (`1.1 → 2.6` ms vs `5,697 → 7,836` ms LLM); doubling prompt size added `~2.2–2.7` seconds to median LLM inference, plus `54` s median on `check_answerable`.
 
-## 6. Scope Limits & Next Experiment
+## 6. Key Findings & Transferable Insights
 
-- Results depend on this benchmark's financial ontology schema and the model tested in Stage A; other query-repair loops or recursive SQL few-shots could reduce the Tier 4 syntax jump (`12 → 39`).
-- **Next step**: Test **tier-gated selective ontology injection**—supply derived metric definitions only on metric/aggregation signatures, enforce canonical ticker/ID linking rules for multi-condition filters, and include explicit `WITH RECURSIVE` templates on Tier 4 path queries.
+*Distilled via multi-agent deliberation (`Codex` systems practitioner + `Claude` evidence gate) from `FINDINGS.md` §1–§2:*
+
+- **Curate row-stored metrics explicitly; automatic schema ingestion misses semantic metrics**: Auto-Ontology compiled `0` SQL attributes from `metric_definitions` rows, whereas `42` curated attributes drove `+0.725`. **Rule:** Inspect compiled attribute yield directly instead of trusting `schema ingested = covered`.
+- **Do not run uncalibrated `check_answerable` inline on concurrent paths**: `_run_lock` serialized `check_answerable` at `~1 call/53 s` (`79/80` timed out past `180 s` at `c=8`), and answerable Tier 2 questions scored only `0.20–0.33` coverage—forcing dev calibration to choose **no abstention gate**.
+- **Assert non-empty context (`ctx_chars`, `ctx_matched_sql`) in request telemetry**: Candidate IDs turned out to be *attribute IDs*, not term IDs—causing silent 404s that passed empty ontology contexts (`*-buggy` runs), while incompatible `lightning-30b` threw HTTP 400 × 3 (`~89 s`) before silently falling back to the raw prompt.
+- **Anchor entities canonically before query generation & restrict ingested catalog views**: Ticker-anchored Cypher (`0.45–0.67`) massively beat ungrounded exact `{name: ...}` matches (`~0%`), and naive `pg_catalog` introspection ingested internal monitoring views like `pg_stat_statements`.
+
+## 7. Scope Limits & Next Experiment
+
+- **Dependent repeats & review status**: The `80` pairs/tier represent `40` questions × `2` temperature-0 repeats, all `250` gold items remain `pending-human-review`, and Tier 2 curation itself can favor the ontology arm (`FINDINGS.md §6`). Stage B Aura DB throughput sweeps are withheld behind Neo4j AUP (`yw-pow.6`).
+- **Next step**: Test **tier-gated selective ontology injection**—supply curated metric definitions only on computed signatures, resolve canonical ticker/entity IDs deterministically before filter generation, and supply explicit `WITH RECURSIVE` templates for Tier 4 path queries.

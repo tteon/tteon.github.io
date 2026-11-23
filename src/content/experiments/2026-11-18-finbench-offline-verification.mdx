@@ -6,11 +6,11 @@ host: "Local Offline Replay"
 hypothesis: "All published FinBench validation, probe, and DB-replay summary figures can be deterministically reproduced from preserved SHA-256 raw artifacts."
 falsification: "Any contract test failure across the 4 suites, any SHA-256 mismatch across preserved run bundles, or any analyzer summary discrepancy refutes deterministic reproducibility."
 verdict: "Supported"
-keyMetric: "56/56 contract tests pass · 713/713 SHA-256 files match · 4/4 JSON analyzers match"
+keyMetric: "713/713 SHA-256 & 4/4 JSON match offline · Bounded live capture: 7/13 strict contract (8/13 grading)"
 takeaways:
   - "Cryptographic SHA-256 manifests verified all 713 raw bundle files and matched 17 source files and 18 exported charts with zero discrepancies."
   - "Re-running all 4 deterministic analyzers into isolated temporary paths reproduced the exact published summary JSONs without live cloud access."
-  - "Reproducibility proves post-capture integrity, not general inference performance—historical live captures remain explicitly bounded (8/13 original grading pass, 7/13 strict contract)."
+  - "Reproducibility proves post-capture integrity, not general inference performance—historical live captures remain explicitly bounded at 7/13 (53.8%) strict answer contract and 8/13 original grading pass."
 soWhat: "When shutting down expensive GPU/DB cloud VMs after a benchmark, archive raw responses + a file-size/SHA-256 manifest + pure offline analyzer scripts in git. Months later, anyone can audit every reported metric without re-renting hardware."
 beadsId: "sr-9jb6"
 repoUrl: "https://github.com/tteon/gare2e"
@@ -102,7 +102,14 @@ Notice the deliberate verdict choice: **our offline reproducibility hypothesis i
 
 Additionally, inspecting `tteon/gare2e@07d7453c` verified provenance: `gare2e` branched directly from `tteon/seocho` commit `c3a1871` via `5422522`, explaining why SEOCHO packaging metadata appears in `gare2e` root manifests.
 
-## 6. Scope Limits & Next Experiment
+## 6. Key Findings & Transferable Insights
+
+*Distilled via multi-agent deliberation (`Codex` + `Claude`):*
+
+- **Hash identity proves non-tampering around a `53.8%` (`7/13`) live baseline—never conflate the two**: Auditing `713/713` files guarantees our post-VM summary numbers were not altered, yet the underlying historical strict contract passed just `7/13` queries and interface probes covered `3` questions × `7` conditions × `1` trial (`21` single-trial cells). **Rule:** Always display live outcome ceilings right alongside offline integrity metrics.
+- **Lock the full compute chain (`raw JSON + analyzer + permissions`) before VM teardown**: Locking file permissions (`0700` dirs / `0600` files) and storing deterministic `/tmp`-isolated Python analyzers ensures external reviewers can reproduce exact charts months later at `$0` GPU cost.
+
+## 7. Scope Limits & Next Experiment
 
 - **Not a live statistical proof**: SHA-256 identity proves zero post-capture tampering, not that page-cache misses dominate CPU/I/O/lock stalls or that interface deltas hold across unseen question sets.
 - **Mock paths in unit checks**: Part of the 56 unit checks stub external DB/LLM drivers cleanly rather than hitting live Neo4j or vLLM processes.

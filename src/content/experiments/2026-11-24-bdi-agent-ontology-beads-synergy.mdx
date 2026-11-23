@@ -154,7 +154,14 @@ Running live agents surfaced two architectural boundaries immediately. First, `t
 - **File / Symbol Scope as `WorldState`**: Ground coding beliefs in exact file SHA-256 + symbol range instead of free prose—if Agent B edits `auth.py`, Agent A's uncommitted patch plan automatically triggers `V5_stale_world_hash`.
 - **Reviewer vs Implementer Separation**: Coder agents attach `plan_tasks` for module ownership while reviewer agents attach `target_issue_id` + test output hashes, blocking Beads closure whenever a test-gate refutes the implementation claim.
 
-## 6. Scope Limits & Honest Verification Boundary
+## 6. Key Findings & Transferable Insights
+
+*Distilled via multi-agent deliberation (`Codex` + `Claude`):*
+
+- **Separate epistemic audit targets (`target_issue_id`) from execution claims (`plan_tasks`)**: Our first live multi-agent test hit a gate false positive (`1` of `3` tasks) because both reviewer (`claude`) and critic (`codex`) populated `plan_tasks` when voting to block `synexp-th0.1`, causing SPARQL `Q_DOUBLE_CLAIM` to flag healthy consensus as a collision. **Rule:** Reviewers reference issues; only single-owner implementers claim plan execution edges.
+- **Hash-pinned `WorldState` (`V5`) catches silent underlying mutation—and needs closed-issue archiving**: While active `WorldState` drift blocks stale agent beliefs deterministically, keeping `V4`/`V5` active across already-`closed` issues would halt subsequent epics unless closed states transition to archival read-only status (`bdi_ontology.py`). Similarly, `Codex`'s aggregate `+0.070` over-generalization was caught on `synexp-th0.2` specifically because both agents addressed one canonical `claimKey` (`ontology_tier_effect`).
+
+## 7. Scope Limits & Honest Verification Boundary
 
 - **Sample scale**: Trial 1 ran 12 self-authored gate cases and Trial 2–3 ran one complete live sandbox pass (`codex`, `claude`, `antigravity`); multi-run variance and noisy production concurrency remain untested.
 - **Claim-key alignment assumption**: `Q_CONFLICT` detects contradictions cleanly only when agents address the same canonical `WorldState` URI and `claimKey`; unnormalized synonyms bypass syntactic conflict matching.

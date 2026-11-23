@@ -151,28 +151,43 @@ def plot_auto_ontology_failures_and_stage_b() -> list[Path]:
     axes[0].text(4.8, 82.0, "T3 empty:\n41→50 (syn=1)", ha="center", va="bottom", fontsize=9.2, fontweight="bold", color="#52525B")
     axes[0].text(7.0, 82.0, "T4 syntax:\n12→39", ha="center", va="bottom", fontsize=9.2, fontweight="bold", color=PALETTE["red_strong"])
 
-    # Panel B: Stage B DB-only replay QPS scaling (REPORT.md lines 67-78)
-    concs = [1, 8, 32, 64, 128, 256]
-    pos = np.arange(len(concs))
-    pg_qps = [1210.1, 4872.8, 5321.8, 5244.8, 4991.1, 4764.1]
-    neo_qps = [8.8, 97.5, 414.2, 837.7, 1291.1, 1355.0]
-    make_trend(
-        axes[1],
-        pos,
-        [pg_qps, neo_qps],
-        ["Postgres (stageB-real QPS)", "Neo4j (stageB-real QPS)"],
-        colors=[PALETTE["blue_main"], PALETTE["red_strong"]],
-        ylabel="Queries per Second (QPS)",
-        xlabel="Client Concurrency",
-        show_shadow=False,
+    # Panel B: Stage A Prompt Token Expansion vs Median LLM Latency Cost (public FINDINGS.md §1, Neo4j DB benchmarks omitted per AUP)
+    conds = ["neo-no", "neo-onto", "pg-no", "pg-onto"]
+    pos = np.arange(len(conds))
+    prompt_toks = [881, 2517, 1357, 2788]
+    llm_s = [7.443, 10.153, 5.697, 7.836]
+
+    b_tok = axes[1].bar(
+        pos - 0.18,
+        prompt_toks,
+        width=0.35,
+        color=[PALETTE["neutral"], PALETTE["red_2"], PALETTE["neutral"], PALETTE["blue_main"]],
+        edgecolor="black",
+        linewidth=1.4,
+        zorder=3,
+        label="Mean Prompt Tokens",
     )
+    axes[1].set_ylabel("Mean Prompt Tokens", color=PALETTE["blue_main"], fontweight="bold")
+    axes[1].set_ylim(0, 3550)
     axes[1].set_xticks(pos)
-    axes[1].set_xticklabels([str(c) for c in concs])
-    axes[1].set_ylim(0, 6100)
-    axes[1].legend(loc="center right", fontsize=11, frameon=False)
-    axes[1].set_title("Stage B DB-Only Throughput Ceiling", pad=12)
-    axes[1].annotate("5,321.8 QPS\n(1.9 ms p50)", xy=(2, 5321.8), xytext=(2.4, 5450), fontsize=10, fontweight="bold", color=PALETTE["blue_main"])
-    axes[1].annotate("1,355.0 QPS\n(679 ms p99)", xy=(5, 1355.0), xytext=(3.1, 1850), fontsize=10, fontweight="bold", color=PALETTE["red_strong"], arrowprops={"arrowstyle": "->", "color": PALETTE["red_strong"], "lw": 1.3})
+    axes[1].set_xticklabels(["Neo4j\nNo-Onto", "Neo4j\n+Onto", "Postgres\nNo-Onto", "Postgres\n+Onto"], fontsize=10.5)
+    axes[1].yaxis.grid(True, linestyle="--", alpha=0.25, zorder=0)
+    for rect, v in zip(b_tok, prompt_toks):
+        axes[1].text(rect.get_x() + rect.get_width() / 2.0, v + 55, f"{v:,}", ha="center", va="bottom", fontsize=9.2, fontweight="bold")
+
+    ax2 = axes[1].twinx()
+    ax2.spines["top"].set_visible(False)
+    b_lat = ax2.plot(pos + 0.22, llm_s, marker="o", markersize=8, linewidth=2.4, color=PALETTE["red_strong"], label="Median LLM Time (s)", zorder=4)
+    ax2.set_ylabel("Median LLM Inference Time (s)", color=PALETTE["red_strong"], fontweight="bold")
+    ax2.set_ylim(0, 13.5)
+    axes[1].set_xlim(-0.55, 3.65)
+    for xv, yv in zip(pos + 0.22, llm_s):
+        ax2.text(xv, yv + 0.45, f"{yv:.1f}s", ha="center", va="bottom", fontsize=9.2, fontweight="bold", color=PALETTE["red_strong"])
+
+    h1, l1 = axes[1].get_legend_handles_labels()
+    h2, l2 = ax2.get_legend_handles_labels()
+    axes[1].legend(h1 + h2, l1 + l2, loc="upper left", fontsize=9.5, frameon=False)
+    axes[1].set_title("Stage A Context Tax: +1.2–1.6K Tokens Adds +2.1–2.7s LLM Time", pad=12)
 
     return finalize_figure(fig, OUT_DIR / "auto-ontology-failure-modes.png", dpi=300, tight_pad=2.1)
 

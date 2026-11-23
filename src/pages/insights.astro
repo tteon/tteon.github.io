@@ -1,0 +1,219 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const experiments = (await getCollection('experiments'))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const myths = [
+  {
+    category: 'Ontology & GraphRAG Construction',
+    assumption: 'Adding a shared domain ontology always makes extractors agree and improves Text2SQL/Cypher uniformly.',
+    reality: 'Inter-model agreement dropped (0.375 no-schema → 0.221 hand-written → 0.193 FIBO, LoG 1.4, n=16×3); Tier 2 computed metrics surged (+0.725 Postgres) via 42 curated SQL attrs while Tier 3 multi-condition filters regressed (−0.225) and Tier 4 recursive SQL errors jumped (12 → 39).',
+    href: '/experiments/2026-11-15-auto-ontology-postgres-vs-neo4j/',
+    label: 'Auto-Ontology Stage A',
+  },
+  {
+    category: 'Ontology & GraphRAG Construction',
+    assumption: 'Typed subgraphs or compacted triples outperform flat retrieved text chunks.',
+    reality: 'Raw RDF collapsed FinDER IDF recall (0.018 vs Text 0.286, n=2,542); in E2E (38 cases / 15 issuers), flat matched evidence outperformed typed subgraphs (79/96 & 90/120 vs 69/96 & 69/120, 1,927 vs 3,252 median tok), and verbalizing triples rescued recall 3.4× at half LPG tokens.',
+    href: '/experiments/2026-09-02-modality-paradox-and-construction-tax/',
+    label: 'Modality & LoG/E2E',
+  },
+  {
+    category: 'Ontology & GraphRAG Construction',
+    assumption: 'Same-family LLM judges reliably score GraphRAG pipelines, and stacking retrieval + router + CoT compounds gains.',
+    reality: 'Switching Kimi self-judge to GPT-4o dropped Hybrid 0.97 → 0.49 (−0.30 general strictness, ~0.18–0.20 verbosity leniency, n=10); full stacking (a+b+c) trailed Hybrid on GPT-4o (0.743 vs 0.850, p=0.040) and PlannerAgent collapsed 0.277 vs 0.659.',
+    href: '/experiments/2026-04-27-icml-factorial-and-judge-swap/',
+    label: 'ICML & KGC Suite',
+  },
+  {
+    category: 'Agent Interfaces & Coordination',
+    assumption: 'Splitting Text2Cypher into planner/worker/verifier agents with auto-repair outperforms a single agent.',
+    reality: 'Single direct execution beat both multi-agent handoffs in all 7 model-effort configurations (n=1,260 MARA runs); automatic repair spent +8 calls, +9,795 prompt tokens, and +289 DB hits for −1 net correct answer across 18 paired cells.',
+    href: '/experiments/2026-09-03-mara-single-vs-multiagent-and-repair/',
+    label: 'MARA 1,260 Factorial',
+  },
+  {
+    category: 'Graph Runtime & Storage',
+    assumption: 'Neo4j Parallel cuts latency ~4× across queries, and faster graph DBs eliminate Graph-CoT delays.',
+    reality: 'Stripping PROFILE shrank true Parallel W4 server gain to 2.46× (n=10, ~23% cross-session drift vs 406 → 498 ms); point/local 3-hop queries ran 0.95–0.97× behind ~100 ms TLS RTT; DB wait accounted for only 0.47% of Graph-CoT wall time (2.79 vs 1,151.7 ms LLM turn p50).',
+    href: '/experiments/2026-11-14-aura-nonprofile-dp-and-pyoxigraph/',
+    label: 'Non-PROFILE & Read-Path',
+  },
+  {
+    category: 'LLM Serving & KV-Cache',
+    assumption: 'Prefix KV caching translates cleanly into E2E speedup and UCX_MAX_RNDV_RAILS=4 enables multi-rail RMA.',
+    reality: 'H200 14.76× prefill TTFT collapsed to 0.2% hits at 99.75% KV occupancy while full sessions gained ~1.19× (10.30 → 8.62s) under 82–93% decode share; NIXL RMA stayed single-rail (13.10 GB/s) until setting UCX_MAX_RMA_RAILS=4 (24.39 GB/s).',
+    href: '/experiments/2026-10-14-kvcache-decode-and-lru-cliff/',
+    label: 'KV Cliff & Decode Share',
+  },
+  {
+    category: 'Verification, Code Graphs & Postmortems',
+    assumption: 'A green cron status="success" or valid SHA-256 checksum certifies a healthy pipeline.',
+    reality: '197/197 DataLab logs wrote status="success" despite 145 Neo4j errors and 146 zero-entity extractions (80/80 consecutive since 2026-07-31); FinBench proved 713/713 SHA-256 non-tampering around a strictly bounded 7/13 (53.8%) historical capture.',
+    href: '/experiments/2026-09-27-postmortem-anisotropy-and-silent-failures/',
+    label: 'Silent Failure Postmortem',
+  },
+];
+
+const checklists = [
+  {
+    title: '1. Evidence-Preserving Retrieval',
+    trigger: 'Trigger: Alias BM25 60/64 vs ctx-graph 2/64 · Opik 0.80 proxy vs 0.30 true DB rows',
+    href: '/experiments/2026-08-02-temporal-grounding-and-ecommerce-ontology/',
+    items: [
+      'Always benchmark against raw text, flat matched evidence, BM25, and reviewed-alias BM25 before shipping graph readers.',
+      'Verify exact financial numbers, dates, units, and supplied citations survive serialization (consider verbalizing RDF triples first).',
+      'Track returned DB record count separately from chunk-fallback or closed-book prose rescues.',
+    ],
+  },
+  {
+    title: '2. Selective Ontology & Schema Injection',
+    trigger: 'Trigger: Tier 2 +0.725 vs Tier 3 −0.225 · 0 compiled row-stored attrs · Declared 70/12 vs Introspected 96/51',
+    href: '/experiments/2026-11-15-auto-ontology-postgres-vs-neo4j/',
+    items: [
+      'Resolve entities to canonical tickers/IDs deterministically before generating WHERE/MATCH filters (avoid loose ILIKE or {name: ...}).',
+      'Supply curated metric formulas for derived computations (Tier 2), explicit WITH RECURSIVE patterns for paths (Tier 4), and avoid blanket schema dumps.',
+      'Inspect store introspection vs declared ontology diffs (LoG 2.1) and verify compiled attribute yield on row-stored metric tables.',
+    ],
+  },
+  {
+    title: '3. Agent Topology & Auto-Repair Admission',
+    trigger: 'Trigger: Direct beat Multi in 7/7 cells · Repair −1 net answer (+8 calls) · 32,769 > 32,768 QAT crash',
+    href: '/experiments/2026-09-03-mara-single-vs-multiagent-and-repair/',
+    items: [
+      'Establish a single direct tool-calling baseline under identical token caps before introducing planner/verifier handoffs.',
+      'Preflight input_tokens + reserved_output <= context_cap and assert every schema tool name against the sandbox runtime.',
+      'Audit verifier false negatives and require byte-diff route checks (LoG 2.2) plus net positive paired gains before enabling repair.',
+    ],
+  },
+  {
+    title: '4. Latency Attribution & Amdahl Concurrency',
+    trigger: 'Trigger: Graph-CoT 0.47% DB stall share · check_answerable _run_lock 1 call/53s · Walk +122 path drift',
+    href: '/experiments/2026-11-14-aura-nonprofile-dp-and-pyoxigraph/',
+    items: [
+      'Measure DB, validator, queue, TLS RTT, and LLM decode shares separately—apply Amdahl’s ceiling before optimizing sub-3 ms queries.',
+      'Use PROFILE only for operator hit inspection; time execution interleaved across arms without PROFILE and validate walk-vs-trail equivalence.',
+      'Load-test metadata/preflight endpoints for lock serialization (e.g. check_answerable _run_lock) and log ctx_chars against silent empty fallbacks.',
+    ],
+  },
+  {
+    title: '5. KV Cache Slack & Multi-Rail RDMA',
+    trigger: 'Trigger: 99.75% occupancy → 0.2% hits · UCX_MAX_RMA_RAILS=4 unlocks 13.10 → 24.39 GB/s',
+    href: '/experiments/2026-07-15-rdma-ucx-rails-and-sd-audit/',
+    items: [
+      'Start KV sizing with 15–20% slack below LRU capacity and stress-test against long-context outlier prompts.',
+      'Verify UCX_MAX_RMA_RAILS explicitly on NIXL RMA paths and coalesce descriptors toward >=16–256 KB to amortize ~7.5 µs protocol floors.',
+      'Keep E0/simulation boundaries explicit: separate observed transfers (280 E0 trials) from unbuilt GPU prefetch actuators and analytical CXL projections.',
+    ],
+  },
+  {
+    title: '6. Publication, Telemetry & BDI Integrity',
+    trigger: 'Trigger: 197/197 cron "success" masked 146 empty runs · BDI SPARQL V1–V5 rejected 8/8 malformed states',
+    href: '/experiments/2026-11-24-bdi-agent-ontology-beads-synergy/',
+    items: [
+      'Fail batch jobs on non-null DB errors or zero output entities (never alert on raw step counts like llm_extractions alone).',
+      'Classify infra/timeout aborts as Inconclusive, archive raw responses + SHA-256 manifests before VM teardown, and disclose bounded live pass rates.',
+      'Require grounded WorldState hashes, canonical claimKeys, and strict separation between reviewer references (target_issue_id) and execution claims (plan_tasks).',
+    ],
+  },
+];
+---
+
+<BaseLayout title="Research Insights & Engineering Playbook — Yitae Jeong" description="Cross-experiment findings, counter-intuitive myths debunked, and copyable architecture checklists distilled via Codex, Claude, and Antigravity multi-agent deliberation.">
+  <div class="mb-8 max-w-3xl">
+    <p class="font-mono text-xs text-blue-800 dark:text-cyan-400 mb-2">MULTI-AGENT SYNTHESIS · CODEX + CLAUDE + ANTIGRAVITY (BDI)</p>
+    <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-stone-950 dark:text-white mb-3">
+      Cross-Experiment Insights &amp; Engineering Playbook
+    </h1>
+    <p class="text-sm sm:text-base text-stone-600 dark:text-zinc-400 leading-relaxed">
+      Why revisit benchmark posts months later? Not for raw latency tables, but for durable design rules that stop teams from repeating expensive mistakes. Every insight below was mined across our 12 published experiments and underlying local <code class="font-mono text-xs">FINDING.md</code> / <code class="font-mono text-xs">E2E_FINDINGS.json</code> logs via parallel <strong class="font-semibold text-stone-800 dark:text-zinc-200">Codex</strong> (systems practitioner) and <strong class="font-semibold text-stone-800 dark:text-zinc-200">Claude</strong> (evidence gate) exploration and reconciled via BDI.
+    </p>
+  </div>
+
+  <section class="mb-12">
+    <h2 class="text-xl font-semibold text-stone-950 dark:text-white mb-2">1. Counter-Intuitive Findings: Assumption vs Measured Reality</h2>
+    <p class="text-sm text-stone-500 dark:text-zinc-400 mb-4">
+      The highest-leverage insights emerged where common GraphRAG and LLM systems intuitions inverted under paired controls.
+    </p>
+    <div class="overflow-x-auto rounded-xl border border-stone-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/30">
+      <table class="w-full text-left text-xs sm:text-sm border-collapse">
+        <thead>
+          <tr class="border-b border-stone-200 dark:border-zinc-800 font-mono text-[11px] uppercase text-stone-500 dark:text-zinc-400 bg-stone-50 dark:bg-zinc-900/60">
+            <th class="py-3 px-4">Domain</th>
+            <th class="py-3 px-4">Common Assumption</th>
+            <th class="py-3 px-4">What Raw Artifacts Proved</th>
+            <th class="py-3 px-4">Evidence</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-stone-200/80 dark:divide-zinc-800/80">
+          {myths.map((m) => (
+            <tr class="align-top">
+              <td class="py-3 px-4 font-mono text-[11px] text-stone-600 dark:text-zinc-400 whitespace-nowrap">{m.category}</td>
+              <td class="py-3 px-4 text-stone-700 dark:text-zinc-300 font-medium">{m.assumption}</td>
+              <td class="py-3 px-4 text-stone-700 dark:text-zinc-300 leading-relaxed">{m.reality}</td>
+              <td class="py-3 px-4 whitespace-nowrap font-mono text-xs">
+                <a href={m.href} class="text-blue-800 dark:text-cyan-400 hover:underline">{m.label} →</a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="mb-12">
+    <h2 class="text-xl font-semibold text-stone-950 dark:text-white mb-2">2. Six Architecture Review Checklists</h2>
+    <p class="text-sm text-stone-500 dark:text-zinc-400 mb-5">
+      Operational pre-flight rules proposed by our systems practitioner pass, anchored to exact failure triggers measured on disk.
+    </p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {checklists.map((c) => (
+        <div class="rounded-xl border border-stone-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/35 p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between gap-2 mb-2">
+              <h3 class="text-base font-semibold text-stone-950 dark:text-white">{c.title}</h3>
+              <a href={c.href} class="font-mono text-[11px] text-blue-800 dark:text-cyan-400 hover:underline shrink-0">Proof →</a>
+            </div>
+            <p class="font-mono text-[11px] text-amber-800 dark:text-amber-300 mb-3 leading-snug">{c.trigger}</p>
+            <ul class="space-y-2 text-xs sm:text-sm text-stone-700 dark:text-zinc-300 leading-relaxed list-disc pl-4">
+              {c.items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold text-stone-950 dark:text-white mb-2">3. Transferable Practical Rule by Experiment ({experiments.length})</h2>
+    <p class="text-sm text-stone-500 dark:text-zinc-400 mb-4">
+      Every post now includes a dedicated Section 6 summarizing distilled findings, counter-intuitive nuances, and explicit boundaries.
+    </p>
+    <div class="divide-y divide-stone-200/80 dark:divide-zinc-800/80 border-t border-b border-stone-200 dark:border-zinc-800">
+      {experiments.map((exp) => (
+        <div class="py-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2 font-mono text-[11px] text-stone-500 dark:text-zinc-400 mb-1">
+              <span>{exp.data.date.toISOString().slice(0, 10)}</span>
+              <span>·</span>
+              <span>{exp.data.category}</span>
+              <span>·</span>
+              <span>{exp.data.verdict}</span>
+            </div>
+            <a href={`/experiments/${exp.id}/#6-key-findings--transferable-insights`} class="text-sm sm:text-base font-semibold text-blue-800 dark:text-cyan-400 hover:underline">
+              {exp.data.title} →
+            </a>
+            <p class="mt-1 text-xs sm:text-sm text-stone-700 dark:text-zinc-300 leading-relaxed">
+              <strong class="font-mono text-[11px] uppercase text-stone-500 dark:text-zinc-400 mr-1.5">Practical Rule:</strong>
+              {exp.data.soWhat}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

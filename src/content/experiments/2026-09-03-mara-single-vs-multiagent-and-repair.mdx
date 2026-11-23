@@ -101,9 +101,17 @@ We hypothesized that splitting Text2Cypher FinBench execution across specialized
 
 1. **Reasoning budget vs multi-agent envelope splitting**: In Stage B effort sweeps (`N=180`), boosting `gpt-oss-120b` from `low → high` left `direct` flat (`16/20`), inflated completion tokens `4.8×` (`63,553 → 306,734`), and caused `26` length-limit stops at `high` inside multi-agent envelopes.
 2. **Verifier false negatives turn auto-repair negative-ROI**: Across `RQ2`, verifiers frequently flagged valid `Direct`/`Multi` queries as incomplete (`12–42` false negatives per arm), pushing a repair agent to issue additional DB queries without improving accuracy (`−1` net correct across `18` paired cells).
-3. **Why DeepSeek-V3.2 reversed in E4 & E2b**: Requiring strict CSV row caps + ontology guardrails helped `gpt-oss-120b` cleanly (`0` silent truncations vs `9`), yet `DeepSeek-V3.2` spent `48–52` seconds per episode over-thinking compliance (`2` silent truncations), whereas `custom JSON` beat `CSV` in E2b (`2/6` in `11.4s` / `1,825` out tok vs `1/6` in `38.1s` / `9,525` out tok).
+3. **Why DeepSeek-V3.2 reversed in E4 & E2b**: Requiring strict CSV row caps + ontology guardrails helped `gpt-oss-120b` cleanly (`0` silent truncations vs `9`), yet `DeepSeek-V3.2` spent `48–52` seconds per episode over-thinking compliance (`2` silent truncations; note E4 totals `n=52` over 26 episodes/arm — `~20 vs ~18` correct — without a standalone significance test). Separately, `custom JSON` beat `CSV` in E2b (`2/6` in `11.4s` / `1,825` out tok vs `1/6` in `38.1s` / `9,525` out tok).
 
-## 6. Scope Limits & Open Beads Work
+## 6. Key Findings & Transferable Insights
+
+*Distilled via multi-agent deliberation (`Codex` + `Claude`):*
+
+- **Establish `single direct + strict caps` as the baseline before adding multi-agent handoffs**: Single direct execution outperformed both multi-agent arms across all `7` model-effort configurations (`1,260` Stage C episodes over `10` core FinBench queries). **Surprise:** `multi_typed` and `multi_envelope` tied identically in `6` of `7` cells (differing only `21 vs 22` on `MiniMax`), showing handoff envelope styling mattered far less than splitting context across agents—or flagging code-path convergence for audit.
+- **Audit verifier false negatives before turning on auto-repair**: When strict verifiers reject valid candidate paths (`30/30` on `gpt-oss-low`, `42/66` on `medium`), retry loops convert correctness into waste (`+8` calls, `+9,795` input tok, `+289` DB hits → `−1` correct answer across `18` paired cells).
+- **Scale budgets by query topology and verify high-reasoning model regressions explicitly**: Well-anchored `customer_inflow` scans scaled `1.02×` (`SF1 → SF100`), while `guarantee_chain` exploded `99.7×`—and always verify guardrail hints on high-reasoning models (`DeepSeek-V3.2` E4 vs `gpt-oss-120b` E1) before global rollout.
+
+## 7. Scope Limits & Open Beads Work
 
 - **Missing High-Hub FinBench regime**: `AIsummit26` Protocol Stage C's high-hub supernode anchor-band block (`AIsummit26-q92`) was left unexecuted (`yw-pow.4`), and earlier `observability` live tests (`seocho-observability-20261011`) exposed `0/24` `DeepSeek-V3.2` completions (all `24/24` adaptive runs crashed; `131/360` total errors).
-- **Ontology Mapping Pilot v1 (`AIsummit26-uqa`, `n=24`)**: Improved gold match `4/12 → 8/12` on `gemma-4-31B-it` but remained `Inconclusive` after breaching the pre-registered `1.5×` prompt token cap (`2.21×`).
+- **Ontology Mapping Pilot v1 (`AIsummit26-uqa`, `n=24`)**: Improved gold match `4/12 → 8/12` on `gemma-4-31B-it` but remained `Inconclusive` after breaching the pre-registered `1.5×` prompt token cap (`2.21×`). Also note `1,260` Stage C episodes repeat across `10` queries (`AIsummit26`) and `MiniMax-M2.7` ran on an adjusted `1,200/4,000` token budget.

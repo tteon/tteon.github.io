@@ -114,7 +114,15 @@ Every metric below comes from immutable JSONL logs under `~/lab/icml2026/experim
 - **Judge leniency traps verbose answers**: On the `random` FinDER slice (`n=10`), Kimi-K2.5 self-judged `hybrid_all` (`0.97`) and `graph_cot_gfm` (`0.92`) far higher than `text_only` (`0.88`). Re-grading those *exact strings* with `GPT-4o` revealed `text_only` actually topped every policy (`0.580 > 0.490 > 0.450 > 0.420`), because verbose structured graph dumps fooled same-family judges when exact financial values were missing (`48.6%` of random-slice answer atoms existed in neither retrieved text nor graph per `phase_a_posthoc.md`).
 - **True Graph-only agent value vs CoT thrashing**: When raw prose is completely withheld (`react_baseline`), Graph CoT+GFM clearly beats unconstrained ReAct (`0.5757` vs `0.2395–0.3013` over `n=152` GPT-4o runs and `0.700` vs `0.096–0.258` on `n=24` Kimi). Yet when good text is already present, extra ambiguity gates (`amb_ablation`, `n=15`: `keyword_only 0.373` vs `hybrid gate 0.293`) and multi-step `PlannerAgent` routing (`0.277 vs 0.659`) add broken tool sequences and drop answer coverage. Even temporal entity resolution (`temporal_er_gpt-4o`, `n=60`) trailed the text floor (`0.750` vs `0.820`).
 
-## 6. Scope Limits & Remediation Items
+## 6. Key Findings & Transferable Insights
+
+*Distilled via multi-agent deliberation (`Codex` systems practitioner + `Claude` evidence gate from `icml2026` & `lesson_learned_graph_text_hybrid.md`):*
+
+- **Decompose judge-swap drops into strictness (`~0.30`) vs graph verbosity inflation (`~0.18–0.20`)**: Switching Kimi-K2.5 → GPT-4o on the `n=10` random slice also cut `text_only` (`0.88 → 0.58`), proving `~0.30` came from stricter grading and `~0.18–0.20` came from same-family reward for verbose graph dumps. *Clarification*: Factorial rows list the **evaluator judge** (`GPT-4o` vs `Kimi-K2.5`), requiring cross-family judges before ranking pipelines.
+- **Hybrid's `+0.225` win is slice-bound (`Compositional`), not a universal rule — watch for the "plausibility trap"**: Across `8-category` (`n=72`), `Hybrid` (`0.611`) barely matches `Text` (`0.607`, `+0.004`); in pre-factorial `relationship-heavy` (`5+` edge, `n=10`) pilots, `Text` topped Graph on M1 (`0.700 vs 0.530`) and numeric fidelity (`0.896 vs 0.630`), while naive hybrid lifted M1 (`0.490 → 0.600`) at the cost of lower F1 (`0.309 → 0.258`) and numeric accuracy (`0.818 → 0.708`). **Decision rule:** Route hybrid retrieval only to verified multi-source compositional prompts with numeric answer checks intact.
+- **Never deploy routers or multi-step planners without single-call floors & byte-diff route audits**: Interactive `PlannerAgent` scored `-0.382` below `single_call` (`0.277 vs 0.659`), and `exp3_router` disguised identical code across two arms—verify query differences deterministically (`LoG 2.2` byte-diff gate) before running sweeps.
+
+## 7. Scope Limits & Remediation Items
 
 - **Biased `v1` history kept separate**: An earlier `n=5,659` scoring run (`results_v1_biased`) assigned `0.000` structural quality to RDF due to unnormalized dangling references; fixing normalization restored `0.6695`.
 - **Tracked cleanup (`yw-pow.5`)**: Fixing `exp3_router.py` lines 11–14 (`apply_route` branch parity bug) and adding the omitted `factorial_kimi-k2.5_rand` row (`a=0.920`) are tracked cleanly in Beads `yw-pow.5`.

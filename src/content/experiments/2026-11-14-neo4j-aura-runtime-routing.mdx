@@ -13,6 +13,8 @@ takeaways:
   - "Route by query topology: reserve Parallel for global multi-hop scans and aggregations, not short OLTP probes."
 soWhat: "If you run graph agents against managed Neo4j over TLS, attach CYPHER runtime=parallel only to global aggregations and unanchored multi-hop queries; leave point lookups and bounded local traversals on Slotted or Pipelined."
 related:
+  - label: "Non-PROFILE Follow-Up: True 2.46× Server Speedup & DP Rewrite Semantics"
+    href: "/experiments/2026-11-14-aura-nonprofile-dp-and-pyoxigraph/"
   - label: "Architecture Note: Federated Queries, Rust Bolt Middleware & Runtime Routing"
     href: "/writing/2026-11-12-neo4j-runtime-and-rust-bolt-routing/"
 repoUrl: "https://github.com/tteon/seocho"
@@ -126,8 +128,15 @@ Inspecting `measurements.csv` explains both sides of the curve cleanly:
 Route by expected operator work relative to your Bolt network RTT: (1) use **Slotted/Pipelined** for single-node lookups, indexed top-k, and bounded seeded traversals (`W1`, `W2`, `W5`); (2) trigger **Parallel** only when `EXPLAIN` shows global label/index-range scans feeding multi-hop `Expand(All)` aggregations (`W3`, `W4`, `W6`).
 </Callout>
 
-## 6. Scope Limits & Next Experiment
+## 6. Key Findings & Transferable Insights
 
-- **Single-stream measurement**: Runs were executed sequentially (`n=5`). Because `parallel` claims multiple worker threads and 2–6 MB heap per query, high-concurrency throughput can favor `pipelined` or queue admission control.
-- **PROFILE instrumentation overhead**: Client wall timings include `PROFILE` operator collection overhead.
+*Distilled via multi-agent deliberation (`Codex` + `Claude`):*
+
+- **Route runtime hints by operator cost relative to network RTT, not hop count**: Point lookups (`W1`), shallow local 3-hop walks (`W2`), and indexed top-k (`W5`) finish in `1–6` ms on server behind a `~100` ms TLS RTT floor (`0.95–0.97×` *slower* under `parallel`), whereas `W3` / `W6` `1.17×` saves only `~20` ms—making `W4` the sole strong `parallel` beneficiary in this suite.
+- **Pair `PROFILE` runs with an uninstrumented timing follow-up**: Our [follow-up non-PROFILE study](/experiments/2026-11-14-aura-nonprofile-dp-and-pyoxigraph/) proved `PROFILE` inflated Slotted `W4` server work, trimming true server speedup to **`2.46×`** vs this post's `4.11×` client-wall measurement. **Checklist:** Use `PROFILE` to inspect DB hits and operator plans, then time production routing policies with `PROFILE` stripped.
+
+## 7. Scope Limits & Next Experiment
+
+- **Single-stream measurement**: Runs were executed sequentially (`n=5`, Parallel `W4` spread `374.7–710.7` ms). Because `parallel` claims multiple worker threads and `2.2–6.0` MB heap per query, high-concurrency throughput can favor `pipelined` or queue admission control.
+- **PROFILE instrumentation overhead**: Client wall timings include `PROFILE` operator collection overhead (see linked follow-up for non-PROFILE server baselines).
 - **Next step**: Measure concurrent agent throughput (concurrency 8–64) and Rust Bolt admission-queue latency when mixed `W1` + `W4` workloads collide.

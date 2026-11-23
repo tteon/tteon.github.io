@@ -104,7 +104,14 @@ We hypothesized (`Supported` at the forensic audit level) that every zero-score 
 1. **Top-level status lies when sub-steps swallow exceptions**: Look at `datalab`'s latest November log (`pipeline_20261123_*.json`): `"status": "success"`, `"steps": {"total_docs": 20, "llm_extractions": 20, "neo4j_error": "{neo4j_code: Neo.ClientError.Security.AuthenticationRateLimit}"}`, alongside `extractions` containing `0` entities across `146` total runs (`66` early gaps in `02-08..07-22` after June–`07-30` extracts, followed by `80/80` consecutive zero-entity runs since `2026-07-31`). Without an assertion failing `status` whenever `neo4j_error` is non-null or `sum(len(e.entities)) == 0`, cron monitoring stays falsely green across months.
 2. **Unregistered tools & reserve math kill offline GPU batch jobs cleanly (`0/12`)**: In `description-ontology-qat-v1`, reserving `4,096` output tokens atop `28,673` input tokens (`32,769`) crossed vLLM's exact `32,768` context ceiling on line 1, while requesting `search_similar_code` aborted the agent inside the Kaggle sandbox before emitting a single line of code. Running a 1-task preflight sandbox smoke check against the *exact* container manifest (`32,768` cap & tool list) catches both failures locally in seconds.
 
-## 6. Scope Limits, Verdict Boundaries & Remediation Backlog
+## 6. Key Findings & Transferable Insights
+
+*Distilled via multi-agent deliberation (`Codex` + `Claude`):*
+
+- **Identical arm scores (`4/8 == 4/8`) + `llm_extractions: 20` vs `0` entities = classic telemetry illusions**: When an ablation (`Arm C +Graph`) matches baseline (`Arm B`) to the question, verify actual tool-call counts (`0/8`) before concluding the graph helped or hurt; similarly, count *non-empty extracted entities* and *non-null DB errors*, never raw step execution counts, to gate `status="success"`.
+- **Preflight exact container context math (`28,673 + 4,096 > 32,768`), tool registries, and off-diagonal vector cosine distributions**: Off-diagonal median cosine `0.9412` and a single off-by-1 token overflow wiped out `0/12` GPU cells—30 seconds of local preflight saves hours of wasted L4 compute.
+
+## 7. Scope Limits, Verdict Boundaries & Remediation Backlog
 
 - **Audit verdict vs underlying task verdict**: This post carries verdict `Supported` solely for the *forensic diagnosis hypothesis* (raw trace inspection confirmed explicit engineering/harness failures behind every collapsed score); the underlying crashed or retracted runs themselves remain unrescued (`Inconclusive` / retracted) and are never counted as negative capability results.
 - **Public tracking via Beads (`yw-pow`)**: None of the failed or retracted experiments above are quietly deleted or reframed as partial wins; all seven actionable remediation bundles remain open/blocked under Beads epic **`yw-pow`** and displayed publicly on our [Complete Catalog & Backlog](/archive/) page.
