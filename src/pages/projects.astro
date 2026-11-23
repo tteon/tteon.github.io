@@ -1,0 +1,93 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const systems = [
+  {
+    name: 'SEOCHO',
+    role: 'Ontology-First Graph Memory & Agent Runtime',
+    links: [
+      { label: 'Docs (seocho.blog)', url: 'https://seocho.blog' },
+      { label: 'GitHub', url: 'https://github.com/tteon/seocho' },
+    ],
+    summary: 'Core middleware separating semantic validation, Bolt connection/query scheduling, and runtime routing across graph backends.',
+  },
+  {
+    name: 'Auto-Ontology Bench',
+    role: 'Postgres vs Neo4j Ontology Grounding Benchmark',
+    links: [{ label: 'GitHub', url: 'https://github.com/tteon/auto-ontology-bench' }],
+    summary: '1,600-request paired McNemar evaluation measuring where explicit ontologies lift accuracy and where they regress multi-tier queries.',
+  },
+  {
+    name: 'GARE2E & Neo4j EE FinBench',
+    role: 'Graph Agentic RAG Evaluation & Integrity Replay',
+    links: [
+      { label: 'gare2e', url: 'https://github.com/tteon/gare2e' },
+      { label: 'neo4j-ee-finbench', url: 'https://github.com/tteon/neo4j-ee-finbench' },
+    ],
+    summary: 'End-to-end financial knowledge graph benchmarks with SHA-256 artifact manifests and reproducible offline replay analyzers.',
+  },
+  {
+    name: 'KV-Cache & GNN-LLM Lab',
+    role: 'LLM Inference Memory & GraphCoT Workload Studies',
+    links: [
+      { label: 'kvcache-lab', url: 'https://github.com/tteon/kvcache-lab' },
+      { label: 'gnn-llm-lab', url: 'https://github.com/tteon/gnn-llm-lab' },
+    ],
+    summary: 'Profiling KV-cache offloading, vLLM prefix/shared memory reuse, and hardware bottlenecks in iterative graph-reasoning agents.',
+  },
+];
+
+const talks = [
+  { event: 'Nodes26', title: 'Neo4j Runtime Optimization, Rust Bolt Middleware & Ontology Context', url: 'https://github.com/tteon/nodes26' },
+  { event: 'AI Engineer NY 2026', title: 'Graph Agentic Systems & Ontology Engineering', url: 'https://github.com/tteon/AIEngineerNY26' },
+  { event: 'AI Summit 2026', title: 'Enterprise GraphRAG & Rust Harness Benchmarks', url: 'https://github.com/tteon/AISummit26' },
+  { event: 'KCC / KDD / KCS Tutorials', title: 'Hands-on GraphRAG, GraphCoT, and Knowledge Graph Tutorials', url: 'https://github.com/tteon/kcc2026-tutorial' },
+];
+---
+
+<BaseLayout title="Projects & Talks — Yitae Jeong">
+  <div class="mb-10">
+    <p class="font-mono text-xs text-cyan-700 dark:text-cyan-400 mb-2">PORTFOLIO</p>
+    <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-950 dark:text-white mb-2">Projects & Talks</h1>
+    <p class="text-sm text-zinc-600 dark:text-zinc-400">
+      Open-source systems, benchmark harnesses, and technical talks across graph databases, ontology engineering, and LLM inference.
+    </p>
+  </div>
+
+  <section class="mb-12">
+    <h2 class="text-lg font-semibold text-zinc-950 dark:text-white mb-4">Open-Source Systems & Benchmarks</h2>
+    <div class="space-y-4">
+      {systems.map((s) => (
+        <div class="rounded-xl border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/40 p-5">
+          <div class="flex flex-wrap items-baseline justify-between gap-2 mb-1">
+            <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">{s.name}</h3>
+            <span class="font-mono text-xs text-zinc-500">{s.role}</span>
+          </div>
+          <p class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mb-3 leading-relaxed">{s.summary}</p>
+          <div class="flex flex-wrap gap-3 font-mono text-xs">
+            {s.links.map((l) => (
+              <a href={l.url} target="_blank" rel="noreferrer" class="text-cyan-700 dark:text-cyan-400 hover:underline">
+                {l.label} ↗
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section>
+    <h2 class="text-lg font-semibold text-zinc-950 dark:text-white mb-4">Talks & Tutorials</h2>
+    <div class="divide-y divide-zinc-200 dark:divide-zinc-800/80 rounded-xl border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/40">
+      {talks.map((t) => (
+        <a href={t.url} target="_blank" rel="noreferrer" class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 px-5 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors">
+          <div>
+            <span class="font-mono text-xs text-cyan-700 dark:text-cyan-400">{t.event}</span>
+            <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t.title}</p>
+          </div>
+          <span class="font-mono text-xs text-zinc-400">Repo ↗</span>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

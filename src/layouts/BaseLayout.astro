@@ -1,0 +1,98 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'Yitae Jeong — Systems & Graph AI Researcher exploring Graph Processing, Ontology-First Agents, KV-Cache, and CXL.',
+} = Astro.props;
+
+const pathname = Astro.url.pathname;
+const nav = [
+  { label: 'Overview', href: '/' },
+  { label: 'Experiments', href: '/experiments/' },
+  { label: 'Writing', href: '/writing/' },
+  { label: 'Projects', href: '/projects/' },
+  { label: 'About', href: '/about/' },
+];
+---
+
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <script is:inline>
+      const saved = localStorage.getItem('theme');
+      if (saved === 'light') document.documentElement.classList.remove('dark');
+      else document.documentElement.classList.add('dark');
+    </script>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <header class="sticky top-0 z-30 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/85 dark:bg-[#090b0e]/85 backdrop-blur-md">
+      <div class="mx-auto max-w-4xl px-5 sm:px-8 h-14 flex items-center justify-between">
+        <a href="/" class="font-mono text-sm font-medium tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+          <span class="inline-block h-2 w-2 rounded-full bg-cyan-400"></span>
+          yitae.lab
+        </a>
+        <div class="flex items-center gap-5 sm:gap-6">
+          <nav class="flex items-center gap-4 sm:gap-5 text-xs sm:text-sm">
+            {nav.map((item) => {
+              const active = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+              return (
+                <a
+                  href={item.href}
+                  class={active
+                    ? 'font-medium text-zinc-950 dark:text-white'
+                    : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors'}
+                >
+                  {item.label}
+                </a>
+              );
+            })}
+          </nav>
+          <button
+            id="theme-toggle"
+            type="button"
+            aria-label="Toggle theme"
+            class="rounded-md border border-zinc-200 dark:border-zinc-800 px-2 py-1 font-mono text-[11px] text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors"
+          >
+            theme
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 mx-auto w-full max-w-4xl px-5 sm:px-8 py-10 sm:py-14">
+      <slot />
+    </main>
+
+    <footer class="border-t border-zinc-200/80 dark:border-zinc-800/80 py-8">
+      <div class="mx-auto max-w-4xl px-5 sm:px-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+        <span>Yitae Jeong (tteon) · Seoul</span>
+        <div class="flex items-center gap-4">
+          <a href="https://github.com/tteon" target="_blank" rel="noreferrer" class="hover:text-zinc-900 dark:hover:text-zinc-100">GitHub</a>
+          <a href="https://www.linkedin.com/in/yitaejeong/" target="_blank" rel="noreferrer" class="hover:text-zinc-900 dark:hover:text-zinc-100">LinkedIn</a>
+          <a href="https://seocho.blog" target="_blank" rel="noreferrer" class="hover:text-zinc-900 dark:hover:text-zinc-100">seocho.blog</a>
+        </div>
+      </div>
+    </footer>
+
+    <script is:inline>
+      document.getElementById('theme-toggle')?.addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      });
+    </script>
+  </body>
+</html>

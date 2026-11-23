@@ -1,10 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="SEOCHO">
-  <rect width="128" height="128" rx="28" fill="#030405"/>
-  <path d="M31 75 64 28l33 47-33 25-33-25Z" fill="#f4efe3"/>
-  <path d="M43 72 64 42l21 30-21 16-21-16Z" fill="#030405"/>
-  <path d="M64 42v46M43 72h42" stroke="#2dd4bf" stroke-width="6" stroke-linecap="round"/>
-  <circle cx="64" cy="42" r="7" fill="#f59e0b"/>
-  <circle cx="43" cy="72" r="7" fill="#22d3ee"/>
-  <circle cx="85" cy="72" r="7" fill="#34d399"/>
-  <circle cx="64" cy="88" r="7" fill="#f4efe3"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="tteon">
+  <rect width="128" height="128" rx="28" fill="#090b0e"/>
+  <rect x="6" y="6" width="116" height="116" rx="22" fill="none" stroke="#27272a" stroke-width="4"/>
+  <path d="M36 42h44M58 28v54c0 12 6 18 18 18h14" fill="none" stroke="#f4f4f5" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="90" cy="42" r="7" fill="#22d3ee"/>
 </svg>

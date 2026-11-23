@@ -1,149 +1,149 @@
 ---
-import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
-import ChangelogList from '../components/ChangelogList.astro';
-import LettaHero from '../components/LettaHero.astro';
-import LettaFeatures from '../components/LettaFeatures.astro';
-import Pathways from '../components/Pathways.astro';
-import LatestBlog from '../components/LatestBlog.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ExperimentCard from '../components/ExperimentCard.astro';
+import { getCollection } from 'astro:content';
 
-const stack = [
-  ['Ontology contract', 'valid node, relationship, and property shapes'],
-  ['Graph memory', 'facts, provenance, constraints, and repair artifacts'],
-  ['Semantic query', 'ontology-aware retrieval before final answers'],
-  ['Runtime boundary', 'HTTP, traces, policy checks, and shared workspaces'],
+const experiments = (await getCollection('experiments'))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
+
+const writings = (await getCollection('writing'))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 4);
+
+const projects = [
+  {
+    name: 'SEOCHO',
+    desc: 'Ontology-first graph memory and runtime for agents — separating semantic validation, Bolt scheduling, and multi-engine query execution.',
+    url: 'https://seocho.blog',
+    repo: 'https://github.com/tteon/seocho',
+    tag: 'GraphRAG · Ontology · Runtime',
+  },
+  {
+    name: 'Auto-Ontology Bench',
+    desc: 'Paired statistical evaluation across Postgres and Neo4j measuring when ontology grounding lifts or degrades multi-tier retrieval accuracy.',
+    url: 'https://github.com/tteon/auto-ontology-bench',
+    repo: 'https://github.com/tteon/auto-ontology-bench',
+    tag: 'Benchmark · Evaluation',
+  },
+  {
+    name: 'GARE2E & FinBench',
+    desc: 'End-to-end replay, serialization probes, and SHA-256-verified evidence pipelines for graph-agentic financial RAG.',
+    url: 'https://github.com/tteon/gare2e',
+    repo: 'https://github.com/tteon/gare2e',
+    tag: 'Reproducibility · Audit',
+  },
+  {
+    name: 'KV-Cache & Systems Lab',
+    desc: 'Experiments on tiered KV-cache offloading, vLLM execution traces, CXL memory, and multi-agent shared memory architectures.',
+    url: 'https://github.com/tteon/kvcache-lab',
+    repo: 'https://github.com/tteon/kvcache-lab',
+    tag: 'vLLM · KV-Cache · CXL',
+  },
 ];
 ---
 
-<StarlightPage frontmatter={{ title: 'SEOCHO | Ontology-Aligned Graph Memory', template: 'splash' }} hasSidebar={false}>
-  <main class="landing-override min-h-screen w-full bg-[var(--seocho-ink)] text-zinc-100 selection:bg-cyan-300/20">
-    <LettaHero />
-    <LettaFeatures />
-    <Pathways />
+<BaseLayout title="Yitae Jeong (tteon) — Systems & Graph AI Research">
+  <section class="pb-12 border-b border-zinc-200 dark:border-zinc-800/80">
+    <p class="font-mono text-xs text-cyan-700 dark:text-cyan-400 mb-3">
+      Yitae Jeong · XCENA · Seoul
+    </p>
+    <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-950 dark:text-white leading-tight mb-4">
+      Exploring the intersection of Graph Processing, Ontology-First Agents, KV-Cache, and CXL.
+    </h1>
+    <p class="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed mb-6">
+      Research notes, reproducible experiment logs, and systems engineering work across graph database runtimes, ontology-guided agent memory, and LLM serving infrastructure. Every experiment entry separates verified measurements from open hypotheses.
+    </p>
+    <div class="flex flex-wrap gap-3 font-mono text-xs">
+      <a href="/experiments/" class="rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 px-3.5 py-2 font-medium hover:opacity-90 transition-opacity">
+        Browse Experiment Log →
+      </a>
+      <a href="https://github.com/tteon" target="_blank" rel="noreferrer" class="rounded-lg border border-zinc-300 dark:border-zinc-700 px-3.5 py-2 text-zinc-700 dark:text-zinc-300 hover:border-zinc-500 transition-colors">
+        GitHub (@tteon)
+      </a>
+      <a href="https://seocho.blog" target="_blank" rel="noreferrer" class="rounded-lg border border-zinc-300 dark:border-zinc-700 px-3.5 py-2 text-zinc-700 dark:text-zinc-300 hover:border-zinc-500 transition-colors">
+        SEOCHO Docs ↗
+      </a>
+      <a href="https://www.linkedin.com/in/yitaejeong/" target="_blank" rel="noreferrer" class="rounded-lg border border-zinc-300 dark:border-zinc-700 px-3.5 py-2 text-zinc-700 dark:text-zinc-300 hover:border-zinc-500 transition-colors">
+        LinkedIn ↗
+      </a>
+    </div>
+  </section>
 
-    <section class="bg-[#030405]">
-      <div class="mx-auto grid w-full max-w-7xl gap-10 px-5 py-20 md:px-8 lg:grid-cols-[0.88fr_1.12fr] lg:items-start">
-        <div class="min-w-0">
-          <p class="mb-3 text-xs font-semibold uppercase text-amber-200/80">First useful run</p>
-          <h2 class="seocho-display text-4xl font-semibold leading-tight text-[var(--seocho-paper)] md:text-5xl">
-            Prove one memory loop locally.
-          </h2>
-          <p class="mt-5 max-w-xl text-base leading-7 text-zinc-400">
-            The shortest path should feel calm: define the ontology, add one
-            record, ask one question, and inspect the graph contract before
-            touching deployment.
-          </p>
-          <div class="mt-7 flex flex-wrap gap-3">
-            <a href="/docs/quickstart/" class="brand-button brand-button-primary">Quickstart</a>
-            <a href="/docs/python_sdk/" class="brand-button brand-button-secondary">Python SDK</a>
-            <a href="/examples/" class="brand-button brand-button-ghost">Examples</a>
+  <section class="py-10 border-b border-zinc-200 dark:border-zinc-800/80 grid grid-cols-1 md:grid-cols-3 gap-5">
+    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800/80 p-4 bg-white/70 dark:bg-zinc-900/30">
+      <span class="font-mono text-[11px] text-cyan-700 dark:text-cyan-400">01 / GRAPH RUNTIME</span>
+      <h2 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mt-1 mb-1.5">Bolt & Execution Routing</h2>
+      <p class="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+        Rust query-scheduling middleware, admission control, and workload-aware routing across Slotted, Pipelined, and Parallel graph runtimes.
+      </p>
+    </div>
+    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800/80 p-4 bg-white/70 dark:bg-zinc-900/30">
+      <span class="font-mono text-[11px] text-cyan-700 dark:text-cyan-400">02 / ONTOLOGY MEMORY</span>
+      <h2 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mt-1 mb-1.5">Federated Ontology Agents</h2>
+      <p class="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+        Preventing context contamination in multi-domain knowledge graphs via competency-driven ontology grounding and paired ablation studies.
+      </p>
+    </div>
+    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800/80 p-4 bg-white/70 dark:bg-zinc-900/30">
+      <span class="font-mono text-[11px] text-cyan-700 dark:text-cyan-400">03 / SERVING & CXL</span>
+      <h2 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mt-1 mb-1.5">KV-Cache & Memory Hierarchy</h2>
+      <p class="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+        Characterizing agentic GraphCoT prefill/decode traces, KV-cache sharing across shared ontology memory, and CXL/RDMA transfer trade-offs.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-10 border-b border-zinc-200 dark:border-zinc-800/80">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-lg font-semibold tracking-tight text-zinc-950 dark:text-white">Recent Experiment Logs</h2>
+      <a href="/experiments/" class="font-mono text-xs text-cyan-700 dark:text-cyan-400 hover:underline">All experiments →</a>
+    </div>
+    <div class="space-y-4">
+      {experiments.map((exp) => (
+        <ExperimentCard slug={exp.id} {...exp.data} />
+      ))}
+    </div>
+  </section>
+
+  <section class="py-10 border-b border-zinc-200 dark:border-zinc-800/80">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-lg font-semibold tracking-tight text-zinc-950 dark:text-white">Technical Writing</h2>
+      <a href="/writing/" class="font-mono text-xs text-cyan-700 dark:text-cyan-400 hover:underline">All notes →</a>
+    </div>
+    <div class="space-y-3">
+      {writings.map((post) => (
+        <a href={`/writing/${post.id}/`} class="block rounded-xl border border-zinc-200 dark:border-zinc-800/80 p-4 hover:border-cyan-500/50 transition-colors bg-white/70 dark:bg-zinc-900/30">
+          <div class="flex items-center gap-2 font-mono text-xs text-zinc-500 dark:text-zinc-400 mb-1">
+            <span>{post.data.date.toISOString().slice(0, 10)}</span>
+            <span>·</span>
+            <span>{post.data.category}</span>
+            <span>·</span>
+            <span>{post.data.readingTime}</span>
           </div>
-        </div>
-
-        <div class="brand-code-panel min-w-0">
-          <div class="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
-            <span class="text-sm font-medium text-zinc-200">copy-paste local path</span>
-            <span class="text-xs text-zinc-500">Python</span>
-          </div>
-          <pre class="overflow-x-auto text-sm leading-6 text-zinc-300"><code>{`from seocho import Seocho, Ontology, NodeDef, RelDef, Property
-
-ontology = Ontology(
-    name="work",
-    nodes={
-        "Person": NodeDef(properties={"name": Property(str, unique=True)}),
-        "Company": NodeDef(properties={"name": Property(str, unique=True)}),
-    },
-    relationships={
-        "WORKS_AT": RelDef(source="Person", target="Company"),
-    },
-)
-
-client = Seocho.local(ontology, llm="mara/MiniMax-M2.5")
-client.add("Marie Curie worked at the University of Paris.")
-print(client.ask("Where did Marie Curie work?"))`}</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <section class="bg-[var(--seocho-paper)] text-[#11110f]">
-      <div class="mx-auto grid w-full max-w-7xl gap-10 px-5 py-20 md:px-8 lg:grid-cols-[1fr_1fr] lg:items-center">
-        <div class="brand-stack-visual min-w-0" aria-hidden="true">
-          {stack.map(([label], index) => (
-            <div class={`brand-stack-layer brand-stack-layer-${index + 1}`}>
-              <span>{label}</span>
-            </div>
-          ))}
-        </div>
-        <div class="min-w-0">
-          <p class="mb-3 text-xs font-bold uppercase text-[#35635b]">System shape</p>
-          <h2 class="seocho-display text-4xl font-semibold leading-tight md:text-5xl">
-            Four surfaces, one contract.
-          </h2>
-          <div class="mt-8 grid gap-4">
-            {stack.map(([label, body]) => (
-              <div class="brand-stack-copy">
-                <h3 class="text-lg font-semibold">{label}</h3>
-                <p class="mt-1 text-sm leading-6 text-[#5d594f]">{body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="mx-auto w-full max-w-7xl px-5 py-20 md:px-8">
-      <div class="mb-8 flex flex-col gap-4 border-b border-white/10 pb-6 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p class="mb-3 text-xs font-semibold uppercase text-cyan-200/80">Docs map</p>
-          <h2 class="seocho-display text-4xl font-semibold text-[var(--seocho-paper)] md:text-5xl">Read next</h2>
-        </div>
-        <a href="/docs/" class="brand-link-light">Open docs home</a>
-      </div>
-      <div class="grid gap-4 md:grid-cols-2">
-        <a href="/learn/" class="brand-read-card">
-          <h3>Concept Guide</h3>
-          <p>A one-page map of vocabulary, modes, request flow, and code ownership.</p>
+          <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-1">{post.data.title}</h3>
+          <p class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">{post.data.summary}</p>
         </a>
-        <a href="/docs/architecture/" class="brand-read-card">
-          <h3>Architecture</h3>
-          <p>The deeper module map for SDK, indexing, query, runtime, and compatibility layers.</p>
+      ))}
+    </div>
+  </section>
+
+  <section class="pt-10">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-lg font-semibold tracking-tight text-zinc-950 dark:text-white">Selected Systems & Benchmarks</h2>
+      <a href="/projects/" class="font-mono text-xs text-cyan-700 dark:text-cyan-400 hover:underline">Projects & talks →</a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {projects.map((p) => (
+        <a href={p.url} target="_blank" rel="noreferrer" class="rounded-xl border border-zinc-200 dark:border-zinc-800/80 p-4 bg-white/70 dark:bg-zinc-900/30 hover:border-cyan-500/50 transition-colors">
+          <div class="flex items-center justify-between mb-1.5">
+            <h3 class="font-semibold text-sm text-zinc-900 dark:text-zinc-100">{p.name}</h3>
+            <span class="font-mono text-[11px] text-zinc-400">↗</span>
+          </div>
+          <p class="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed mb-2.5">{p.desc}</p>
+          <span class="font-mono text-[11px] text-cyan-700 dark:text-cyan-400">{p.tag}</span>
         </a>
-      </div>
-    </section>
-
-    <section class="mx-auto w-full max-w-7xl px-5 py-20 md:px-8">
-      <div class="mb-8 flex flex-col gap-4 border-b border-white/10 pb-6 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p class="mb-3 text-xs font-semibold uppercase text-amber-200/80">Writing</p>
-          <h2 class="seocho-display text-4xl font-semibold text-[var(--seocho-paper)] md:text-5xl">Field notes</h2>
-          <p class="mt-2 text-sm text-zinc-500">Concepts, reasoning, and major release notes.</p>
-        </div>
-        <a href="/blog/" class="brand-link-light">All posts</a>
-      </div>
-      <LatestBlog />
-    </section>
-
-    <section class="mx-auto w-full max-w-7xl px-5 pb-24 md:px-8">
-      <div class="mb-8 flex flex-col gap-4 border-b border-white/10 pb-6 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p class="mb-3 text-xs font-semibold uppercase text-emerald-200/80">Project signal</p>
-          <h2 class="seocho-display text-3xl font-semibold text-[var(--seocho-paper)] md:text-4xl">Latest updates</h2>
-          <p class="mt-2 text-sm text-zinc-500">Release-linked updates from the public GitHub trail.</p>
-        </div>
-        <a href="https://github.com/TTEON/seocho/commits/main/" target="_blank" rel="noopener noreferrer" class="brand-link-light">Commits</a>
-      </div>
-      <ChangelogList />
-    </section>
-  </main>
-</StarlightPage>
-
-<style>
-:global(.sl-container) {
-  max-width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-:global(.sl-markdown-content) {
-  display: contents !important;
-}
-</style>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

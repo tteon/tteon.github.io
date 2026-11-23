@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('experiments');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const dateStr = d.date.toISOString().slice(0, 10);
+---
+
+<BaseLayout title={`${d.title} — Experiment Log`} description={d.summary}>
+  <div class="mb-6">
+    <a href="/experiments/" class="font-mono text-xs text-cyan-700 dark:text-cyan-400 hover:underline">← Back to Experiment Log</a>
+  </div>
+
+  <article>
+    <header class="mb-8 pb-6 border-b border-zinc-200 dark:border-zinc-800">
+      <div class="flex flex-wrap items-center gap-2 font-mono text-xs text-zinc-500 dark:text-zinc-400 mb-3">
+        <span>{dateStr}</span>
+        <span>·</span>
+        <span>Host: {d.host}</span>
+        {d.commit && (
+          <>
+            <span>·</span>
+            <span>Commit: {d.commit}</span>
+          </>
+        )}
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-950 dark:text-white mb-4">
+        {d.title}
+      </h1>
+
+      <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
+        <div>
+          <span class="font-mono text-[10px] uppercase tracking-wider text-zinc-400">Expected Hypothesis</span>
+          <p class="text-zinc-800 dark:text-zinc-200 mt-1">{d.hypothesis}</p>
+        </div>
+        <div>
+          <span class="font-mono text-[10px] uppercase tracking-wider text-zinc-400">Verdict & Key Metric</span>
+          <p class="text-zinc-800 dark:text-zinc-200 mt-1">
+            <strong class="font-mono text-cyan-700 dark:text-cyan-300">{d.verdict}</strong> — <span class="font-mono tabular-nums">{d.keyMetric}</span>
+          </p>
+        </div>
+      </div>
+
+      {d.repoUrl && (
+        <div class="mt-3 font-mono text-xs">
+          <a href={d.repoUrl} target="_blank" rel="noreferrer" class="text-cyan-700 dark:text-cyan-400 hover:underline">
+            Source Repository ↗
+          </a>
+        </div>
+      )}
+    </header>
+
+    <div class="prose-custom">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

@@ -1,26 +1,19 @@
 {
-  "name": "majestic-metal",
+  "name": "tteon-github-io",
   "type": "module",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
     "clean": "node scripts/clean-astro-cache.mjs",
-    "clean:astro": "node scripts/clean-astro-cache.mjs --astro",
-    "build": "astro build",
-    "build:ci": "node scripts/clean-astro-cache.mjs --ci && astro build",
-    "rebuild": "node scripts/clean-astro-cache.mjs --force && astro build",
+    "build": "node scripts/clean-astro-cache.mjs --ci && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "check:docs": "bash scripts/check-doc-quality.sh",
-    "check:sync": "node scripts/check-doc-sync.mjs"
+    "check:links": "bash scripts/check-built-links.sh"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.37.6",
-    "@tailwindcss/vite": "^4.2.0",
     "astro": "^5.6.1",
-    "sharp": "^0.34.2",
-    "starlight-blog": "^0.25.2"
+    "sharp": "^0.34.2"
   },
   "devDependencies": {
     "@astrojs/mdx": "^4.3.13",
