@@ -1,0 +1,108 @@
+---
+title: "Reproducing 713 Cloud Benchmark Artifacts Offline After the GPU Instance Is Torn Down"
+date: 2026-11-18
+host: "Local Offline Replay"
+hypothesis: "All published FinBench validation, probe, and DB-replay summary figures can be deterministically reproduced from preserved SHA-256 raw artifacts."
+falsification: "Any contract test failure across the 4 suites, any SHA-256 mismatch across preserved run bundles, or any analyzer summary discrepancy refutes deterministic reproducibility."
+verdict: "Supported"
+keyMetric: "56/56 contract tests pass · 713/713 SHA-256 files match · 4/4 JSON analyzers match"
+takeaways:
+  - "Cryptographic SHA-256 manifests verified all 713 raw bundle files and matched 17 source files and 18 exported charts with zero discrepancies."
+  - "Re-running all 4 deterministic analyzers into isolated temporary paths reproduced the exact published summary JSONs without live cloud access."
+  - "Reproducibility proves post-capture integrity, not general inference performance—historical live captures remain explicitly bounded (8/13 original grading pass, 7/13 strict contract)."
+soWhat: "When shutting down expensive GPU/DB cloud VMs after a benchmark, archive raw responses + a file-size/SHA-256 manifest + pure offline analyzer scripts in git. Months later, anyone can audit every reported metric without re-renting hardware."
+beadsId: "sr-9jb6"
+repoUrl: "https://github.com/tteon/gare2e"
+environment:
+  machine: "Local offline audit workspace (no live Vast.ai GPU inference)"
+  runtime: "Python unittest contract suites + 4 offline JSON analyzers"
+  dataset: "6 preserved run directories (validation r1/r2, probes r1, db-replay r1/r2, ablation r1)"
+  repeats: "56 contract/unit tests · 713 manifest files · 17 source & 18 chart SHA-256 hashes"
+  artifactSha256: "713/713 files match SHA-256 manifest; permissions 0700 dirs / 0600 files (0 mismatches)"
+figures:
+  - src: "/figures/finbench-verification-audit.png"
+    alt: "Left: verified raw file counts per preserved run directory totaling 713 files. Right: historical live-run pass bounds (8/13 grading, 7/13 contract)."
+    caption: "Figure 1. Separating offline cryptographic verification of preserved archives from bounded historical live captures."
+tags: ["finbench", "reproducibility", "sha256", "audit"]
+summary: "A reusable pattern for proving benchmark non-tampering offline (713 raw files, 4 analyzers, 56 contract tests) while keeping live-run limits transparent."
+---
+
+import Figure from '../../components/Figure.astro';
+import Diagram from '../../components/Diagram.astro';
+
+## 1. Motivation: The Half-Life of Cloud GPU Benchmarks
+
+Most multi-agent database benchmarks run on ephemeral GPU instances (such as Vast.ai). Once the VM is destroyed, readers cannot re-run live inference—so numbers in blog posts quickly become unverifiable trust-me claims. Even worse, authors sometimes mix offline artifact checks with claims about live generalization.
+
+## 2. How the Two-Layer Provenance Chain Works
+
+Instead of claiming "reproducible anywhere," we separate what can be **cryptographically re-verified offline** (file capture through chart hashes) from **bounded live observations** (the original online captures):
+
+<Diagram title="Post-Cloud Benchmark Provenance Chain" caption="Each transition is pinned by deterministic scripts and SHA-256 manifests so offline audits can replay summary JSONs and chart inputs without re-running live GPUs.">
+  <svg viewBox="0 0 760 140" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cryptographic provenance pipeline from live capture to published charts">
+    <rect x="10" y="34" width="124" height="68" rx="8" stroke="var(--svg-amber)" stroke-width="1.6" fill="var(--svg-amber-stroke)" fill-opacity="0.08"/>
+    <text x="72" y="61" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="11" font-weight="bold">1. Live Capture</text>
+    <text x="72" y="79" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="10">Fixed n runs (Vast.ai)</text>
+
+    <path d="M136 68 L160 68" stroke="currentColor" stroke-width="1.5"/>
+    <rect x="162" y="34" width="134" height="68" rx="8" stroke="var(--svg-blue)" stroke-width="1.6" fill="var(--svg-blue)" fill-opacity="0.08"/>
+    <text x="229" y="61" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="11" font-weight="bold">2. SHA-256 Manifest</text>
+    <text x="229" y="79" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="10">713 files + chmod 0600</text>
+
+    <path d="M298 68 L322 68" stroke="currentColor" stroke-width="1.5"/>
+    <rect x="324" y="34" width="134" height="68" rx="8" stroke="var(--svg-blue)" stroke-width="1.6" fill="var(--svg-blue)" fill-opacity="0.08"/>
+    <text x="391" y="61" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="11" font-weight="bold">3. 4× Analyzers</text>
+    <text x="391" y="79" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="10">Re-run into /tmp JSON</text>
+
+    <path d="M460 68 L484 68" stroke="currentColor" stroke-width="1.5"/>
+    <rect x="486" y="34" width="124" height="68" rx="8" stroke="var(--svg-green)" stroke-width="1.6" fill="var(--svg-green-fill)" fill-opacity="0.14"/>
+    <text x="548" y="61" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="11" font-weight="bold">4. Evidence Gate</text>
+    <text x="548" y="79" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="10">56 unit/contract tests</text>
+
+    <path d="M612 68 L636 68" stroke="currentColor" stroke-width="1.5"/>
+    <rect x="638" y="34" width="112" height="68" rx="8" stroke="var(--svg-green)" stroke-width="1.6" fill="var(--svg-green-fill)" fill-opacity="0.14"/>
+    <text x="694" y="61" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="11" font-weight="bold">5. Published Post</text>
+    <text x="694" y="79" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="10">18 charts hash-locked</text>
+  </svg>
+</Diagram>
+
+## 3. Environment & Replay Commands
+
+This audit ran offline against preserved artifacts (`sr-9jb6`) with zero remote VM mutations, writing re-derived outputs exclusively to isolated `/tmp` folders:
+
+```bash
+python3 -m unittest discover -s experiments/vast_finbench_validation -p 'test_*.py' -v
+python3 -m unittest discover -s experiments/vast_finbench_probes -p 'test_*.py' -v
+python3 -m unittest discover -s experiments/vast_finbench_db_replay -p 'test_*.py' -v
+python3 -m unittest discover -s docs/blog/text2cypher-bottlenecks -p 'test_*.py' -v
+python3 docs/blog/text2cypher-bottlenecks/verify_package.py
+```
+
+## 4. Visual Evidence & Integrity Results
+
+<Figure
+  src="/figures/finbench-verification-audit.png"
+  alt="Preserved artifact file counts per run directory compared against un-rerun historical live run bounds."
+  caption="Figure 1. Left: Preserved artifact counts verified against SHA-256 manifests across 6 run directories (713 files total). Right: Exact bounds of the earlier live GPU/DB runs (8/13 original pass, 7/13 strict answer contract) that remain un-rerun during this offline audit."
+/>
+
+| Verification Layer | Suite / Analyzer | Result |
+|---|---|---|
+| Full case contract tests | `vast_finbench_validation` | 17 / 17 pass |
+| Interface diagnostic probes | `vast_finbench_probes` | 12 / 12 pass |
+| DB replay & query representation | `vast_finbench_db_replay` | 19 / 19 pass |
+| Published chart & prose numbers | `test_evidence.py` | 8 / 8 pass (17 sources, 18 charts match) |
+| Raw bundle SHA-256 + permissions | `artifact-sha256.json` | 713 / 713 files match (0 perm mismatches) |
+| Summary JSON determinism | `analyze_{run,probes,replay,ablation}.py` | 4 / 4 exact JSON equality in `/tmp` |
+
+## 5. Mechanism Breakdown: Why Separating Replay Integrity From Live Scope Matters
+
+Notice the deliberate verdict choice: **our offline reproducibility hypothesis is Supported** (56/56 tests, 713/713 manifests, 4/4 JSON outputs match identically). However, in an earlier draft we labeled this *Mixed* by conflating offline checksum proof with live inference generalizability. Keeping the verdict clean (`Supported` for archive reproducibility) while highlighting the exact historical bounds in Figure 1 (13 baseline queries with 8/13 original pass and 7/13 strict contract; 3 probe questions × 7 conditions × 1 trial; 180 DB replay runs; 30 query pairs (60 paired runs)) preserves clarity without softening boundaries.
+
+Additionally, inspecting `tteon/gare2e@07d7453c` verified provenance: `gare2e` branched directly from `tteon/seocho` commit `c3a1871` via `5422522`, explaining why SEOCHO packaging metadata appears in `gare2e` root manifests.
+
+## 6. Scope Limits & Next Experiment
+
+- **Not a live statistical proof**: SHA-256 identity proves zero post-capture tampering, not that page-cache misses dominate CPU/I/O/lock stalls or that interface deltas hold across unseen question sets.
+- **Mock paths in unit checks**: Part of the 56 unit checks stub external DB/LLM drivers cleanly rather than hitting live Neo4j or vLLM processes.
+- **Next step**: Re-run page-cache vs CPU/I/O lock isolation profiling on dedicated local hardware when attribution experiments resume.

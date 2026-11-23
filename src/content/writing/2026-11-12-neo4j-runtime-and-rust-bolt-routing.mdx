@@ -1,0 +1,106 @@
+---
+title: "Federated Query Partitioning, Rust Bolt Middleware, and Runtime Routing in Neo4j"
+date: 2026-11-12
+category: "Architecture"
+takeaways:
+  - "Do not blame prompt engineering before measuring entity ambiguity: in our Nodes26 corpus, over 382 companies overlapped 2+ document domains—meaning one shared graph triggers predictable text2cypher schema-collision loops."
+  - "Introduce Rust over Bolt not to rewrite Bolt transport, but to move query queueing, concurrency admission, and backpressure out from behind Python's GIL."
+  - "Measured Aura runs modify naive routing intuition: short local 3-hop lookups (W2) are still Bolt RTT-bound (~103–107 ms) where Parallel adds negative overhead (0.97×); reserve Parallel strictly for heavy global scans (W4, 4.11× speedup)."
+soWhat: "Before optimizing LLM prompts on a monolithic graph, measure term overlap across document categories. Partition overlapping domains into federated graphs, keep concurrency control outside Python's GIL, and route only unanchored global scans to Parallel runtimes."
+related:
+  - label: "Measured Runtime Benchmark: Aura Slotted vs Pipelined vs Parallel (90 runs)"
+    href: "/experiments/2026-11-14-neo4j-aura-runtime-routing/"
+tags: ["neo4j", "rust", "bolt", "graphrag", "ontology"]
+summary: "Why monolithic GraphRAG pipelines collide under shared entities and Python GIL scheduling—updated with measured Aura runtime routing boundaries."
+sourceNote: "40_Knowledge/wiki/neo4j-runtime-and-rust-bolt-routing.md"
+---
+
+import Diagram from '../../components/Diagram.astro';
+import Callout from '../../components/Callout.astro';
+
+When Graph Agentic RAG pipelines connect Python LLM agents directly to a single shared Neo4j database under one default runtime, three failures reinforce each other: **domain entity ambiguity**, **Python GIL queue contention over Bolt**, and **runtime mismatch on heavy scans**.
+
+## 1. Federated Graphs Before Prompt Tuning
+
+Identical company names carry different meanings across document domains (financial filings, supply-chain tables, risk disclosures). Cramming every chunk attribute into one shared label schema bloats property tables until `text2cypher` fails repair loops or returns empty rows.
+
+Before partitioning a database, run a lightweight **TF-IDF term-overlap analysis** across document categories. In the Nodes26 reference dataset, **more than 382 companies appeared across two or more domains**—direct quantitative justification for domain-scoped ontologies evaluated via competency questions before routing across federated graphs:
+
+<Diagram title="Monolithic Graph vs Federated Ontology + Rust Bolt Middleware" caption="Partitioning overlapping company graphs eliminates cross-domain property collisions, while placing a Rust scheduler outside Python's GIL decouples agent concurrency from driver lock contention.">
+  <svg viewBox="0 0 760 220" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Before and after architecture: monolithic Python Neo4j vs federated ontology graphs with Rust Bolt middleware">
+    <rect x="12" y="18" width="235" height="184" rx="10" stroke="var(--svg-red)" stroke-width="1.6" fill="var(--svg-red)" fill-opacity="0.06"/>
+    <text x="129" y="42" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="12" font-weight="bold">Before: Single Graph + Python</text>
+    <rect x="34" y="60" width="190" height="36" rx="6" stroke="currentColor" stroke-opacity="0.3"/>
+    <text x="129" y="82" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="11">N Python Agents (GIL)</text>
+    <path d="M129 98 L129 124" stroke="var(--svg-red)" stroke-width="1.5"/>
+    <rect x="34" y="126" width="190" height="58" rx="6" stroke="var(--svg-red)" stroke-width="1.5"/>
+    <text x="129" y="149" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="11">1 Monolithic Neo4j DB</text>
+    <text x="129" y="169" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="10">382+ colliding companies · 1 runtime</text>
+
+    <path d="M254 110 L292 110" stroke="currentColor" stroke-width="2"/>
+    <polygon points="292,105 302,110 292,115" fill="currentColor"/>
+
+    <rect x="308" y="18" width="438" height="184" rx="10" stroke="var(--svg-blue)" stroke-width="1.8" fill="var(--svg-blue)" fill-opacity="0.05"/>
+    <text x="527" y="42" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="12" font-weight="bold">After: Ontology Routing + Rust Bolt Scheduler</text>
+    <rect x="328" y="64" width="112" height="108" rx="8" stroke="currentColor" stroke-opacity="0.3"/>
+    <text x="384" y="108" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="11">Python Agents</text>
+    <text x="384" y="126" text-anchor="middle" fill="currentColor" opacity="0.65" font-family="sans-serif" font-size="10">(Competency Qs)</text>
+
+    <path d="M442 118 L466 118" stroke="currentColor" stroke-width="1.5"/>
+    <rect x="468" y="64" width="128" height="108" rx="8" stroke="var(--svg-blue)" stroke-width="1.6" fill="var(--svg-blue)" fill-opacity="0.1"/>
+    <text x="532" y="92" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="11" font-weight="bold">Rust Middleware</text>
+    <text x="532" y="114" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-size="10">• Queue &amp; Backpressure</text>
+    <text x="532" y="131" text-anchor="middle" fill="currentColor" font-size="10">• Semaphore Cap</text>
+    <text x="532" y="148" text-anchor="middle" fill="currentColor" font-size="10">• Shape Runtime Hint</text>
+
+    <path d="M598 92 L624 80" stroke="currentColor" stroke-width="1.4"/>
+    <path d="M598 118 L624 118" stroke="currentColor" stroke-width="1.4"/>
+    <path d="M598 144 L624 156" stroke="currentColor" stroke-width="1.4"/>
+    <rect x="626" y="62" width="104" height="32" rx="6" stroke="currentColor" stroke-opacity="0.35"/>
+    <text x="678" y="82" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10">Domain Graph A</text>
+    <rect x="626" y="102" width="104" height="32" rx="6" stroke="currentColor" stroke-opacity="0.35"/>
+    <text x="678" y="122" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10">Domain Graph B</text>
+    <rect x="626" y="142" width="104" height="32" rx="6" stroke="currentColor" stroke-opacity="0.35"/>
+    <text x="678" y="162" text-anchor="middle" fill="currentColor" font-size="10" font-family="monospace">Domain Graph C</text>
+  </svg>
+</Diagram>
+
+## 2. Where Rust Middleware Ends and Neo4j Engine Internals Begin
+
+Putting Rust in front of Neo4j does not bypass the Bolt protocol—every driver still speaks Bolt over TCP/TLS. The real value lies cleanly separating **client-side scheduling responsibility** from **database JVM execution internals**:
+
+<Diagram title="Execution & Memory Ownership Boundary" caption="Rust middleware owns queueing, semaphore admission, driver pooling, PULL batching, and Cypher runtime hint injection; Neo4j JVM and the OS kernel still govern CPU pinning, morsel work-stealing, and page cache eviction.">
+  <svg viewBox="0 0 760 156" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Control boundary between Rust Bolt scheduler and Neo4j JVM internals">
+    <rect x="14" y="16" width="340" height="124" rx="10" stroke="var(--svg-blue)" stroke-width="1.8" fill="var(--svg-blue)" fill-opacity="0.06"/>
+    <text x="30" y="40" fill="var(--svg-blue)" font-family="monospace" font-size="12" font-weight="bold">Owned by Rust Bolt Middleware</text>
+    <text x="30" y="63" fill="currentColor" font-family="sans-serif" font-size="12">1. Priority Queue &amp; Execution Ordering</text>
+    <text x="30" y="83" fill="currentColor" font-family="sans-serif" font-size="12">2. Concurrency Semaphore &amp; Admission Cap</text>
+    <text x="30" y="103" fill="currentColor" font-family="sans-serif" font-size="12">3. Driver Pool Sizing &amp; Bolt PULL n Batching</text>
+    <text x="30" y="123" fill="currentColor" font-family="sans-serif" font-size="12">4. Query-Shape Hint (slotted / pipelined / parallel)</text>
+
+    <line x1="380" y1="16" x2="380" y2="140" stroke="currentColor" stroke-dasharray="4 4" stroke-opacity="0.45"/>
+
+    <rect x="406" y="16" width="340" height="124" rx="10" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.5"/>
+    <text x="422" y="40" fill="currentColor" font-family="monospace" font-size="12" font-weight="bold">Controlled Inside Neo4j JVM / OS</text>
+    <text x="422" y="63" fill="currentColor" opacity="0.8" font-family="sans-serif" font-size="12">• Worker Thread CPU Pinning</text>
+    <text x="422" y="83" fill="currentColor" opacity="0.8" font-family="sans-serif" font-size="12">• Internal Morsel Scheduling &amp; Work-Stealing</text>
+    <text x="422" y="103" fill="currentColor" opacity="0.8" font-family="sans-serif" font-size="12">• JVM Heap Pressure &amp; GC Pauses</text>
+    <text x="422" y="123" fill="currentColor" opacity="0.8" font-family="sans-serif" font-size="12">• Physical Page Cache Placement</text>
+  </svg>
+</Diagram>
+
+## 3. Query-Shape Runtime Routing (Measured vs Proposed)
+
+Neo4j Community executes exclusively on `Slotted` (row-by-row volcano operators without intra-query parallelism). Enterprise and Aura add `Pipelined` (fused morsel pipelines) and `Parallel` (partitioned worker scans). Incorporating our controlled [Aura runtime benchmark](/experiments/2026-11-14-neo4j-aura-runtime-routing/), the table below explicitly marks **measured Aura behavior** separately from **untested architectural hypotheses**:
+
+| Query Shape | Bottleneck Profile | Route Choice | Evidence Status |
+|---|---|---|---|
+| Point index lookup (`W1`) / indexed top-k (`W5`) | Network Bolt RTT (~100 ms) dominates 1–2 ms server cost | `Slotted` or `Pipelined` (avoid `Parallel`) | **Measured (Aura)**: `Parallel` 0.95–0.97× (`+2.2 MB` heap overhead) |
+| Seeded local 3-hop walk (`W2`) | Low DB hits (~1.8K–2.8K); server work stays 2–6 ms | `Slotted` or `Pipelined` | **Measured (Aura)**: RTT-bound at 103–107 ms (`Parallel` 0.97×) |
+| Global aggregation (`W3`) &amp; supernode fan-out (`W6`) | Moderate CPU/memory scan above RTT floor | `Parallel` (low concurrency) | **Measured (Aura)**: 1.17× speedup on single stream |
+| Global unanchored 3-hop analytics (`W4`) | Millions of DB hits (6.1M–10.0M) | `Parallel` | **Measured (Aura)**: **4.11×** faster (2,324.6 → 565.4 ms) |
+| High-concurrency multi-agent reads (8–64 clients) | Worker thread &amp; heap contention (`Parallel` allocates MBs/query) | Admission cap + `Pipelined` fallback | **Proposed hypothesis**: concurrent worker contention remains untested |
+
+<Callout type="warn" title="Architectural Gap Remaining Open">
+Single-stream Aura benchmarks validate why heavy global scans (`W4`) need `Parallel` while shallow local walks (`W2`) stay RTT-bound, but measuring actual Python GIL wait time vs Rust Bolt admission queue throughput under multi-agent concurrency (8–64 parallel callers) requires an isolated load-test harness.
+</Callout>

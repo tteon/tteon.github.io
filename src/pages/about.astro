@@ -4,30 +4,36 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout title="About — Yitae Jeong">
   <div class="max-w-2xl">
-    <p class="font-mono text-xs text-cyan-700 dark:text-cyan-400 mb-2">ABOUT</p>
-    <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-950 dark:text-white mb-6">Yitae Jeong (tteon)</h1>
+    <p class="font-mono text-xs text-blue-800 dark:text-cyan-400 mb-2">ABOUT</p>
+    <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-stone-950 dark:text-white mb-6">Yitae Jeong (tteon)</h1>
 
     <div class="prose-custom">
       <p>
-        I work at <strong>XCENA</strong> in Seoul, exploring how graph databases, explicit ontologies, and LLM inference infrastructure (vLLM, KV-cache, CXL/RDMA) fit together under real production constraints.
+        I am a research engineer at <strong>XCENA</strong> in Seoul working at the intersection of graph processing, ontology-grounded agents, and LLM inference infrastructure (vLLM, KV-cache sharing, and CXL/RDMA memory hierarchies).
       </p>
 
-      <h2>How This Lab Log Works</h2>
+      <h2>How Experiments Are Logged Here</h2>
       <p>
-        Rather than hiding experiment outputs inside private folders or cherry-picking wins, every experiment entry published here is backed by raw run artifacts, commit hashes, and pre-registered hypotheses:
+        Rather than leaving results scattered across terminal logs or cherry-picking wins, every experiment entry declares its hypothesis, falsification condition, environment manifest, and scope boundaries:
       </p>
       <ul>
-        <li><strong>Supported</strong>: Measured outcomes satisfy pre-registered criteria without confounding failures.</li>
+        <li><strong>Supported</strong>: Measured results satisfy pre-registered criteria cleanly within stated scope limits.</li>
         <li><strong>Refuted</strong>: Hypothesis failed under valid execution conditions.</li>
-        <li><strong>Mixed</strong>: Gains in one workload tier or dimension alongside regressions in another.</li>
-        <li><strong>Inconclusive</strong>: Execution failed or lacked baseline parity (failures are never disguised as rejections or passes).</li>
+        <li><strong>Mixed</strong>: Quantified gains in one workload regime alongside statistically clear regressions or costs in another.</li>
+        <li><strong>Inconclusive</strong>: Execution failed or lacked baseline parity (infra failures are never reported as passes or rejections).</li>
       </ul>
 
-      <h2>Links</h2>
+      <h2 id="seocho">SEOCHO (Separate Documentation Site)</h2>
+      <p>
+        <strong>SEOCHO</strong> is an ontology-first graph memory framework separating semantic ontology validation, Rust Bolt scheduling, and multi-engine query execution across Neo4j and Postgres backends. Its standalone project documentation lives separately at{' '}
+        <a href="https://seocho.blog" target="_blank" rel="noreferrer">seocho.blog</a>{' '}
+        (<a href="https://github.com/tteon/seocho" target="_blank" rel="noreferrer">github.com/tteon/seocho</a>).
+      </p>
+
+      <h2>Profiles</h2>
       <ul>
         <li>GitHub: <a href="https://github.com/tteon" target="_blank" rel="noreferrer">github.com/tteon</a></li>
         <li>LinkedIn: <a href="https://www.linkedin.com/in/yitaejeong/" target="_blank" rel="noreferrer">linkedin.com/in/yitaejeong</a></li>
-        <li>SEOCHO Documentation: <a href="https://seocho.blog" target="_blank" rel="noreferrer">seocho.blog</a></li>
       </ul>
     </div>
   </div>

@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Takeaways from '../../components/Takeaways.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -11,136 +13,156 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
 const d = entry.data;
 const dateStr = d.date.toISOString().slice(0, 10);
+const words = (entry.body || '').trim().split(/\s+/).filter(Boolean).length;
+const readTime = `${Math.max(1, Math.round(words / 180))} min read`;
 
 const verdictBadge: Record<string, string> = {
-  Supported: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-  Refuted: 'border-rose-500/40 bg-rose-500/10 text-rose-700 dark:text-rose-300',
-  Mixed: 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300',
-  Inconclusive: 'border-zinc-500/40 bg-zinc-500/10 text-zinc-600 dark:text-zinc-400',
+  Supported: 'border-emerald-600/30 bg-emerald-500/10 text-emerald-800 dark:border-emerald-500/30 dark:text-emerald-300',
+  Refuted: 'border-rose-600/30 bg-rose-500/10 text-rose-800 dark:border-rose-500/30 dark:text-rose-300',
+  Mixed: 'border-amber-600/30 bg-amber-500/10 text-amber-800 dark:border-amber-500/30 dark:text-amber-300',
+  Inconclusive: 'border-stone-400/40 bg-stone-500/10 text-stone-700 dark:text-zinc-400',
 };
 ---
 
-<BaseLayout title={`${d.title} — Experiment Log`} description={d.summary}>
-  <div class="mb-6">
-    <a href="/experiments/" class="font-mono text-xs text-cyan-700 dark:text-cyan-400 hover:underline">← Back to Experiment Log</a>
+<BaseLayout title={`${d.title} — Yitae Jeong`} description={d.summary}>
+  <div class="mb-5">
+    <a href="/experiments/" class="font-mono text-xs text-blue-800 dark:text-cyan-400 hover:underline">← Back to Experiments</a>
   </div>
 
-  <article>
-    <header class="mb-8 pb-6 border-b border-zinc-200 dark:border-zinc-800">
-      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-        <div class="flex flex-wrap items-center gap-2 font-mono text-xs text-zinc-500 dark:text-zinc-400">
-          <span>{dateStr}</span>
-          <span>·</span>
-          <span>Host: {d.host}</span>
-          {d.beadsId && (
-            <>
-              <span>·</span>
-              <span>Beads: {d.beadsId}</span>
-            </>
-          )}
-          {d.commit && (
-            <>
-              <span>·</span>
-              <span>Commit: {d.commit}</span>
-            </>
-          )}
-        </div>
-        <span class={`rounded-full border px-2.5 py-0.5 font-mono text-xs font-medium ${verdictBadge[d.verdict]}`}>
-          {d.verdict}
-        </span>
-      </div>
-
-      <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-950 dark:text-white mb-4">
-        {d.title}
-      </h1>
-
-      <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-4 space-y-3 text-xs sm:text-sm">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <span class="font-mono text-[10px] uppercase tracking-wider text-zinc-400">Pre-Registered Hypothesis</span>
-            <p class="text-zinc-800 dark:text-zinc-200 mt-1">{d.hypothesis}</p>
+  <div class="lg:grid lg:grid-cols-[minmax(0,68ch)_220px] lg:gap-12 lg:items-start">
+    <article class="min-w-0">
+      <header class="mb-6 pb-5 border-b border-stone-200 dark:border-zinc-800">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div class="flex flex-wrap items-center gap-2 font-mono text-xs text-stone-500 dark:text-zinc-400">
+            <span>{dateStr}</span>
+            <span>·</span>
+            <span>{d.host}</span>
+            <span>·</span>
+            <span>{readTime}</span>
+            {d.beadsId && (
+              <>
+                <span>·</span>
+                <span>{d.beadsId}</span>
+              </>
+            )}
           </div>
-          <div>
-            <span class="font-mono text-[10px] uppercase tracking-wider text-zinc-400">Verdict & Headline Metric</span>
-            <p class="text-zinc-800 dark:text-zinc-200 mt-1">
-              <strong class="font-mono text-cyan-700 dark:text-cyan-300">{d.verdict}</strong> —{' '}
-              <span class="font-mono tabular-nums">{d.keyMetric}</span>
-            </p>
-          </div>
-        </div>
-        {d.falsification && (
-          <div class="pt-3 border-t border-zinc-200/70 dark:border-zinc-800/80">
-            <span class="font-mono text-[10px] uppercase tracking-wider text-zinc-400">Falsification Criteria</span>
-            <p class="text-zinc-700 dark:text-zinc-300 mt-1">{d.falsification}</p>
-          </div>
-        )}
-      </div>
-
-      {d.environment && (
-        <div class="mt-3 rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-100/70 dark:bg-zinc-950/60 p-4">
-          <span class="font-mono text-[10px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-            Environment & Reproducibility Manifest
+          <span class={`rounded-full border px-2.5 py-0.5 font-mono text-xs font-medium ${verdictBadge[d.verdict]}`}>
+            {d.verdict}
           </span>
-          <dl class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-xs font-mono">
-            {d.environment.machine && (
-              <div>
-                <dt class="text-zinc-400">Host / Compute</dt>
-                <dd class="text-zinc-800 dark:text-zinc-200">{d.environment.machine}</dd>
-              </div>
-            )}
-            {d.environment.runtime && (
-              <div>
-                <dt class="text-zinc-400">Runtime / Engines</dt>
-                <dd class="text-zinc-800 dark:text-zinc-200">{d.environment.runtime}</dd>
-              </div>
-            )}
-            {d.environment.dataset && (
-              <div>
-                <dt class="text-zinc-400">Workload / Dataset</dt>
-                <dd class="text-zinc-800 dark:text-zinc-200">{d.environment.dataset}</dd>
-              </div>
-            )}
-            {d.environment.repeats && (
-              <div>
-                <dt class="text-zinc-400">Sample Size / Repeats</dt>
-                <dd class="text-zinc-800 dark:text-zinc-200">{d.environment.repeats}</dd>
-              </div>
-            )}
-            {d.environment.artifactSha256 && (
-              <div class="sm:col-span-2">
-                <dt class="text-zinc-400">Artifact Checksum / Integrity</dt>
-                <dd class="text-zinc-800 dark:text-zinc-200 break-all">{d.environment.artifactSha256}</dd>
-              </div>
-            )}
-          </dl>
         </div>
+
+        <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-stone-950 dark:text-white leading-tight mb-3">
+          {d.title}
+        </h1>
+        <p class="text-base text-stone-600 dark:text-zinc-400 leading-relaxed mb-3">
+          {d.summary}
+        </p>
+        <p class="font-mono text-xs sm:text-[13px] text-blue-800 dark:text-cyan-300 tabular-nums">
+          Headline result: {d.keyMetric}
+        </p>
+      </header>
+
+      {d.takeaways.length > 0 && <Takeaways items={d.takeaways} soWhat={d.soWhat} />}
+
+      <TableOfContents headings={headings} variant="mobile" />
+
+      <details class="my-5 rounded-xl border border-stone-200 dark:border-zinc-800 bg-stone-50/70 dark:bg-zinc-900/40 px-4 py-3 text-xs">
+        <summary class="cursor-pointer font-mono font-medium text-stone-700 dark:text-zinc-300 select-none">
+          Pre-registered Hypothesis, Falsification Criteria &amp; Environment Manifest
+        </summary>
+        <dl class="mt-3 pt-3 border-t border-stone-200/80 dark:border-zinc-800 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="sm:col-span-2">
+            <dt class="font-mono uppercase text-[10px] text-stone-400">Hypothesis</dt>
+            <dd class="text-stone-800 dark:text-zinc-200 mt-0.5 leading-relaxed">{d.hypothesis}</dd>
+          </div>
+          {d.falsification && (
+            <div class="sm:col-span-2">
+              <dt class="font-mono uppercase text-[10px] text-stone-400">Falsification Criteria</dt>
+              <dd class="text-stone-700 dark:text-zinc-300 mt-0.5 leading-relaxed">{d.falsification}</dd>
+            </div>
+          )}
+          {d.environment?.machine && (
+            <div>
+              <dt class="font-mono uppercase text-[10px] text-stone-400">Host / Compute</dt>
+              <dd class="font-mono text-stone-800 dark:text-zinc-200 mt-0.5">{d.environment.machine}</dd>
+            </div>
+          )}
+          {d.environment?.runtime && (
+            <div>
+              <dt class="font-mono uppercase text-[10px] text-stone-400">Runtime</dt>
+              <dd class="font-mono text-stone-800 dark:text-zinc-200 mt-0.5">{d.environment.runtime}</dd>
+            </div>
+          )}
+          {d.environment?.dataset && (
+            <div>
+              <dt class="font-mono uppercase text-[10px] text-stone-400">Workload / Dataset</dt>
+              <dd class="font-mono text-stone-800 dark:text-zinc-200 mt-0.5">{d.environment.dataset}</dd>
+            </div>
+          )}
+          {d.environment?.repeats && (
+            <div>
+              <dt class="font-mono uppercase text-[10px] text-stone-400">Sample Size / Repeats</dt>
+              <dd class="font-mono text-stone-800 dark:text-zinc-200 mt-0.5">{d.environment.repeats}</dd>
+            </div>
+          )}
+          {d.environment?.artifactSha256 && (
+            <div class="sm:col-span-2">
+              <dt class="font-mono uppercase text-[10px] text-stone-400">Integrity / SHA-256</dt>
+              <dd class="font-mono text-stone-800 dark:text-zinc-200 mt-0.5 break-all">{d.environment.artifactSha256}</dd>
+            </div>
+          )}
+          {d.repoUrl && (
+            <div class="sm:col-span-2">
+              <a href={d.repoUrl} target="_blank" rel="noreferrer" class="font-mono text-blue-800 dark:text-cyan-400 hover:underline">
+                Source Repository ↗
+              </a>
+            </div>
+          )}
+        </dl>
+      </details>
+
+      <div class="prose-custom">
+        <Content />
+      </div>
+
+      {d.related.length > 0 && (
+        <aside class="mt-12 pt-6 border-t border-stone-200 dark:border-zinc-800">
+          <p class="font-mono text-xs uppercase tracking-wider text-stone-400 mb-3">Related Notes &amp; Experiments</p>
+          <ul class="space-y-2 text-sm">
+            {d.related.map((r) => (
+              <li>
+                <a href={r.href} class="text-blue-800 dark:text-cyan-400 hover:underline font-medium">
+                  {r.label} →
+                </a>
+              </li>
+            ))}
+          </ul>
+        </aside>
       )}
+    </article>
 
-      {d.repoUrl && (
-        <div class="mt-3 font-mono text-xs">
-          <a href={d.repoUrl} target="_blank" rel="noreferrer" class="text-cyan-700 dark:text-cyan-400 hover:underline">
-            Source Repository ↗
-          </a>
-        </div>
-      )}
-    </header>
-
-    {d.figures.length > 0 && (
-      <section class="mb-8 space-y-5">
-        {d.figures.map((fig) => (
-          <figure class="paper-figure">
-            <img src={fig.src} alt={fig.alt} loading="eager" />
-            <figcaption>{fig.caption}</figcaption>
-          </figure>
-        ))}
-      </section>
-    )}
-
-    <div class="prose-custom">
-      <Content />
+    <div class="hidden lg:block sticky top-20 self-start">
+      <aside class="pl-4 border-l border-stone-200 dark:border-zinc-800">
+        <p class="font-mono text-[11px] uppercase tracking-wider text-stone-500 dark:text-zinc-400 mb-3">Contents</p>
+        <nav aria-label="Desktop table of contents">
+          <ul class="space-y-2 text-xs leading-snug">
+            {headings.filter((h) => h.depth >= 2 && h.depth <= 3).map((h) => (
+              <li class={h.depth === 3 ? 'pl-3' : ''}>
+                <a
+                  href={`#${h.slug}`}
+                  data-toc-link={h.slug}
+                  class="toc-link block py-0.5 text-stone-500 dark:text-zinc-400 hover:text-stone-900 dark:hover:text-zinc-100 transition-colors"
+                >
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </aside>
     </div>
-  </article>
+  </div>
 </BaseLayout>

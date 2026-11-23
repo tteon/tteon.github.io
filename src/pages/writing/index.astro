@@ -4,32 +4,39 @@ import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('writing'))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+function estReadTime(body?: string): string {
+  const words = (body || '').trim().split(/\s+/).filter(Boolean).length;
+  return `${Math.max(1, Math.round(words / 200))} min read`;
+}
 ---
 
 <BaseLayout title="Writing — Yitae Jeong" description="Architecture notes and systems engineering essays.">
-  <div class="mb-8">
-    <p class="font-mono text-xs text-cyan-700 dark:text-cyan-400 mb-2">TECHNICAL WRITING</p>
-    <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-950 dark:text-white mb-2">Writing & Architecture Notes</h1>
-    <p class="text-sm text-zinc-600 dark:text-zinc-400">
-      Long-form design notes distilled from conference talks, debugging sessions, and infrastructure work.
+  <div class="mb-8 max-w-2xl">
+    <p class="font-mono text-xs text-blue-800 dark:text-cyan-400 mb-2">TECHNICAL WRITING</p>
+    <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-stone-950 dark:text-white mb-2">Writing &amp; Architecture Notes</h1>
+    <p class="text-sm sm:text-base text-stone-600 dark:text-zinc-400 leading-relaxed">
+      Systems architecture essays distilled from production bottlenecks, graph query scheduling, and benchmark analysis.
     </p>
   </div>
 
-  <div class="space-y-4">
+  <div class="divide-y divide-stone-200 dark:divide-zinc-800/80 border-t border-stone-200 dark:border-zinc-800/80 max-w-3xl">
     {posts.map((post) => (
-      <a href={`/writing/${post.id}/`} class="block rounded-xl border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/40 p-5 hover:border-cyan-500/50 transition-colors">
-        <div class="flex items-center gap-2 font-mono text-xs text-zinc-500 dark:text-zinc-400 mb-1.5">
+      <a href={`/writing/${post.id}/`} class="group block py-6 hover:bg-stone-100/50 dark:hover:bg-zinc-900/35 -mx-3 px-3 rounded-xl transition-colors">
+        <div class="flex items-center gap-2 font-mono text-xs text-stone-500 dark:text-zinc-400 mb-1.5">
           <span>{post.data.date.toISOString().slice(0, 10)}</span>
           <span>·</span>
           <span>{post.data.category}</span>
           <span>·</span>
-          <span>{post.data.readingTime}</span>
+          <span>{estReadTime(post.body)}</span>
         </div>
-        <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">{post.data.title}</h2>
-        <p class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mb-3">{post.data.summary}</p>
+        <h2 class="text-lg sm:text-xl font-semibold text-stone-900 dark:text-zinc-100 group-hover:text-blue-800 dark:group-hover:text-cyan-300 transition-colors mb-1.5">
+          {post.data.title}
+        </h2>
+        <p class="text-sm text-stone-600 dark:text-zinc-400 mb-3 leading-relaxed">{post.data.summary}</p>
         <div class="flex flex-wrap gap-2">
           {post.data.tags.map((t) => (
-            <span class="font-mono text-[11px] text-zinc-500">#{t}</span>
+            <span class="font-mono text-[11px] text-stone-400 dark:text-zinc-500">#{t}</span>
           ))}
         </div>
       </a>

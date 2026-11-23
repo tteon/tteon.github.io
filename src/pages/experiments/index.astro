@@ -10,23 +10,23 @@ const verdicts = ['All', 'Supported', 'Refuted', 'Mixed', 'Inconclusive'];
 ---
 
 <BaseLayout title="Experiment Log — Yitae Jeong" description="Hypothesis-driven systems and GraphRAG experiment logs with raw artifact verification.">
-  <div class="mb-8">
-    <p class="font-mono text-xs text-cyan-700 dark:text-cyan-400 mb-2">LAB JOURNAL / REPRODUCIBLE EVIDENCE</p>
-    <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-950 dark:text-white mb-2">Experiment Log</h1>
-    <p class="text-sm text-zinc-600 dark:text-zinc-400 max-w-2xl">
-      Each entry records the execution host, pre-registered hypothesis, verdict, measured metrics, and explicit scope limits. Execution failures are marked Inconclusive rather than Refuted.
+  <div class="mb-7 max-w-2xl">
+    <p class="font-mono text-xs text-blue-800 dark:text-cyan-400 mb-2">LAB JOURNAL / REPRODUCIBLE EVIDENCE</p>
+    <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight text-stone-950 dark:text-white mb-2">Experiment Log</h1>
+    <p class="text-sm sm:text-base text-stone-600 dark:text-zinc-400 leading-relaxed">
+      Each post pairs pre-registered falsification criteria, raw artifacts, and publication figures with practical takeaways. Execution failures are always marked Inconclusive.
     </p>
   </div>
 
-  <div class="flex flex-wrap gap-2 mb-6" id="verdict-filters">
+  <div class="flex flex-wrap gap-2 mb-4" id="verdict-filters">
     {verdicts.map((v, idx) => (
       <button
         type="button"
         data-filter={v}
         class={`filter-btn rounded-full border px-3 py-1 font-mono text-xs transition-colors ${
           idx === 0
-            ? 'border-cyan-500 bg-cyan-500/15 text-cyan-700 dark:text-cyan-300'
-            : 'border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-500'
+            ? 'border-blue-700 bg-blue-700/10 text-blue-800 dark:border-cyan-500 dark:bg-cyan-500/15 dark:text-cyan-300'
+            : 'border-stone-300 dark:border-zinc-700 text-stone-600 dark:text-zinc-400 hover:border-stone-500'
         }`}
       >
         {v}
@@ -34,7 +34,7 @@ const verdicts = ['All', 'Supported', 'Refuted', 'Mixed', 'Inconclusive'];
     ))}
   </div>
 
-  <div class="space-y-4" id="exp-list">
+  <div id="exp-list" class="max-w-4xl">
     {experiments.map((exp) => (
       <ExperimentCard slug={exp.id} {...exp.data} />
     ))}
@@ -47,9 +47,9 @@ const verdicts = ['All', 'Supported', 'Refuted', 'Mixed', 'Inconclusive'];
       btn.addEventListener('click', () => {
         const target = btn.getAttribute('data-filter');
         buttons.forEach((b) => {
-          b.className = 'filter-btn rounded-full border px-3 py-1 font-mono text-xs transition-colors border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-500';
+          b.className = 'filter-btn rounded-full border px-3 py-1 font-mono text-xs transition-colors border-stone-300 dark:border-zinc-700 text-stone-600 dark:text-zinc-400 hover:border-stone-500';
         });
-        btn.className = 'filter-btn rounded-full border px-3 py-1 font-mono text-xs transition-colors border-cyan-500 bg-cyan-500/15 text-cyan-700 dark:text-cyan-300';
+        btn.className = 'filter-btn rounded-full border px-3 py-1 font-mono text-xs transition-colors border-blue-700 bg-blue-700/10 text-blue-800 dark:border-cyan-500 dark:bg-cyan-500/15 dark:text-cyan-300';
         cards.forEach((card) => {
           const v = card.getAttribute('data-verdict');
           card.style.display = target === 'All' || v === target ? 'block' : 'none';

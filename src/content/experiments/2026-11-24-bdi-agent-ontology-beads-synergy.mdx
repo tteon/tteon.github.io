@@ -1,0 +1,160 @@
+---
+title: "Preventing Multi-Agent Task Corruption with Per-Agent BDI Ontologies and Beads"
+date: 2026-11-24
+host: "Local Sandbox (Codex + Claude + Dolt Beads)"
+hypothesis: "Modeling per-agent Beliefs, Desires, Intentions, and WorldState provenance as named RDF graphs coupled to Beads (bd) catches ungrounded/stale mutations via SPARQL and converts cross-agent disagreement into actionable issue blockers at minimal latency overhead."
+falsification: "If SPARQL gates miss injected ungrounded, expired, or hash-drifted beliefs, fail to block conflicting live Codex/Claude proposals in Beads, or double-claiming bypasses arbitration, the BDI+Beads coordination architecture fails."
+verdict: "Supported"
+keyMetric: "12/12 functional gate accuracy (38.6 ms median) · 2 live blocks + 1 clean claim · 191.6 ms RDF/SPARQL vs 26.0 s LLMs"
+takeaways:
+  - "Giving Codex, Claude, and Antigravity isolated RDF mental-state graphs stops one agent's ungrounded belief from silently mutating shared Beads task states."
+  - "When Codex proposed enabling full ontology by default (from aggregate +0.070) and live Claude countered with Tier 3 −0.225 regression, cross-graph SPARQL flagged the conflict and automatically blocked the task with both justifications attached."
+  - "All RDF serialization and cross-graph SPARQL queries took ~191.6 ms total (0.74% of 26.0 s live LLM time), proving formal epistemic governance adds negligible overhead."
+soWhat: "When sharing a Beads queue across multiple coding or research agents—especially future code-collaboration workflows—store per-agent beliefs and intentions in separated graphs gated on file/test hashes and justification links before running bd update --claim or changing issue status."
+related:
+  - label: "The Contested Ontology Benchmark: Tier 2 +0.725 vs Tier 3 −0.225"
+    href: "/experiments/2026-11-15-auto-ontology-postgres-vs-neo4j/"
+repoUrl: "https://github.com/tteon/yitaewiki"
+environment:
+  machine: "Local Ubuntu workstation running Paseo daemon, Dolt shared server, Codex CLI, and Claude CLI"
+  runtime: "Python 3.14 + rdflib 7.6.0 + Beads (bd) Dolt backend + live codex exec & claude -p"
+  dataset: "Trial 1: 12 self-authored check cases (4 valid, 8 corrupted); Trial 2: 3 isolated sandbox tasks"
+  repeats: "Single controlled end-to-end suite (3 live LLM invocations: 6.7 s Codex, 9.7 s & 9.6 s Claude)"
+figures:
+  - src: "/figures/bdi-beads-synergy.png"
+    alt: "Left: SPARQL V1-V5 validation gate yield across 12 check cases. Right: log-scale latency breakdown showing RDF+SPARQL is 0.74% of live LLM wall time."
+    caption: "Figure 1. Functional gate coverage across 12 test assertions and wall-clock latency distribution."
+tags: ["multi-agent", "bdi", "ontology", "sparql", "beads", "codex", "claude"]
+summary: "How per-agent BDI named graphs (Codex, Claude, Antigravity) turn a shared Dolt issue tracker into an epistemically audited multi-agent coordination layer—and how it extends cleanly to coding collaboration."
+---
+
+import Figure from '../../components/Figure.astro';
+import Diagram from '../../components/Diagram.astro';
+import Callout from '../../components/Callout.astro';
+
+## 1. Motivation: The Silent Failure Story That Demands Per-Agent Epistemics
+
+Suppose a scheduled job runs an experiment on a remote B200 GPU host (`newtonne-b200`) and exits non-zero:
+
+```text
+exit_code = 1
+stderr    = "ssh: connect to host newtonne-b200 port 22: Connection timed out"
+```
+
+A downstream summarizer sees `exit_code = 1`, jumps to *"hypothesis refuted"*, and closes the shared tracker issue. Without an explicit record separating **raw environment observations** from **each agent's reasoning chain and justification**, bad conclusions propagate directly into task queues—and two agents end up claiming or closing the same task for contradictory reasons.
+
+<Callout type="note" title="Quick Concept Glossary">
+  <p><strong>WorldState</strong>: Immutable observed fact snapshot (e.g., <code>WorldState_ws_ubuntu_run</code>) tagged with a timestamp and SHA-256 content hash.</p>
+  <p><strong>BDI Chain (Belief → Desire → Intention)</strong>: Each agent (<code>codex</code>, <code>claude</code>, <code>antigravity</code>) writes persistent Beliefs grounded in a <code>WorldState</code> and <code>Justification</code>, linked to role-specific Desires and committed Intentions inside its own named RDF graph.</p>
+  <p><strong>SPARQL Integrity Gates (<code>V1–V5</code> &amp; <code>Q_CONFLICT</code>)</strong>: Deterministic queries executed before any <code>bd</code> write—rejecting unjustified beliefs, stale file hashes, cross-agent polarity contradictions, or double-claimed execution tasks.</p>
+  <p><strong>Beads (<code>bd</code>)</strong>: Git-adjacent Dolt issue tracker holding epics, <code>blocks</code> DAG dependencies, and atomic <code>--claim</code> task ownership.</p>
+</Callout>
+
+## 2. Architecture: Per-Agent Named Graphs Bridging Observations to Beads
+
+Rather than dumping free-text reflections into one shared Markdown scratchpad, each agent updates only its own RDF graph (`agents/codex.ttl`, `agents/claude.ttl`, `agents/antigravity.ttl`) while reading shared objective snapshots from `world.ttl`. Deterministic SPARQL rules arbitrate before touching `bd`:
+
+<Diagram title="T2B2T Multi-Agent Architecture & Beads Coordination Bridge" caption="Phase 1 projects Beads tasks and raw telemetry into world.ttl. Agents emit justified BDI triples into separate named graphs; SPARQL V1–V5 and Q_CONFLICT either block contested issues in bd or pass single-owner plans to --claim.">
+  <svg viewBox="0 0 760 250" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Per-agent BDI named graphs connecting world snapshots through SPARQL gates to Beads">
+    <rect x="14" y="82" width="136" height="84" rx="10" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.5"/>
+    <text x="82" y="109" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="12" font-weight="bold">world.ttl</text>
+    <text x="82" y="128" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="10.5">Beads DAG + Host State</text>
+    <text x="82" y="145" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="10.5">SHA-256 Snapshots</text>
+
+    <path d="M152 104 L212 48" stroke="currentColor" stroke-width="1.4"/>
+    <path d="M152 124 L212 124" stroke="currentColor" stroke-width="1.4"/>
+    <path d="M152 144 L212 200" stroke="currentColor" stroke-width="1.4"/>
+
+    <rect x="215" y="14" width="195" height="62" rx="8" stroke="var(--svg-blue)" stroke-width="1.6" fill="var(--svg-blue)" fill-opacity="0.08"/>
+    <text x="312" y="36" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="11.5" font-weight="bold">@codex (Critic / Coder)</text>
+    <text x="312" y="55" text-anchor="middle" fill="currentColor" opacity="0.75" font-family="sans-serif" font-size="10.5">belief → desire → patch plan</text>
+
+    <rect x="215" y="93" width="195" height="62" rx="8" stroke="var(--svg-green)" stroke-width="1.6" fill="var(--svg-green-fill)" fill-opacity="0.12"/>
+    <text x="312" y="115" text-anchor="middle" fill="var(--svg-green)" font-family="monospace" font-size="11.5" font-weight="bold">@claude (Verification Gate)</text>
+    <text x="312" y="134" text-anchor="middle" fill="currentColor" opacity="0.75" font-family="sans-serif" font-size="10.5">audit evidence → support / refute</text>
+
+    <rect x="215" y="172" width="195" height="62" rx="8" stroke="var(--svg-teal)" stroke-width="1.6" fill="var(--svg-teal)" fill-opacity="0.08"/>
+    <text x="312" y="194" text-anchor="middle" fill="var(--svg-teal)" font-family="monospace" font-size="11.5" font-weight="bold">@antigravity (Orchestrator)</text>
+    <text x="312" y="213" text-anchor="middle" fill="currentColor" opacity="0.75" font-family="sans-serif" font-size="10.5">converged plan → task ownership</text>
+
+    <path d="M412 45 L468 110" stroke="currentColor" stroke-width="1.4"/>
+    <path d="M412 124 L468 124" stroke="currentColor" stroke-width="1.4"/>
+    <path d="M412 203 L468 138" stroke="currentColor" stroke-width="1.4"/>
+
+    <rect x="470" y="64" width="136" height="120" rx="10" stroke="var(--svg-amber)" stroke-width="1.8" fill="var(--svg-amber-stroke)" fill-opacity="0.09"/>
+    <text x="538" y="90" text-anchor="middle" fill="var(--svg-amber)" font-family="monospace" font-size="11.5" font-weight="bold">SPARQL Gates</text>
+    <text x="538" y="111" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10">V1–V5 Integrity</text>
+    <text x="538" y="129" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10">Q_CONFLICT</text>
+    <text x="538" y="147" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10">Q_DOUBLE_CLAIM</text>
+    <text x="538" y="167" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="sans-serif" font-size="9.5">Zero-LLM deterministic check</text>
+
+    <path d="M608 124 L638 124" stroke="currentColor" stroke-width="1.6"/>
+    <rect x="640" y="72" width="108" height="104" rx="10" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.6"/>
+    <text x="694" y="102" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="12" font-weight="bold">Beads (bd)</text>
+    <text x="694" y="123" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="10">-s blocked</text>
+    <text x="694" y="141" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="10">--claim</text>
+    <text x="694" y="159" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="monospace" font-size="10">--append-notes</text>
+  </svg>
+</Diagram>
+
+## 3. Sandbox Test Environment & Live Contested Task Sequence
+
+We initialized a clean isolated Dolt Beads repo (`synexp-th0`, 3 tasks) and ran two evaluations: (1) a 12-case functional integrity check covering missing justifications, phantom `WorldState` URIs, expired `TimeInterval` bounds, and mutated artifact SHA-256 hashes; and (2) a live multi-agent deliberation invoking real `codex exec` and `claude -p` processes under JSON schemas enforcing BDI fields.
+
+Here is how the contested promotion task (`synexp-th0.2`) resolved step by step:
+
+<Diagram title="Contested Promotion Task Arbitration (synexp-th0.2)" caption="Live conflict trace: Codex supports default rollout from aggregate accuracy (+0.070), Claude refutes it with per-tier regression (−0.225), and SPARQL Q_CONFLICT locks the task in Beads before code/config mutation occurs.">
+  <svg viewBox="0 0 760 156" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sequence flow of contested task synexp-th0.2 ending in blocked state">
+    <rect x="14" y="20" width="168" height="52" rx="8" stroke="var(--svg-blue)" stroke-width="1.5" fill="var(--svg-blue)" fill-opacity="0.08"/>
+    <text x="98" y="42" text-anchor="middle" fill="var(--svg-blue)" font-family="monospace" font-size="11" font-weight="bold">@codex: support (0.72)</text>
+    <text x="98" y="59" text-anchor="middle" fill="currentColor" opacity="0.75" font-family="sans-serif" font-size="10">overall +0.070 (p=0.0167)</text>
+
+    <rect x="14" y="88" width="168" height="52" rx="8" stroke="var(--svg-green)" stroke-width="1.5" fill="var(--svg-green-fill)" fill-opacity="0.12"/>
+    <text x="98" y="110" text-anchor="middle" fill="var(--svg-green)" font-family="monospace" font-size="11" font-weight="bold">@claude: refute (0.93)</text>
+    <text x="98" y="127" text-anchor="middle" fill="currentColor" opacity="0.75" font-family="sans-serif" font-size="10">Tier 3 −0.225 · syntax 13→38</text>
+
+    <path d="M184 46 L256 76" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M184 114 L256 88" stroke="currentColor" stroke-width="1.5"/>
+
+    <rect x="258" y="44" width="218" height="72" rx="8" stroke="var(--svg-red)" stroke-width="1.6" fill="var(--svg-red)" fill-opacity="0.09"/>
+    <text x="367" y="69" text-anchor="middle" fill="var(--svg-red)" font-family="monospace" font-size="11" font-weight="bold">Q_CONFLICT Triggered</text>
+    <text x="367" y="88" text-anchor="middle" fill="currentColor" opacity="0.8" font-family="sans-serif" font-size="10.5">Same WorldState + claimKey</text>
+    <text x="367" y="104" text-anchor="middle" fill="currentColor" opacity="0.8" font-family="sans-serif" font-size="10.5">Opposing polarities detected</text>
+
+    <path d="M478 80 L526 80" stroke="var(--svg-red)" stroke-width="1.6"/>
+    <rect x="528" y="44" width="218" height="72" rx="8" stroke="var(--svg-red)" stroke-width="1.6"/>
+    <text x="637" y="69" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="11" font-weight="bold">synexp-th0.2 → BLOCKED</text>
+    <text x="637" y="88" text-anchor="middle" fill="currentColor" opacity="0.8" font-family="sans-serif" font-size="10.5">Actor: bdi:arbiter</text>
+    <text x="637" y="104" text-anchor="middle" fill="currentColor" opacity="0.7" font-family="monospace" font-size="9.5">[BDI-CONFLICT] note attached</text>
+  </svg>
+</Diagram>
+
+## 4. Visual Evidence & Measured Runtime Behavior
+
+Notice the baseline honesty on Panel A: plain `bd` CLI has no epistemic verification layer by design (blocking 0/8 malformed assertions), so the 12-case check measures functional gate correctness (`38.55 ms` median check time, `78.33 ms` max) rather than a blind algorithmic win. Panel B measures genuine runtime cost:
+
+<Figure
+  src="/figures/bdi-beads-synergy.png"
+  alt="Left: SPARQL V1-V5 gate validation across 12 functional cases. Right: log-scale latency comparison showing RDF/SPARQL adds 0.74% of live LLM wall time."
+  caption="Figure 1. Left: Functional verification over 12 self-authored check assertions (4 valid grounded chains accepted, 8 missing-justification/phantom-world/expired/hash-drifted assertions rejected). Right: Single-run component timings (RDF+SPARQL total 191.6 ms vs 26,033 ms across 3 live LLM calls)."
+/>
+
+| Scenario / Task | Agent Beliefs & Coordination Action | Resulting Beads State |
+|---|---|---|
+| `synexp-th0.1` (SSH timeout trap) | Live Codex (6.69s, conf 1.0) and Claude (9.73s, conf 0.96) both refuted false `"hypothesis refuted"` note citing `stderr` | `blocked` (`[BDI-CONSENSUS-BLOCK agents=claude+codex]`) |
+| `synexp-th0.2` (Tier 3 regression debate) | Codex (`support`, 0.72) vs live Claude (9.62s, `refute`, 0.93) caught by `Q_CONFLICT` | `blocked` (`[BDI-CONFLICT]` preserving both reasons) |
+| `synexp-th0.3` (Aura W4 Parallel routing) | Clean single-owner Antigravity plan claimed task; follow-up `bdi:codex --claim` call failed cleanly | `in_progress`, assignee `bdi:antigravity` |
+
+## 5. How Design Choices Shaped Real Outcomes (and Extending to Coding Agents)
+
+Running live agents surfaced two architectural boundaries immediately. First, `target_issue_id` (an epistemic audit reference) must stay distinct from `plan_tasks` (an execution claim): when both reviewer (`claude`) and worker (`codex`) populated execution components on `synexp-th0.1`, SPARQL flagged healthy consensus blocking as a duplicate-claim collision. Second, shared `WorldState` ingestion must preserve custom external telemetry triples when re-scanning Beads issues, or downstream `V2` integrity gates rightfully freeze mutations.
+
+**Extending cleanly to Coding Collaboration Agents**: Because each `.ttl` graph already enforces `WorldState` SHA-256 pinning (`V5`), cross-agent `Q_CONFLICT`, and task claim separation (`Q_DOUBLE_CLAIM`), extending this to multi-agent software engineering requires adding only two lightweight mappings without changing the core engine:
+- **File / Symbol Scope as `WorldState`**: Ground coding beliefs in exact file SHA-256 + symbol range instead of free prose—if Agent B edits `auth.py`, Agent A's uncommitted patch plan automatically triggers `V5_stale_world_hash`.
+- **Reviewer vs Implementer Separation**: Coder agents attach `plan_tasks` for module ownership while reviewer agents attach `target_issue_id` + test output hashes, blocking Beads closure whenever a test-gate refutes the implementation claim.
+
+## 6. Scope Limits & Honest Verification Boundary
+
+- **Sample scale**: Trial 1 ran 12 self-authored gate cases and Trial 2–3 ran one complete live sandbox pass (`codex`, `claude`, `antigravity`); multi-run variance and noisy production concurrency remain untested.
+- **Claim-key alignment assumption**: `Q_CONFLICT` detects contradictions cleanly only when agents address the same canonical `WorldState` URI and `claimKey`; unnormalized synonyms bypass syntactic conflict matching.
+- **Next step**: Validate `V5_stale_world_hash` auto-invalidation across multi-day cron runs and real two-agent coding PR workflows.

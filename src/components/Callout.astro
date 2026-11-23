@@ -1,0 +1,20 @@
+---
+interface Props {
+  type?: 'note' | 'warn' | 'decision';
+  title?: string;
+}
+const { type = 'note', title } = Astro.props;
+
+const styles: Record<string, string> = {
+  note: 'border-l-blue-700 dark:border-l-cyan-400 bg-stone-50 dark:bg-zinc-900/50',
+  warn: 'border-l-amber-600 dark:border-l-amber-400 bg-amber-50/60 dark:bg-amber-950/20',
+  decision: 'border-l-emerald-700 dark:border-l-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/20',
+};
+---
+
+<aside class={`my-6 rounded-lg border border-stone-200 dark:border-zinc-800 border-l-4 px-4 py-3.5 text-sm leading-relaxed text-stone-700 dark:text-zinc-300 ${styles[type]}`}>
+  {title && <p class="font-mono text-xs font-semibold uppercase tracking-wider text-stone-900 dark:text-zinc-100 mb-1.5">{title}</p>}
+  <div class="[&>p]:my-1.5 [&>p:first-child]:mt-0 [&>p:last-child]:mb-0">
+    <slot />
+  </div>
+</aside>

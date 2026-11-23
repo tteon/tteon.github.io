@@ -1,0 +1,21 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  caption: string;
+  wide?: boolean;
+}
+const { src, alt, caption, wide = true } = Astro.props;
+---
+
+<figure class={`my-7 overflow-hidden rounded-xl border border-stone-200 dark:border-zinc-700/80 bg-white dark:bg-[#f6f6f3] shadow-sm ${wide ? 'lg:-mx-8 xl:-mx-12' : ''}`}>
+  <a href={src} target="_blank" rel="noreferrer" class="block group relative" title="Open full-resolution figure">
+    <img src={src} alt={alt} loading="lazy" class="w-full h-auto block p-3 sm:p-4 bg-white dark:bg-[#f6f6f3]" />
+    <span class="hidden sm:inline-block absolute top-2.5 right-2.5 rounded bg-stone-900/75 text-white px-2 py-0.5 font-mono text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
+      Full Size ↗
+    </span>
+  </a>
+  <figcaption class="border-t border-stone-200 dark:border-zinc-700/70 bg-stone-50 dark:bg-zinc-900 px-4 py-3 text-xs sm:text-[13px] text-stone-600 dark:text-zinc-300 leading-relaxed">
+    {caption}
+  </figcaption>
+</figure>

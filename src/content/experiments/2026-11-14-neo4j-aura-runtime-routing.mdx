@@ -1,0 +1,132 @@
+---
+title: "Parallel Runtime Cuts a Global 3-Hop Query 4.11× on Aura — and Does Nothing for Lookups"
+date: 2026-11-14
+host: "Neo4j Aura"
+hypothesis: "Routing heavy global 3-hop analytics and supernode fan-out queries to Pipelined/Parallel runtimes significantly lowers wall latency over Slotted, while point lookups remain network-RTT bound."
+falsification: "If Parallel fails to outperform Slotted on global 3-hop traversals (W4) or produces inconsistent result digests across runtimes, runtime-aware routing is refuted."
+verdict: "Supported"
+keyMetric: "W4 analytics: 2,324.6 ms (Slotted) → 975.7 ms (Pipelined) → 565.4 ms (Parallel)"
+takeaways:
+  - "Switching global 3-hop analytics (W4) to Neo4j Parallel cuts median client wall time 4.11× (2,324.6 ms to 565.4 ms) with identical result digests across all 5 runs."
+  - "Single-node lookups and shallow local 3-hop walks hit a ~100 ms remote Bolt TLS round-trip floor, making Parallel workers slight negative overhead (0.95–0.97× speed, 2.2–2.8 MB runtime memory)."
+  - "Route by query topology: reserve Parallel for global multi-hop scans and aggregations, not short OLTP probes."
+soWhat: "If you run graph agents against managed Neo4j over TLS, attach CYPHER runtime=parallel only to global aggregations and unanchored multi-hop queries; leave point lookups and bounded local traversals on Slotted or Pipelined."
+related:
+  - label: "Architecture Note: Federated Queries, Rust Bolt Middleware & Runtime Routing"
+    href: "/writing/2026-11-12-neo4j-runtime-and-rust-bolt-routing/"
+repoUrl: "https://github.com/tteon/seocho"
+environment:
+  machine: "Neo4j Aura managed instance accessed via remote Bolt/TLS"
+  runtime: "Cypher explicit runtime hints (slotted | pipelined | parallel) + PROFILE"
+  dataset: "6 synthetic graph workloads (W1 point lookup through W6 supernode fan-out)"
+  repeats: "5 measured runs per (workload, runtime) cell · 90 runs total · digest-verified"
+figures:
+  - src: "/figures/aura-runtime-routing.png"
+    alt: "Log-scale client wall latency with n=5 min-max error bars and normalized speedup vs Slotted across W1 to W6."
+    caption: "Figure 1. Median client wall latency with min-max ranges (n=5) across Slotted, Pipelined, and Parallel on Neo4j Aura."
+tags: ["neo4j", "runtime", "slotted", "pipelined", "parallel"]
+summary: "90-run benchmark across six graph query shapes showing when Cypher runtime hints pay off (4.11× on global 3-hop analytics) versus when network round-trips dominate (~100 ms RTT floor)."
+---
+
+import Figure from '../../components/Figure.astro';
+import Diagram from '../../components/Diagram.astro';
+import Callout from '../../components/Callout.astro';
+
+## 1. Motivation: One Default Runtime Cannot Serve Every Agent Query Shape
+
+Graph-based LLM agents emit two completely different kinds of Cypher in the same session: sub-millisecond entity lookups (`W1`) alongside unanchored multi-hop neighborhood scans (`W4`). Before writing query-shape routing heuristics into our Rust Bolt middleware, we needed direct proof on managed Neo4j Aura of where `slotted`, `pipelined`, and `parallel` actually change client wall time—and where TLS network round trips drown out executor choices.
+
+## 2. Worked Query Shapes & Experimental Setup
+
+Six canonical graph workloads (`W1`–`W6`, 5 measured runs each = 90 runs) were run under explicit `CYPHER runtime=slotted`, `pipelined`, and `parallel` hints. Consider the two opposite extremes from `workloads.py`:
+
+```cypher
+// W1_point_lookup — single indexed seed (~1–2 ms server work)
+MATCH (n:AuraRuntimeLabNode {id: 101})
+RETURN n.id AS id, n.segment AS segment, n.score AS score
+
+// W4_global_3hop_analytics — full 3-hop scan across filtered endpoints (~6.1M–10.0M DB hits)
+MATCH (a:AuraRuntimeLabNode)-[:AURA_LAB_LINK]->(b)-[:AURA_LAB_LINK]->(c)-[:AURA_LAB_LINK]->(d)
+WHERE d.score >= 30
+RETURN a.segment AS segment, count(*) AS path_count, avg(toFloat(d.score)) AS mean_score
+ORDER BY path_count DESC, segment ASC LIMIT 20
+```
+
+Every run verified identical SHA-16 result digests across all three runtimes (`PASS (1 result digest)` for all 6 workloads).
+
+## 3. How the Three Runtimes Differ (Conceptual Mechanism)
+
+Why does `parallel` slash `W4` while burning extra memory on `W1`? The three Neo4j execution engines schedule operator pipelines differently:
+
+<Diagram title="Neo4j Execution Engines & Remote Bolt RTT Envelope" caption="Conceptual scheduling comparison: Slotted processes batches through volcano operators; Pipelined fuses operators over morsels; Parallel shards partitioned index scans across workers—effective only when server compute exceeds the ~100 ms remote Bolt TLS floor.">
+  <svg viewBox="0 0 760 230" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Comparison of Slotted, Pipelined, Parallel runtimes and Bolt RTT floor">
+    <rect x="12" y="14" width="225" height="196" rx="10" stroke="currentColor" stroke-opacity="0.25" stroke-width="1.5"/>
+    <text x="28" y="38" fill="currentColor" font-family="monospace" font-size="13" font-weight="bold">Slotted (single-core)</text>
+    <text x="28" y="56" fill="currentColor" opacity="0.65" font-family="sans-serif" font-size="11">Row-by-row volcano operators</text>
+    <rect x="28" y="74" width="190" height="28" rx="6" stroke="var(--svg-red)" stroke-width="1.5" fill="var(--svg-red)" fill-opacity="0.12"/>
+    <text x="123" y="92" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="11">Seek → Expand → Filter</text>
+    <rect x="28" y="114" width="190" height="28" rx="6" stroke="var(--svg-red)" stroke-width="1.5" fill="var(--svg-red)" fill-opacity="0.12"/>
+    <text x="123" y="132" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="11">Materialize Slots → Agg</text>
+    <text x="28" y="176" fill="currentColor" opacity="0.75" font-family="monospace" font-size="11">Mem: tiny (~64 B–8 KB)</text>
+    <text x="28" y="194" fill="var(--svg-red)" font-family="monospace" font-size="11">W4 bottle: 2.3 s single lane</text>
+
+    <rect x="262" y="14" width="225" height="196" rx="10" stroke="currentColor" stroke-opacity="0.25" stroke-width="1.5"/>
+    <text x="278" y="38" fill="currentColor" font-family="monospace" font-size="13" font-weight="bold">Pipelined (fused morsels)</text>
+    <text x="278" y="56" fill="currentColor" opacity="0.65" font-family="sans-serif" font-size="11">Operator fusion in tight pipeline</text>
+    <rect x="278" y="74" width="190" height="68" rx="6" stroke="var(--svg-green)" stroke-width="1.5" fill="var(--svg-green-fill)" fill-opacity="0.14"/>
+    <text x="373" y="102" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="11">Fused Pipeline Loop</text>
+    <text x="373" y="122" text-anchor="middle" fill="currentColor" opacity="0.75" font-family="monospace" font-size="10">(zero intermediate rows)</text>
+    <text x="278" y="176" fill="currentColor" opacity="0.75" font-family="monospace" font-size="11">Mem: low (~0.3–15 KB)</text>
+    <text x="278" y="194" fill="var(--svg-green)" font-family="monospace" font-size="11">W4 gain: 2.38× faster (976 ms)</text>
+
+    <rect x="512" y="14" width="236" height="196" rx="10" stroke="var(--svg-blue)" stroke-width="1.8"/>
+    <text x="528" y="38" fill="currentColor" font-family="monospace" font-size="13" font-weight="bold">Parallel (worker shards)</text>
+    <text x="528" y="56" fill="currentColor" opacity="0.65" font-family="sans-serif" font-size="11">Partitioned scan across workers</text>
+    <rect x="528" y="74" width="58" height="36" rx="5" stroke="var(--svg-blue)" stroke-width="1.5" fill="var(--svg-blue)" fill-opacity="0.14"/>
+    <text x="557" y="96" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10">Wkr 1</text>
+    <rect x="598" y="74" width="58" height="36" rx="5" stroke="var(--svg-blue)" stroke-width="1.5" fill="var(--svg-blue)" fill-opacity="0.14"/>
+    <text x="627" y="96" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10">Wkr 2</text>
+    <rect x="668" y="74" width="58" height="36" rx="5" stroke="var(--svg-blue)" stroke-width="1.5" fill="var(--svg-blue)" fill-opacity="0.14"/>
+    <text x="697" y="96" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10">Wkr N</text>
+    <rect x="528" y="118" width="198" height="24" rx="5" stroke="var(--svg-blue)" stroke-width="1.5" fill="var(--svg-blue)" fill-opacity="0.1"/>
+    <text x="627" y="134" text-anchor="middle" fill="currentColor" font-family="monospace" font-size="10">Merge / Top-K Aggregation</text>
+    <text x="528" y="176" fill="currentColor" opacity="0.75" font-family="monospace" font-size="11">Mem: 2.2–6.0 MB overhead</text>
+    <text x="528" y="194" fill="var(--svg-blue)" font-family="monospace" font-size="11">W4 gain: 4.11× faster (565 ms)</text>
+  </svg>
+</Diagram>
+
+## 4. Visual Evidence & Quantitative Spread
+
+Once query execution rises above the ~100 ms Bolt TLS round trip, execution runtime becomes the dominant term in wall latency:
+
+<Figure
+  src="/figures/aura-runtime-routing.png"
+  alt="Median client wall time in log milliseconds with n=5 min-max error bars and speedup vs Slotted across six workloads."
+  caption="Figure 1. Left: Median client wall latency (ms, log scale) with full min–max ranges over 5 runs per cell; W1, W2, and W5 sit flat on the ~100 ms Bolt TLS RTT floor, whereas W4 drops from 2,324.6 ms (Slotted) to 975.7 ms (Pipelined) and 565.4 ms (Parallel). Right: Speedup relative to Slotted."
+/>
+
+| Workload | Slotted median (min–max ms) | Pipelined median (min–max ms) | Parallel median (min–max ms) | Speedup (Par / Slot) | Digest Check |
+|---|---:|---:|---:|---:|---|
+| `W1_point_lookup` | 100.58 (100.2–102.0) | 100.50 (100.0–101.2) | 103.98 (101.2–105.8) | 0.97× | PASS (1 digest) |
+| `W2_local_3hop` | 103.41 (102.1–104.8) | 104.78 (103.5–106.6) | 106.68 (104.4–107.7) | 0.97× | PASS (1 digest) |
+| `W3_global_aggregation` | 139.09 (138.1–142.2) | 137.26 (124.7–141.9) | **118.93** (112.0–127.6) | 1.17× | PASS (1 digest) |
+| `W4_global_3hop_analytics` | 2,324.62 (2,206.9–2,405.7) | 975.65 (950.5–1,177.8) | **565.39** (374.7–710.7) | **4.11×** | PASS (1 digest) |
+| `W5_indexed_topk` | 100.97 (99.8–101.2) | 101.40 (100.0–102.4) | 105.85 (104.4–111.8) | 0.95× | PASS (1 digest) |
+| `W6_supernode_fanout` | 137.13 (135.6–139.7) | 133.88 (124.2–137.4) | **117.49** (114.8–122.5) | 1.17× | PASS (1 digest) |
+
+## 5. Mechanism Breakdown & Decision Rule
+
+Inspecting `measurements.csv` explains both sides of the curve cleanly:
+
+- **Why shallow queries stay flat (`W1`, `W2`, `W5`)**: On `W1`, server first-result + consume time is only 1–2 ms (`4` DB hits), whereas the TLS client wall time is 100–106 ms. Requesting `parallel` on `W1` allocates `2.23 MB` of worker memory vs `64 B` on `slotted` purely to sit behind network RTT. Even on `W2` (local 3-hop from one seed node, `1,755`–`2,850` DB hits), server time is 2–6 ms, so `parallel` (`2.75 MB`) yields `0.97×` slowdown.
+- **Why global traversals diverge (`W4`)**: Scanning across unanchored `3-hop` neighborhoods executes `6.14M` DB hits in `slotted` (`2,099`–`2,300 ms` server consume) vs worker-partitioned `PartitionedNodeIndexSeekByRange` in `parallel` (`270`–`602 ms` server consume), explaining the `4.11×` speedup.
+
+<Callout type="decision" title="Practical Query-Routing Heuristic">
+Route by expected operator work relative to your Bolt network RTT: (1) use **Slotted/Pipelined** for single-node lookups, indexed top-k, and bounded seeded traversals (`W1`, `W2`, `W5`); (2) trigger **Parallel** only when `EXPLAIN` shows global label/index-range scans feeding multi-hop `Expand(All)` aggregations (`W3`, `W4`, `W6`).
+</Callout>
+
+## 6. Scope Limits & Next Experiment
+
+- **Single-stream measurement**: Runs were executed sequentially (`n=5`). Because `parallel` claims multiple worker threads and 2–6 MB heap per query, high-concurrency throughput can favor `pipelined` or queue admission control.
+- **PROFILE instrumentation overhead**: Client wall timings include `PROFILE` operator collection overhead.
+- **Next step**: Measure concurrent agent throughput (concurrency 8–64) and Rust Bolt admission-queue latency when mixed `W1` + `W4` workloads collide.

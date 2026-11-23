@@ -4,144 +4,130 @@ import ExperimentCard from '../components/ExperimentCard.astro';
 import { getCollection } from 'astro:content';
 
 const experiments = (await getCollection('experiments'))
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .slice(0, 3);
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
 const writings = (await getCollection('writing'))
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .slice(0, 4);
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-const projects = [
+function estReadTime(body?: string): string {
+  const words = (body || '').trim().split(/\s+/).filter(Boolean).length;
+  return `${Math.max(1, Math.round(words / 200))} min read`;
+}
+
+const systems = [
   {
     name: 'SEOCHO',
-    desc: 'Ontology-first graph memory and runtime for agents — separating semantic validation, Bolt scheduling, and multi-engine query execution.',
-    url: 'https://seocho.blog',
-    repo: 'https://github.com/tteon/seocho',
+    desc: 'Ontology-first graph memory & multi-engine agent runtime.',
+    href: '/about/#seocho',
+    external: false,
     tag: 'GraphRAG · Ontology · Runtime',
   },
   {
     name: 'Auto-Ontology Bench',
-    desc: 'Paired statistical evaluation across Postgres and Neo4j measuring when ontology grounding lifts or degrades multi-tier retrieval accuracy.',
-    url: 'https://github.com/tteon/auto-ontology-bench',
-    repo: 'https://github.com/tteon/auto-ontology-bench',
-    tag: 'Benchmark · Evaluation',
+    desc: '1,600-request paired McNemar suite across Postgres and Neo4j.',
+    href: 'https://github.com/tteon/auto-ontology-bench',
+    external: true,
+    tag: 'Benchmark · SQL/Cypher',
   },
   {
     name: 'GARE2E & FinBench',
-    desc: 'End-to-end replay, serialization probes, and SHA-256-verified evidence pipelines for graph-agentic financial RAG.',
-    url: 'https://github.com/tteon/gare2e',
-    repo: 'https://github.com/tteon/gare2e',
+    desc: 'SHA-256-verified graph RAG audit and DB replay harnesses.',
+    href: 'https://github.com/tteon/gare2e',
+    external: true,
     tag: 'Reproducibility · Audit',
   },
   {
-    name: 'KV-Cache & Systems Lab',
-    desc: 'Experiments on tiered KV-cache offloading, vLLM execution traces, CXL memory, and multi-agent shared memory architectures.',
-    url: 'https://github.com/tteon/kvcache-lab',
-    repo: 'https://github.com/tteon/kvcache-lab',
-    tag: 'vLLM · KV-Cache · CXL',
+    name: 'KV-Cache & BDI Agents',
+    desc: 'Multi-agent BDI RDF orchestration, Beads tracking, and vLLM/CXL traces.',
+    href: '/experiments/2026-11-24-bdi-agent-ontology-beads-synergy/',
+    external: false,
+    tag: 'BDI · Beads · Serving',
   },
 ];
 ---
 
 <BaseLayout title="Yitae Jeong (tteon) — Systems & Graph AI Research">
-  <section class="pb-12 border-b border-zinc-200 dark:border-zinc-800/80">
-    <p class="font-mono text-xs text-cyan-700 dark:text-cyan-400 mb-3">
+  <section class="pb-10 border-b border-stone-200 dark:border-zinc-800/80 max-w-3xl">
+    <p class="font-mono text-xs text-blue-800 dark:text-cyan-400 mb-3">
       Yitae Jeong · XCENA · Seoul
     </p>
-    <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-950 dark:text-white leading-tight mb-4">
-      Exploring the intersection of Graph Processing, Ontology-First Agents, KV-Cache, and CXL.
+    <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-stone-950 dark:text-white leading-[1.18] mb-4">
+      Systems notes &amp; reproducible experiments on graph runtimes, ontology agents, and LLM serving.
     </h1>
-    <p class="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed mb-6">
-      Research notes, reproducible experiment logs, and systems engineering work across graph database runtimes, ontology-guided agent memory, and LLM serving infrastructure. Every experiment entry separates verified measurements from open hypotheses.
+    <p class="text-base text-stone-600 dark:text-zinc-400 leading-relaxed mb-6">
+      Every post pairs an architecture diagram or publication plot with raw artifact verification, explicit failure boundaries, and practical engineering takeaways.
     </p>
     <div class="flex flex-wrap gap-3 font-mono text-xs">
-      <a href="/experiments/" class="rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 px-3.5 py-2 font-medium hover:opacity-90 transition-opacity">
-        Browse Experiment Log →
+      <a href="/experiments/" class="rounded-lg bg-stone-900 text-white dark:bg-zinc-100 dark:text-zinc-950 px-4 py-2 font-medium hover:opacity-90 transition-opacity">
+        Browse Experiments →
       </a>
-      <a href="https://github.com/tteon" target="_blank" rel="noreferrer" class="rounded-lg border border-zinc-300 dark:border-zinc-700 px-3.5 py-2 text-zinc-700 dark:text-zinc-300 hover:border-zinc-500 transition-colors">
-        GitHub (@tteon)
+      <a href="/writing/" class="rounded-lg border border-stone-300 dark:border-zinc-700 px-4 py-2 text-stone-700 dark:text-zinc-300 hover:border-stone-500 transition-colors">
+        Architecture Notes
       </a>
-      <a href="https://seocho.blog" target="_blank" rel="noreferrer" class="rounded-lg border border-zinc-300 dark:border-zinc-700 px-3.5 py-2 text-zinc-700 dark:text-zinc-300 hover:border-zinc-500 transition-colors">
-        SEOCHO Docs ↗
-      </a>
-      <a href="https://www.linkedin.com/in/yitaejeong/" target="_blank" rel="noreferrer" class="rounded-lg border border-zinc-300 dark:border-zinc-700 px-3.5 py-2 text-zinc-700 dark:text-zinc-300 hover:border-zinc-500 transition-colors">
-        LinkedIn ↗
+      <a href="/about/" class="rounded-lg border border-stone-300 dark:border-zinc-700 px-4 py-2 text-stone-700 dark:text-zinc-300 hover:border-stone-500 transition-colors">
+        About
       </a>
     </div>
   </section>
 
-  <section class="py-10 border-b border-zinc-200 dark:border-zinc-800/80 grid grid-cols-1 md:grid-cols-3 gap-5">
-    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800/80 p-4 bg-white/70 dark:bg-zinc-900/30">
-      <span class="font-mono text-[11px] text-cyan-700 dark:text-cyan-400">01 / GRAPH RUNTIME</span>
-      <h2 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mt-1 mb-1.5">Bolt & Execution Routing</h2>
-      <p class="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-        Rust query-scheduling middleware, admission control, and workload-aware routing across Slotted, Pipelined, and Parallel graph runtimes.
-      </p>
+  <section class="py-10 border-b border-stone-200 dark:border-zinc-800/80">
+    <div class="flex items-baseline justify-between mb-2">
+      <h2 class="text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Experiment Log</h2>
+      <a href="/experiments/" class="font-mono text-xs text-blue-800 dark:text-cyan-400 hover:underline">Filter by verdict →</a>
     </div>
-    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800/80 p-4 bg-white/70 dark:bg-zinc-900/30">
-      <span class="font-mono text-[11px] text-cyan-700 dark:text-cyan-400">02 / ONTOLOGY MEMORY</span>
-      <h2 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mt-1 mb-1.5">Federated Ontology Agents</h2>
-      <p class="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-        Preventing context contamination in multi-domain knowledge graphs via competency-driven ontology grounding and paired ablation studies.
-      </p>
-    </div>
-    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800/80 p-4 bg-white/70 dark:bg-zinc-900/30">
-      <span class="font-mono text-[11px] text-cyan-700 dark:text-cyan-400">03 / SERVING & CXL</span>
-      <h2 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mt-1 mb-1.5">KV-Cache & Memory Hierarchy</h2>
-      <p class="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-        Characterizing agentic GraphCoT prefill/decode traces, KV-cache sharing across shared ontology memory, and CXL/RDMA transfer trade-offs.
-      </p>
-    </div>
-  </section>
-
-  <section class="py-10 border-b border-zinc-200 dark:border-zinc-800/80">
-    <div class="flex items-center justify-between mb-5">
-      <h2 class="text-lg font-semibold tracking-tight text-zinc-950 dark:text-white">Recent Experiment Logs</h2>
-      <a href="/experiments/" class="font-mono text-xs text-cyan-700 dark:text-cyan-400 hover:underline">All experiments →</a>
-    </div>
-    <div class="space-y-4">
+    <p class="text-sm text-stone-500 dark:text-zinc-400 mb-4">
+      Measured runs grounded in preserved manifests, paired statistics, and honest failure boundaries.
+    </p>
+    <div>
       {experiments.map((exp) => (
         <ExperimentCard slug={exp.id} {...exp.data} />
       ))}
     </div>
   </section>
 
-  <section class="py-10 border-b border-zinc-200 dark:border-zinc-800/80">
-    <div class="flex items-center justify-between mb-5">
-      <h2 class="text-lg font-semibold tracking-tight text-zinc-950 dark:text-white">Technical Writing</h2>
-      <a href="/writing/" class="font-mono text-xs text-cyan-700 dark:text-cyan-400 hover:underline">All notes →</a>
+  <section class="py-10 border-b border-stone-200 dark:border-zinc-800/80">
+    <div class="flex items-baseline justify-between mb-4">
+      <h2 class="text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Technical Writing</h2>
+      <a href="/writing/" class="font-mono text-xs text-blue-800 dark:text-cyan-400 hover:underline">All notes →</a>
     </div>
-    <div class="space-y-3">
+    <div class="divide-y divide-stone-200/80 dark:divide-zinc-800/80">
       {writings.map((post) => (
-        <a href={`/writing/${post.id}/`} class="block rounded-xl border border-zinc-200 dark:border-zinc-800/80 p-4 hover:border-cyan-500/50 transition-colors bg-white/70 dark:bg-zinc-900/30">
-          <div class="flex items-center gap-2 font-mono text-xs text-zinc-500 dark:text-zinc-400 mb-1">
+        <a href={`/writing/${post.id}/`} class="group block py-4 hover:bg-stone-100/50 dark:hover:bg-zinc-900/35 -mx-3 px-3 rounded-xl transition-colors">
+          <div class="flex items-center gap-2 font-mono text-xs text-stone-500 dark:text-zinc-400 mb-1">
             <span>{post.data.date.toISOString().slice(0, 10)}</span>
             <span>·</span>
             <span>{post.data.category}</span>
             <span>·</span>
-            <span>{post.data.readingTime}</span>
+            <span>{estReadTime(post.body)}</span>
           </div>
-          <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-1">{post.data.title}</h3>
-          <p class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400">{post.data.summary}</p>
+          <h3 class="text-base sm:text-lg font-semibold text-stone-900 dark:text-zinc-100 group-hover:text-blue-800 dark:group-hover:text-cyan-300 transition-colors mb-1">
+            {post.data.title}
+          </h3>
+          <p class="text-sm text-stone-600 dark:text-zinc-400 leading-relaxed">{post.data.summary}</p>
         </a>
       ))}
     </div>
   </section>
 
   <section class="pt-10">
-    <div class="flex items-center justify-between mb-5">
-      <h2 class="text-lg font-semibold tracking-tight text-zinc-950 dark:text-white">Selected Systems & Benchmarks</h2>
-      <a href="/projects/" class="font-mono text-xs text-cyan-700 dark:text-cyan-400 hover:underline">Projects & talks →</a>
+    <div class="flex items-baseline justify-between mb-4">
+      <h2 class="text-xl font-semibold tracking-tight text-stone-950 dark:text-white">Systems &amp; Research Repositories</h2>
+      <a href="/projects/" class="font-mono text-xs text-blue-800 dark:text-cyan-400 hover:underline">All projects &amp; talks →</a>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      {projects.map((p) => (
-        <a href={p.url} target="_blank" rel="noreferrer" class="rounded-xl border border-zinc-200 dark:border-zinc-800/80 p-4 bg-white/70 dark:bg-zinc-900/30 hover:border-cyan-500/50 transition-colors">
+      {systems.map((p) => (
+        <a
+          href={p.href}
+          target={p.external ? '_blank' : undefined}
+          rel={p.external ? 'noreferrer' : undefined}
+          class="group rounded-xl border border-stone-200 dark:border-zinc-800/80 p-4 bg-white/70 dark:bg-zinc-900/30 hover:border-blue-600/40 dark:hover:border-cyan-500/40 transition-colors"
+        >
           <div class="flex items-center justify-between mb-1.5">
-            <h3 class="font-semibold text-sm text-zinc-900 dark:text-zinc-100">{p.name}</h3>
-            <span class="font-mono text-[11px] text-zinc-400">↗</span>
+            <h3 class="font-semibold text-sm text-stone-900 dark:text-zinc-100 group-hover:text-blue-800 dark:group-hover:text-cyan-300">{p.name}</h3>
+            <span class="font-mono text-[11px] text-stone-400">{p.external ? '↗' : '→'}</span>
           </div>
-          <p class="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed mb-2.5">{p.desc}</p>
-          <span class="font-mono text-[11px] text-cyan-700 dark:text-cyan-400">{p.tag}</span>
+          <p class="text-xs sm:text-sm text-stone-600 dark:text-zinc-400 leading-relaxed mb-2">{p.desc}</p>
+          <span class="font-mono text-[11px] text-blue-800 dark:text-cyan-400">{p.tag}</span>
         </a>
       ))}
     </div>
