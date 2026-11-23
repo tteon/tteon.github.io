@@ -9,9 +9,10 @@ interface Props {
   keyMetric: string;
   summary: string;
   tags: string[];
+  figures?: { src: string; alt: string; caption: string }[];
 }
 
-const { slug, title, date, host, hypothesis, verdict, keyMetric, summary, tags } = Astro.props;
+const { slug, title, date, host, hypothesis, verdict, keyMetric, summary, tags, figures = [] } = Astro.props;
 
 const verdictStyle: Record<string, string> = {
   Supported: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
@@ -34,6 +35,11 @@ const dateStr = date.toISOString().slice(0, 10);
       <span>{dateStr}</span>
       <span>·</span>
       <span class="rounded bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 text-zinc-700 dark:text-zinc-300">{host}</span>
+      {figures.length > 0 && (
+        <span class="rounded bg-cyan-500/10 px-1.5 py-0.5 text-[11px] text-cyan-700 dark:text-cyan-300">
+          {figures.length} {figures.length === 1 ? 'fig' : 'figs'}
+        </span>
+      )}
     </div>
     <span class={`rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-medium ${verdictStyle[verdict]}`}>
       {verdict}

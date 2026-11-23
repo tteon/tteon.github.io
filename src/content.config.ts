@@ -8,10 +8,30 @@ const experiments = defineCollection({
     date: z.coerce.date(),
     host: z.string(),
     hypothesis: z.string(),
+    falsification: z.string().optional(),
     verdict: z.enum(['Supported', 'Refuted', 'Mixed', 'Inconclusive']),
     keyMetric: z.string(),
+    beadsId: z.string().optional(),
     repoUrl: z.string().optional(),
     commit: z.string().optional(),
+    environment: z
+      .object({
+        machine: z.string().optional(),
+        runtime: z.string().optional(),
+        dataset: z.string().optional(),
+        repeats: z.string().optional(),
+        artifactSha256: z.string().optional(),
+      })
+      .optional(),
+    figures: z
+      .array(
+        z.object({
+          src: z.string(),
+          alt: z.string(),
+          caption: z.string(),
+        })
+      )
+      .default([]),
     tags: z.array(z.string()).default([]),
     summary: z.string(),
   }),

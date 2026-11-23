@@ -66,3 +66,18 @@
 .prose-custom a {
   @apply text-cyan-700 dark:text-cyan-400 underline decoration-cyan-500/30 underline-offset-4 hover:decoration-cyan-400;
 }
+
+.prose-custom figure,
+.paper-figure {
+  @apply my-6 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/80 shadow-sm;
+}
+
+.prose-custom figure img,
+.paper-figure img {
+  @apply w-full h-auto bg-white p-3 sm:p-4;
+}
+
+.prose-custom figcaption,
+.paper-figure figcaption {
+  @apply border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 px-4 py-3 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed;
+}
